@@ -1,0 +1,11 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tab="http://schemas.android.com/apk/res-auto" >
+
+    <item android:id="@+id/item1" android:title="I1" tab:showAsAction="always|withText" android:titleCondensed="I1"></item><item android:id="@+id/item2" android:title="I2" tab:showAsAction="always|withText" android:titleCondensed="I2"></item><item android:id="@+id/item3" android:title="I3" tab:showAsAction="ifRoom|withText" android:titleCondensed="I3"></item><item android:id="@+id/item4" android:title="I4" tab:showAsAction="ifRoom|withText" android:titleCondensed="I4"></item>
+    
+    
+    
+    
+    <item android:id="@+id/settings" android:showAsAction="never" android:title="@string/action_settings"></item>
+
+</menu>
