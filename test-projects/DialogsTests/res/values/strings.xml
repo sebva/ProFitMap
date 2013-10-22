@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">MenuContextuelFlottant</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="dialog_name">Tits?</string>
+    <string name="dialog_msg">Titties indeed</string>
+    <string name="dialog_fire_missiles">Titties indeed</string>
+    <string name="fire">Titties indeed</string>
+    <string name="cancel">Titties indeed</string>
+    <string-array name="sports_names">
+        <item >Jogging</item>
+        <item >Running</item>
+        <item >Biking</item>
+    </string-array>
+
+</resources>
