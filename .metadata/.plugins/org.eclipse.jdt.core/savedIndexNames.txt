@@ -1,0 +1,8 @@
+INDEX VERSION 1.126+/home/danick/Dropbox/SVNP3/13dlm-ta214/.metadata/.plugins/org.eclipse.jdt.core
+2706740987.index
+35154580.index
+1415693123.index
+2040064081.index
+1552536054.index
+1237934209.index
+3244719852.index

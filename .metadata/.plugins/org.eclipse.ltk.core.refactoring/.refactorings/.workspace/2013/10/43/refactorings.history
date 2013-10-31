@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Delete resource &apos;ProFitMap/src/ch/hearc/profitmap/gui/training.java&apos;" deleteContents="false" description="Delete resource &apos;ProFitMap/src/ch/hearc/profitmap/gui/training.java&apos;" element1="/ProFitMap/src/ch/hearc/profitmap/gui/training.java" flags="7" id="org.eclipse.ltk.core.refactoring.delete.resources" resources="1" stamp="1382898897488"/>
+</session>
