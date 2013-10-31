@@ -1,5 +1,10 @@
 package ch.hearc.profitmap.model;
 
-public class Tracks {
+import java.util.Collection;
+
+public class Tracks
+{
+
+	private Collection<Track> tracks;
 
 }
