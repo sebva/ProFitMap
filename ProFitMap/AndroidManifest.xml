@@ -44,6 +44,10 @@
     android:name="com.google.android.maps.v2.API_KEY"
     android:value="AIzaSyAdMEbJxPbRFosiuev3CFFuDv6JHJEz0oQ"/>
 
+        <activity
+            android:name="ch.hearc.profitmap.gui.settings.SettingsActivity"
+            android:label="@string/title_activity_settings" >
+        </activity>
     </application>
 
 </manifest>
