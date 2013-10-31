@@ -1,114 +1,234 @@
+/*
+ * Copyright 2013 The Android Open Source Project
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the
+ * License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+ * CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+ */
+
 package ch.hearc.profitmap;
 
-
 import android.app.ActionBar;
+import android.app.ActionBar.OnNavigationListener;
+import android.app.Activity;
+import android.app.FragmentManager;
+import android.content.res.Configuration;
+import android.database.MatrixCursor;
 import android.os.Bundle;
-
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.NavUtils;
-import android.view.Gravity;
-import android.view.LayoutInflater;
+import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.TextView;
+import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
+import android.widget.SpinnerAdapter;
+import ch.hearc.profitmap.gui.TrackListTileFragment;
 
-public class TrackListActivity extends FragmentActivity implements ActionBar.OnNavigationListener {
+public class TrackListActivity extends Activity
+{
+	private DrawerLayout mDrawerLayout;
+	private ListView mDrawerList;
+	private ActionBarDrawerToggle mDrawerToggle;
 
-    /**
-     * The serialization (saved instance state) Bundle key representing the
-     * current dropdown positio															n.
-     */
-    private static final String STATE_SELECTED_NAVIGATION_ITEM = "selected_navigation_item";
+	private CharSequence mDrawerTitle;
+	private CharSequence mTitle;
+	private MatrixCursor mSportsCursor;
+	private static final String[] mColumns = { "_id", "image", "text" };
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_track_list);
+	private String[] mSports;
+	private String[] mSportsImages;
 
-        // Set up the action bar to show a dropdown list.
-        final ActionBar actionBar = getActionBar();
-        actionBar.setDisplayShowTitleEnabled(false);
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+	private int mCurrentIndex = 0;
+	private TrackListTileFragment mTrackListFragment;
 
-        // Set up the dropdown list navigation in the action bar.
-        actionBar.setListNavigationCallbacks(
-                // Specify a SpinnerAdapter to populate the dropdown list.
-                new ArrayAdapter<String>(
-                        actionBar.getThemedContext(),
-                        android.R.layout.simple_list_item_1,
-                        android.R.id.text1,
-                        new String[] {
-                                getString(R.string.title_section1),
-                                getString(R.string.title_section2),
-                                getString(R.string.title_section3),
-                        }),
-                this);
-    }
+	@Override
+	protected void onCreate(Bundle savedInstanceState)
+	{
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_track_list);
 
+		mTitle = mDrawerTitle = getTitle();
+		mSportsCursor = new MatrixCursor(mColumns, 4);
+		mSports = getResources().getStringArray(R.array.sports_array);
+		mSportsImages = getResources().getStringArray(R.array.sports_images);
+		for (int i = 0; i < mSports.length; i++)
+		{
+			Object[] row = new Object[3];
+			row[0] = i;
+			row[1] = getSportImageIdentifier(i);
+			row[2] = mSports[i];
 
-    @Override
-    public void onRestoreInstanceState(Bundle savedInstanceState) {
-        // Restore the previously serialized current dropdown position.
-        if (savedInstanceState.containsKey(STATE_SELECTED_NAVIGATION_ITEM)) {
-            getActionBar().setSelectedNavigationItem(
-                    savedInstanceState.getInt(STATE_SELECTED_NAVIGATION_ITEM));
-        }
-    }
+			mSportsCursor.addRow(row);
+		}
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        // Serialize the current dropdown position.
-        outState.putInt(STATE_SELECTED_NAVIGATION_ITEM,
-                getActionBar().getSelectedNavigationIndex());
-    }
+		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+		mDrawerList = (ListView) findViewById(R.id.left_drawer);
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.track_list, menu);
-        return true;
-    }
-    
-    @Override
-    public boolean onNavigationItemSelected(int position, long id) {
-        // When the given dropdown item is selected, show its contents in the
-        // container view.
-        Fragment fragment = new DummySectionFragment();
-        Bundle args = new Bundle();
-        args.putInt(DummySectionFragment.ARG_SECTION_NUMBER, position + 1);
-        fragment.setArguments(args);
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.container, fragment)
-                .commit();
-        return true;
-    }
+		// set a custom shadow that overlays the main content when the drawer opens
+		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+		// set up the drawer's list view with items and click listener
+		mDrawerList.setAdapter(new SimpleCursorAdapter(this, R.layout.drawer_list_item, mSportsCursor, new String[] { "image", "text" }, new int[] {
+				R.id.imageView, R.id.textView }, 0));
 
-    /**
-     * A dummy fragment representing a section of the app, but that simply
-     * displays dummy text.
-     */
-    public static class DummySectionFragment extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
-        public static final String ARG_SECTION_NUMBER = "section_number";
+		mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
-        public DummySectionFragment() {
-        }
+		// enable ActionBar app icon to behave as action to toggle nav drawer
+		final ActionBar actionBar = getActionBar();
+		actionBar.setDisplayHomeAsUpEnabled(true);
+		actionBar.setHomeButtonEnabled(true);
+		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
 
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_track_list_dummy, container, false);
-            TextView dummyTextView = (TextView) rootView.findViewById(R.id.section_label);
-            dummyTextView.setText(Integer.toString(getArguments().getInt(ARG_SECTION_NUMBER)));
-            return rootView;
-        }
-    }
+		String[] sports = getResources().getStringArray(R.array.sort_modes);
+		SpinnerAdapter mSpinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, sports);
+		actionBar.setListNavigationCallbacks(mSpinnerAdapter, new OnNavigationListener()
+		{
 
+			@Override
+			public boolean onNavigationItemSelected(int itemPosition, long itemId)
+			{
+				// TODO Auto-generated method stub
+				return false;
+			}
+		});
+
+		// ActionBarDrawerToggle ties together the the proper interactions
+		// between the sliding drawer and the action bar app icon
+		mDrawerToggle = new ActionBarDrawerToggle(this, /* host Activity */
+		mDrawerLayout, /* DrawerLayout object */
+		R.drawable.ic_drawer, /* nav drawer image to replace 'Up' caret */
+		R.string.drawer_open, /* "open drawer" description for accessibility */
+		R.string.drawer_close /* "close drawer" description for accessibility */
+		)
+		{
+			public void onDrawerClosed(View view)
+			{
+				onDrawerOpenClose(false);
+				ActivityCompat.invalidateOptionsMenu(TrackListActivity.this); // creates call to onPrepareOptionsMenu()
+			}
+
+			public void onDrawerOpened(View drawerView)
+			{
+				onDrawerOpenClose(true);
+				ActivityCompat.invalidateOptionsMenu(TrackListActivity.this); // creates call to onPrepareOptionsMenu()
+			}
+		};
+		mDrawerLayout.setDrawerListener(mDrawerToggle);
+
+		if (savedInstanceState == null)
+		{
+			selectItem(0);
+		}
+	}
+	
+	private void onDrawerOpenClose(boolean isOpen)
+	{
+		ActionBar actionBar = getActionBar();
+		if(isOpen)
+		{
+			setTitle(mDrawerTitle);
+			actionBar.setIcon(R.drawable.ic_launcher);
+			actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+		}
+		else
+		{
+			setTitle(mTitle);
+			actionBar.setIcon(getSportImageIdentifier(mCurrentIndex));
+			actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+		}
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu)
+	{
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.track_list, menu);
+		return super.onCreateOptionsMenu(menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item)
+	{
+		// The action bar home/up action should open or close the drawer.
+		// ActionBarDrawerToggle will take care of this.
+		return mDrawerToggle.onOptionsItemSelected(item);
+	}
+
+	/* The click listner for ListView in the navigation drawer */
+	private class DrawerItemClickListener implements ListView.OnItemClickListener
+	{
+		@Override
+		public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+		{
+			selectItem(position);
+			Log.i("Drawer", view.getClass().getName());
+		}
+	}
+
+	private void selectItem(int position)
+	{
+		mCurrentIndex = position;
+		if (mTrackListFragment == null)
+		{
+			mTrackListFragment = new TrackListTileFragment();
+			Bundle args = new Bundle();
+			args.putInt(TrackListTileFragment.ARG_SPORT_NUMBER, position);
+			mTrackListFragment.setArguments(args);
+
+			FragmentManager fragmentManager = getFragmentManager();
+			fragmentManager.beginTransaction().replace(R.id.content_frame, mTrackListFragment).commit();
+		}
+		else
+			mTrackListFragment.setSport(position);
+
+		// update selected item and title, then close the drawer
+		mDrawerList.setItemChecked(position, true);
+		setTitle(mSports[position]);
+		getActionBar().setIcon(getSportImageIdentifier(mCurrentIndex));
+		mDrawerLayout.closeDrawer(mDrawerList);
+	}
+
+	private int getSportImageIdentifier(int position)
+	{
+		return getResources().getIdentifier(mSportsImages[position], "drawable", TrackListActivity.class.getPackage().getName());
+	}
+
+	@Override
+	public void setTitle(CharSequence title)
+	{
+		mTitle = title;
+		getActionBar().setTitle(mTitle);
+	}
+
+	/**
+	 * When using the ActionBarDrawerToggle, you must call it during onPostCreate() and onConfigurationChanged()...
+	 */
+
+	@Override
+	protected void onPostCreate(Bundle savedInstanceState)
+	{
+		super.onPostCreate(savedInstanceState);
+		// Sync the toggle state after onRestoreInstanceState has occurred.
+		mDrawerToggle.syncState();
+	}
+
+	@Override
+	public void onConfigurationChanged(Configuration newConfig)
+	{
+		super.onConfigurationChanged(newConfig);
+		// Pass any configuration change to the drawer toggls
+		mDrawerToggle.onConfigurationChanged(newConfig);
+		onDrawerOpenClose(mDrawerLayout.isDrawerOpen(GravityCompat.START));
+		Log.d(getClass().getSimpleName(), "Rotate");
+	}
 }
