@@ -1,5 +1,7 @@
 package ch.hearc.profitmap.gui.settings;
 
+import java.util.List;
+
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -17,12 +19,7 @@ import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
 import android.text.TextUtils;
 import android.view.MenuItem;
-
-import java.util.List;
-
 import ch.hearc.profitmap.R;
-import ch.hearc.profitmap.R.string;
-import ch.hearc.profitmap.R.xml;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On handset devices, settings are presented as a single list. On tablets, settings

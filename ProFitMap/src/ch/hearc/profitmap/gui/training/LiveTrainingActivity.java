@@ -1,43 +1,23 @@
 package ch.hearc.profitmap.gui.training;
 
 import java.util.Locale;
-import java.util.Random;
 
-import com.google.android.gms.maps.*;
-import com.google.android.gms.maps.model.*;
-
-import ch.hearc.profitmap.MapElements;
-import ch.hearc.profitmap.MapSectionFragment;
-import ch.hearc.profitmap.R;
-import ch.hearc.profitmap.R.id;
-import ch.hearc.profitmap.R.layout;
-import ch.hearc.profitmap.R.menu;
-import ch.hearc.profitmap.R.string;
-
-import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.FragmentTransaction;
-import android.content.Context;
-import android.graphics.Color;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.NavUtils;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import ch.hearc.profitmap.MapSectionFragment;
+import ch.hearc.profitmap.R;
 
 public class LiveTrainingActivity extends FragmentActivity implements
 		ActionBar.TabListener {
@@ -60,7 +40,6 @@ public class LiveTrainingActivity extends FragmentActivity implements
 	public boolean isCreated = false;
 	
 
-	private MapElements mapElements = new MapElements();
 	
 	@Override
 	protected void onPause() {
