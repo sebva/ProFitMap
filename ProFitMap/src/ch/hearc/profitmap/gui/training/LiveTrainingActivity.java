@@ -1,10 +1,13 @@
 package ch.hearc.profitmap.gui.training;
 
 import java.util.Locale;
+import java.util.Random;
 
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.*;
 
+import ch.hearc.profitmap.MapElements;
+import ch.hearc.profitmap.MapSectionFragment;
 import ch.hearc.profitmap.R;
 import ch.hearc.profitmap.R.id;
 import ch.hearc.profitmap.R.layout;
@@ -20,6 +23,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -53,10 +57,22 @@ public class LiveTrainingActivity extends FragmentActivity implements
 	 */
 	ViewPager mViewPager;
 	
+	public boolean isCreated = false;
+	
+
+	private MapElements mapElements = new MapElements();
+	
+	@Override
+	protected void onPause() {
+		// TODO Auto-generated method stub
+		super.onPause();
+	}
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		Log.i("onC", "creat");
 		super.onCreate(savedInstanceState);
+		
 		setContentView(R.layout.activity_live_training);
 
 		// Set up the action bar.
@@ -192,111 +208,5 @@ public class LiveTrainingActivity extends FragmentActivity implements
 		}
 	}
 	
-	public static class MapSectionFragment extends Fragment {
-		
-		private SupportMapFragment fragment;
-
-		private GoogleMap map;
-		private static final LatLng NEUCH_LOC = new LatLng(47.0045047, 6.957424);
-		private MarkerOptions mo = new MarkerOptions().position(NEUCH_LOC)
-				.snippet("Tits!").title("Prout!");
-		private Marker m;
-
-		private PolylineOptions plo = new PolylineOptions().geodesic(true).color(
-				Color.parseColor("#AA66CC"));
-		private Polyline pl;
-		
-		public MapSectionFragment()
-		{
-		}
-		
-		@Override
-		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		    return inflater.inflate(R.layout.fragment_live_training_map, container, false);
-		}
-		@Override
-		public void onResume() {
-		    super.onResume();
-		    if (map == null) {
-		        map = fragment.getMap();
-				m = map.addMarker(mo);
-				setupFakeGPS();
-		    }
-		}
-		@Override
-		public void onActivityCreated(Bundle savedInstanceState) {
-		    super.onActivityCreated(savedInstanceState);
-		    FragmentManager fm = getChildFragmentManager();
-		    fragment = (SupportMapFragment) fm.findFragmentById(R.id.map);
-		    if (fragment == null) {
-		        fragment = SupportMapFragment.newInstance();
-		        fm.beginTransaction().replace(R.id.map, fragment).commit();
-		    }
-		}
-		private void setupFakeGPS() {
-			final LocationManager lm;
-			FakeLocationListener ll;
-			lm = (LocationManager)getActivity().getSystemService(Context.LOCATION_SERVICE);
-			ll = new FakeLocationListener();
-			if (lm.getProvider("Test") == null) {
-				lm.addTestProvider("Test", false, false, false, false, false,
-						false, false, 0, 1);
-			}
-			lm.setTestProviderEnabled("Test", true);
-			lm.requestLocationUpdates("Test", 0, 0, ll);
-
-			map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-				@SuppressLint("NewApi")
-				@Override
-				public void onMapClick(LatLng l) {
-					Log.i(map.hashCode()+ "","hash");
-					Location loc = new Location("Test");
-					loc.setLatitude(l.latitude);
-					loc.setLongitude(l.longitude);
-					loc.setAltitude(0);
-					loc.setAccuracy(1);
-					loc.setTime(System.currentTimeMillis());
-					loc.setElapsedRealtimeNanos(1000);
-					lm.setTestProviderLocation("Test", loc);
-				}
-			});
-		}
-		private class FakeLocationListener implements LocationListener {
-			@Override
-			public void onLocationChanged(Location location) {
-
-				// Called when a new location is found by the network location
-				// provider.
-				Log.i("lat", location.getLatitude() + "");
-				Log.i("long", location.getLongitude() + "");
-				// map.addMarker(new MarkerOptions().position(new
-				// LatLng(location.getLatitude(), location.getLongitude())));
-				plo.add(new LatLng(location.getLatitude(), location.getLongitude()));
-				if (pl != null) {
-					pl.remove();
-				}
-
-				pl = map.addPolyline(plo);
-			}
-
-			@Override
-			public void onProviderDisabled(String provider) {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void onProviderEnabled(String provider) {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void onStatusChanged(String provider, int status, Bundle extras) {
-				// TODO Auto-generated method stub
-
-			}
-		}
-	}
 
 }
