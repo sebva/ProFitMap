@@ -38,4 +38,7 @@
     <string name="start">Start</string>
     <string name="stop">Stop</string>
     <string name="pause">Pause</string>
+    <string name="unlink_dropbox">Unlink Dropbox</string>
+    <string name="dropbox_connected">Your Dropbox account has been successfully linked !</string>
+    <string name="dropbox_error">Error while linking Dropbox</string>
 </resources>

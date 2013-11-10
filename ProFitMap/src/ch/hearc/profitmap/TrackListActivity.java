@@ -16,6 +16,7 @@ import android.app.ActionBar;
 import android.app.ActionBar.OnNavigationListener;
 import android.app.Activity;
 import android.app.FragmentManager;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.MatrixCursor;
@@ -34,8 +35,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.SpinnerAdapter;
+import android.widget.Toast;
 import ch.hearc.profitmap.gui.TrackListTileFragment;
 import ch.hearc.profitmap.gui.settings.SettingsActivity;
+import ch.hearc.profitmap.model.Tracks;
 
 public class TrackListActivity extends Activity
 {
@@ -47,12 +50,15 @@ public class TrackListActivity extends Activity
 	private CharSequence mTitle;
 	private MatrixCursor mSportsCursor;
 	private static final String[] mColumns = { "_id", "image", "text" };
+	private static final int DROPBOX_LINK_CALLBACK = 0;
 
 	private String[] mSports;
 	private String[] mSportsImages;
 
 	private int mCurrentIndex = 0;
 	private TrackListTileFragment mTrackListFragment;
+	private Tracks mTracks;
+	private ProgressDialog mProgressDialog;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -60,6 +66,7 @@ public class TrackListActivity extends Activity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_track_list);
 
+		mTracks = Tracks.getInstance();
 		mTitle = mDrawerTitle = getTitle();
 		mSportsCursor = new MatrixCursor(mColumns, 4);
 		mSports = getResources().getStringArray(R.array.sports_array);
@@ -133,6 +140,28 @@ public class TrackListActivity extends Activity
 		}
 	}
 	
+	@Override
+	protected void onStart()
+	{
+		super.onStart();
+		
+		if(!mTracks.isDropboxLinked())
+		{
+			mTracks.linkToDropbox(this, DROPBOX_LINK_CALLBACK);
+		}
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
+		if(requestCode == DROPBOX_LINK_CALLBACK)
+		{
+			Toast.makeText(this, (resultCode == Activity.RESULT_OK) ? getString(R.string.dropbox_connected) : getString(R.string.dropbox_error), Toast.LENGTH_LONG).show();
+		}
+		else
+			super.onActivityResult(requestCode, resultCode, data);
+	}
+	
 	private void onDrawerOpenClose(boolean isOpen)
 	{
 		ActionBar actionBar = getActionBar();
@@ -165,6 +194,10 @@ public class TrackListActivity extends Activity
 		{
 			case R.id.action_settings:
 				startActivity(new Intent(this, SettingsActivity.class));
+				break;
+			case R.id.action_unlink_dropbox:
+				mTracks.unlinkDropbox();
+				mTracks.linkToDropbox(this, DROPBOX_LINK_CALLBACK);
 				break;
 		}
 		return super.onMenuItemSelected(featureId, item);

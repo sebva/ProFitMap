@@ -6,10 +6,8 @@ import android.location.Location;
 
 public class GeoImage
 {
-
 	private String imagePath;
 	private Location location;
 	private Collection<TrackInstance> images;
 	private TrackInstance thumbnail;
-
 }
