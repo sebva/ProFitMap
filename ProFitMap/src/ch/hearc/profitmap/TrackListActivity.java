@@ -15,6 +15,7 @@ package ch.hearc.profitmap;
 import android.app.ActionBar;
 import android.app.ActionBar.OnNavigationListener;
 import android.app.Activity;
+import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -36,6 +37,7 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.SpinnerAdapter;
 import android.widget.Toast;
+import ch.hearc.profitmap.gui.StartTrainingDialogFragment;
 import ch.hearc.profitmap.gui.TrackListTileFragment;
 import ch.hearc.profitmap.gui.settings.SettingsActivity;
 import ch.hearc.profitmap.model.Tracks;
@@ -192,6 +194,10 @@ public class TrackListActivity extends Activity
 	{
 		switch(item.getItemId())
 		{
+			case R.id.action_start_training:
+				DialogFragment newFragment = new StartTrainingDialogFragment();
+		        newFragment.show(getFragmentManager(), "missiles");
+				break;
 			case R.id.action_settings:
 				startActivity(new Intent(this, SettingsActivity.class));
 				break;

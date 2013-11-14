@@ -1,10 +1,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <item android:id="@+id/action_unlink_dropbox" android:title="@string/unlink_dropbox" android:showAsAction="never" android:titleCondensed="@string/unlink_dropbox"></item><item
+    <item android:id="@+id/action_start_training" android:icon="@drawable/ic_action_start" android:title="@string/start" android:showAsAction="always"></item><item android:id="@+id/action_unlink_dropbox" android:title="@string/unlink_dropbox" android:showAsAction="never" android:titleCondensed="@string/unlink_dropbox"></item><item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
         android:showAsAction="never"
         android:title="@string/action_settings"/>
+    
     
 
 </menu>

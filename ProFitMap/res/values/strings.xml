@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   Copyright 2013 The Android Open Source Project
 
@@ -12,25 +13,36 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-  -->
+-->
 
 <resources>
+
     <string name="app_name">ProFitMap</string>
+
     <string-array name="sports_array">
-        <item >Running</item>
-        <item >Biking</item>
+        <item>Running</item>
+        <item>Biking</item>
+        <item>Skiing</item>
+        <item>Kayaking</item>
     </string-array>
+
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
+
     <string-array name="sports_images">
         <item>running</item>
         <item>biking</item>
+        <item>ski</item>
+        <item>kayak</item>
     </string-array>
+
     <string name="action_settings">Settings</string>
+
     <string-array name="sort_modes">
-        <item >Date</item>
-        <item >Distance</item>
+        <item>Date</item>
+        <item>Distance</item>
     </string-array>
+
     <string name="title_section1">Section 1</string>
     <string name="title_section2">Section 2</string>
     <string name="title_section3">Section 3</string>
@@ -41,4 +53,10 @@
     <string name="unlink_dropbox">Unlink Dropbox</string>
     <string name="dropbox_connected">Your Dropbox account has been successfully linked !</string>
     <string name="dropbox_error">Error while linking Dropbox</string>
+    <string name="start_training">Start training</string>
+    <string name="title_activity_end_training">End training</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="save_activity">Save training</string>
+    <string name="dismiss_training">Dismiss training</string>
+
 </resources>
