@@ -4,8 +4,15 @@ import java.util.Locale;
 
 import android.app.ActionBar;
 import android.app.FragmentTransaction;
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.location.Location;
+import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -38,22 +45,89 @@ public class LiveTrainingActivity extends FragmentActivity implements
 	 * The {@link ViewPager} that will host the section contents.
 	 */
 	ViewPager mViewPager;
-	
-	public boolean isCreated = false;
-	
 
+	public boolean isCreated = false;
+	public boolean isPaused = false;
+
+	private MapSectionFragment msf;
+
+	private Uri mCapturedImageURI;
 	
+	private Menu menu;
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.action_startrec:
+			isPaused = false;
+			switchStartPauseVisibility();
+			break;
+		case R.id.action_stoprec:
+			startActivity(new Intent(this, EndTrainingActivity.class));
+			break;
+		case R.id.action_pause:
+			isPaused = true;
+			switchStartPauseVisibility();
+			break;
+		case R.id.action_takepic:
+			takePic();
+			break;
+		default:
+			break;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+
+	private void takePic() {
+
+		String fileName = "temp.jpg";
+		ContentValues values = new ContentValues();
+		values.put(MediaStore.Images.Media.TITLE, fileName);
+		mCapturedImageURI = getContentResolver().insert(
+				MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+
+		Intent cameraIntent = new Intent(
+				android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+		cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, mCapturedImageURI);  
+
+		startActivityForResult(cameraIntent, 2);
+	}
+
+	private void switchStartPauseVisibility() {
+		MenuItem pItem = menu.findItem(R.id.action_pause);
+		MenuItem sItem = menu.findItem(R.id.action_startrec);
+
+		sItem.setVisible(!sItem.isVisible());
+		pItem.setVisible(!pItem.isVisible());
+	}
+
+	@Override
+	protected void onActivityResult(int arg0, int arg1, Intent intent) {
+		LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+		Location l = lm.getLastKnownLocation("Test"); // Fake GPS provider
+
+		String[] projection = { MediaStore.Images.Media.DATA}; 
+	    Cursor cursor = getApplicationContext().getContentResolver().query(mCapturedImageURI, projection, null, null, null);
+        int column_index_data = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA); 
+        cursor.moveToFirst(); 
+        String capturedImageFilePath = cursor.getString(column_index_data);		
+		msf.addPicMarkerToLocation(l, capturedImageFilePath);
+
+		Log.i("Result i :", "" + l.toString() + capturedImageFilePath);
+		super.onActivityResult(arg0, arg1, intent);
+	}
+
 	@Override
 	protected void onPause() {
 		// TODO Auto-generated method stub
 		super.onPause();
 	}
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		Log.i("onC", "creat");
 		super.onCreate(savedInstanceState);
-		
+
 		setContentView(R.layout.activity_live_training);
 
 		// Set up the action bar.
@@ -95,20 +169,9 @@ public class LiveTrainingActivity extends FragmentActivity implements
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
+		this.menu = menu;
 		getMenuInflater().inflate(R.menu.live_training, menu);
 		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item)
-	{
-		switch(item.getItemId())
-		{
-			case R.id.action_stoprec:
-				startActivity(new Intent(this, EndTrainingActivity.class));
-				break;
-		}
-		return super.onOptionsItemSelected(item);
 	}
 	
 	@Override
@@ -145,8 +208,11 @@ public class LiveTrainingActivity extends FragmentActivity implements
 			// Return a DummySectionFragment (defined as a static inner class
 			// below) with the page number as its lone argument.
 			Fragment fragment = null;
-			if (position == 1) fragment = new MapSectionFragment();
-			else fragment = new DummySectionFragment();
+			if (position == 1) {
+				fragment = new MapSectionFragment();
+				msf = (MapSectionFragment) fragment;
+			} else
+				fragment = new DummySectionFragment();
 			Bundle args = new Bundle();
 			args.putInt("pos", position + 1);
 			fragment.setArguments(args);
@@ -200,6 +266,5 @@ public class LiveTrainingActivity extends FragmentActivity implements
 			return rootView;
 		}
 	}
-	
 
 }

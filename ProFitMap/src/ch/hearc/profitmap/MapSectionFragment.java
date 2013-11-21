@@ -3,7 +3,10 @@ package ch.hearc.profitmap;
 import java.util.Random;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -15,19 +18,48 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import ch.hearc.profitmap.gui.training.LiveTrainingActivity;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MapSectionFragment extends Fragment {
 
 	private SupportMapFragment fragment;
 
 	private MapElements mapElements;
+	
+	private Activity parentActivity;
 
 	public MapSectionFragment() {
 
+	}
+	
+	public boolean addPicMarkerToLocation(Location loc, String filePath)
+	{
+		if (mapElements != null)
+		{
+			MarkerOptions mo = new MarkerOptions().position(new LatLng(loc.getLatitude(),loc.getLongitude()));
+			
+			Log.i("fp", filePath);
+			Bitmap micon = BitmapFactory.decodeFile(filePath);
+			Bitmap scaled = Bitmap.createScaledBitmap(micon, 120, 120, false);
+			Log.i("tt", micon.getWidth()+ " widthBit");
+			mo.icon(BitmapDescriptorFactory.fromBitmap(scaled));
+			mapElements.map.addMarker(mo);
+			mapElements.moList.add(mo);
+			return true;
+		}
+		else return false;
+	}
+	
+	@Override
+	public void onAttach(Activity activity) {
+		parentActivity = activity;
+		super.onAttach(activity);
 	}
 
 	@Override
@@ -57,15 +89,13 @@ public class MapSectionFragment extends Fragment {
 			if (mapElements.map == null) {
 				Log.i("MSF", "onRes inif");
 				mapElements.map = fragment.getMap();
-				mapElements.m = mapElements.map.addMarker(mapElements.mo);
 				setupFakeGPS();
 			}
-			
-			else
-			{
+
+			else {
 				mapElements.map = fragment.getMap();
-				mapElements.m = mapElements.map.addMarker(mapElements.mo);
-				mapElements.pl = mapElements.map.addPolyline(mapElements.plo);
+				mapElements.showMarkers();
+				mapElements.showPolyline();
 			}
 		}
 		super.onResume();
@@ -132,13 +162,13 @@ public class MapSectionFragment extends Fragment {
 		lm.setTestProviderEnabled("Test", true);
 		lm.requestLocationUpdates("Test", 0, 0, ll);
 
-		new Thread(new Runnable() {
+		/*new Thread(new Runnable() {
 
 			@Override
 			public void run() {
 				clickMapSleep(lm);
 			}
-		}).start();
+		}).start();*/
 
 		mapElements.map
 				.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
@@ -161,21 +191,9 @@ public class MapSectionFragment extends Fragment {
 		@Override
 		public void onLocationChanged(Location location) {
 
-			// Called when a new location is found by the network location
-			// provider.
-			Log.i("lat", location.getLatitude() + "");
-			Log.i("long", location.getLongitude() + "");
-			// map.addMarker(new MarkerOptions().position(new
-			// LatLng(location.getLatitude(), location.getLongitude())));
-			mapElements.plo.add(new LatLng(location.getLatitude(), location
-					.getLongitude()));
-			Log.i("size", "" + mapElements.plo.getPoints().size() + ":"
-					+ mapElements.plo.hashCode());
-			if (mapElements.pl != null) {
-				mapElements.pl.remove();
-			}
+			if (!((LiveTrainingActivity)parentActivity).isPaused) mapElements.addPointAndRefreshPolyline(new LatLng(location
+					.getLatitude(), location.getLongitude()));
 
-			mapElements.pl = mapElements.map.addPolyline(mapElements.plo);
 		}
 
 		@Override

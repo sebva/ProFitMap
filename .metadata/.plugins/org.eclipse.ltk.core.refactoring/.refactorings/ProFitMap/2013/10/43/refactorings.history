@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring comment="Rename type &apos;ch.hearc.profitmap.gui.training.EndTrainingActivit&apos; to &apos;EndTrainingActivity&apos;&#x0D;&#x0A;- Original project: &apos;ProFitMap&apos;&#x0D;&#x0A;- Original element: &apos;ch.hearc.profitmap.gui.training.EndTrainingActivit&apos;&#x0D;&#x0A;- Renamed element: &apos;ch.hearc.profitmap.gui.training.EndTrainingActivity&apos;&#x0D;&#x0A;- Update references to refactored element&#x0D;&#x0A;- Update textual occurrences in comments and strings" description="Rename type &apos;EndTrainingActivit&apos;" flags="589830" id="org.eclipse.jdt.ui.rename.type" input="/src&lt;ch.hearc.profitmap.gui.training{EndTrainingActivit.java[EndTrainingActivit" matchStrategy="1" name="EndTrainingActivity" qualified="false" references="true" similarDeclarations="false" stamp="1382899104958" textual="false" version="1.0"/>
-</session>
