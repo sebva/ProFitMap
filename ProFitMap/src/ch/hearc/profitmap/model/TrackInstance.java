@@ -14,15 +14,13 @@ public class TrackInstance
 	private int rating;
 	private double totalPauseTime;
 	private int numberOfPauses;
-	private Track track;
 	private Collection<GeoImage> images;
 	private GeoImage thumbnail;
 	private List<Location> locations;
 	private Statistics statistics;
 
-	public TrackInstance(Track track)
+	public TrackInstance()
 	{
-		this.track = track;
 		locations = new LinkedList<Location>();
 		statistics = new Statistics(this);
 		timestampStart = new Date();

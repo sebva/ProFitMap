@@ -82,6 +82,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="ch.hearc.profitmap.gui.training.LiveTrainingActivity" />
         </activity>
+        <activity
+            android:name="ch.hearc.profitmap.gui.TrackDetailActivity"
+            android:label="@string/title_activity_track_detail"
+            android:parentActivityName="ch.hearc.profitmap.TrackListActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="ch.hearc.profitmap.TrackListActivity" />
+        </activity>
     </application>
 
 </manifest>

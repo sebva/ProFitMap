@@ -40,7 +40,7 @@ import android.widget.Toast;
 import ch.hearc.profitmap.gui.StartTrainingDialogFragment;
 import ch.hearc.profitmap.gui.TrackListTileFragment;
 import ch.hearc.profitmap.gui.settings.SettingsActivity;
-import ch.hearc.profitmap.model.Tracks;
+import ch.hearc.profitmap.model.DropboxManager;
 
 public class TrackListActivity extends Activity
 {
@@ -48,8 +48,7 @@ public class TrackListActivity extends Activity
 	private ListView mDrawerList;
 	private ActionBarDrawerToggle mDrawerToggle;
 
-	private CharSequence mDrawerTitle;
-	private CharSequence mTitle;
+	private DropboxManager mDropboxManager;
 	private MatrixCursor mSportsCursor;
 	private static final String[] mColumns = { "_id", "image", "text" };
 	private static final int DROPBOX_LINK_CALLBACK = 0;
@@ -59,7 +58,6 @@ public class TrackListActivity extends Activity
 
 	private int mCurrentIndex = 0;
 	private TrackListTileFragment mTrackListFragment;
-	private Tracks mTracks;
 	private ProgressDialog mProgressDialog;
 
 	@Override
@@ -68,8 +66,7 @@ public class TrackListActivity extends Activity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_track_list);
 
-		mTracks = Tracks.getInstance();
-		mTitle = mDrawerTitle = getTitle();
+		mDropboxManager = DropboxManager.getInstance();
 		mSportsCursor = new MatrixCursor(mColumns, 4);
 		mSports = getResources().getStringArray(R.array.sports_array);
 		mSportsImages = getResources().getStringArray(R.array.sports_images);
@@ -147,9 +144,9 @@ public class TrackListActivity extends Activity
 	{
 		super.onStart();
 		
-		if(!mTracks.isDropboxLinked())
+		if(!mDropboxManager.isDropboxLinked())
 		{
-			mTracks.linkToDropbox(this, DROPBOX_LINK_CALLBACK);
+			mDropboxManager.linkToDropbox(this, DROPBOX_LINK_CALLBACK);
 		}
 	}
 	
@@ -169,13 +166,11 @@ public class TrackListActivity extends Activity
 		ActionBar actionBar = getActionBar();
 		if(isOpen)
 		{
-			setTitle(mDrawerTitle);
 			actionBar.setIcon(R.drawable.ic_launcher);
 			actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
 		}
 		else
 		{
-			setTitle(mTitle);
 			actionBar.setIcon(getSportImageIdentifier(mCurrentIndex));
 			actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
 		}
@@ -202,8 +197,8 @@ public class TrackListActivity extends Activity
 				startActivity(new Intent(this, SettingsActivity.class));
 				break;
 			case R.id.action_unlink_dropbox:
-				mTracks.unlinkDropbox();
-				mTracks.linkToDropbox(this, DROPBOX_LINK_CALLBACK);
+				mDropboxManager.unlinkDropbox();
+				mDropboxManager.linkToDropbox(this, DROPBOX_LINK_CALLBACK);
 				break;
 		}
 		return super.onMenuItemSelected(featureId, item);
@@ -246,7 +241,6 @@ public class TrackListActivity extends Activity
 
 		// update selected item and title, then close the drawer
 		mDrawerList.setItemChecked(position, true);
-		setTitle(mSports[position]);
 		getActionBar().setIcon(getSportImageIdentifier(mCurrentIndex));
 		mDrawerLayout.closeDrawer(mDrawerList);
 	}
@@ -259,8 +253,7 @@ public class TrackListActivity extends Activity
 	@Override
 	public void setTitle(CharSequence title)
 	{
-		mTitle = title;
-		getActionBar().setTitle(mTitle);
+		getActionBar().setTitle(title);
 	}
 
 	/**

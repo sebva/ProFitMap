@@ -10,11 +10,9 @@ public class Track
 	private String name;
 	private double length;
 	private List<TrackInstance> trackInstances;
-	private Tracks tracks;
 
-	public Track(Tracks tracks)
+	public Track()
 	{
-		this.tracks = tracks;
 		trackInstances = new ArrayList<TrackInstance>();
 	}
 	
@@ -26,6 +24,11 @@ public class Track
 	public String getName()
 	{
 		return name;
+	}
+	
+	public boolean isSingleInstance()
+	{
+		return trackInstances.size() == 1;
 	}
 
 	public void setName(String name)
@@ -53,6 +56,11 @@ public class Track
 	public List<TrackInstance> getTrackInstances()
 	{
 		return trackInstances;
+	}
+
+	public TrackInstance getTrackInstance(int position)
+	{
+		return trackInstances.get(position);
 	}
 	
 	

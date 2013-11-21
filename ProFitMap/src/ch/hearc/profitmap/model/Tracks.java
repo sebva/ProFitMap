@@ -1,32 +1,23 @@
 package ch.hearc.profitmap.model;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import android.app.Activity;
-import android.util.Log;
+import android.content.Context;
+import android.location.Location;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ListAdapter;
+import android.widget.TextView;
+import ch.hearc.profitmap.R;
 
-import com.dropbox.sync.android.DbxAccount;
-import com.dropbox.sync.android.DbxAccountManager;
-import com.dropbox.sync.android.DbxAccountManager.AccountListener;
-import com.dropbox.sync.android.DbxDatastore;
-import com.dropbox.sync.android.DbxDatastore.SyncStatusListener;
-import com.dropbox.sync.android.DbxException;
-import com.dropbox.sync.android.DbxFileSystem;
-import com.dropbox.sync.android.DbxFileSystem.PathListener;
-import com.dropbox.sync.android.DbxPath;
-import com.dropbox.sync.android.DbxRecord;
-import com.dropbox.sync.android.DbxTable;
-
-public class Tracks extends BaseAdapter implements AccountListener, PathListener, SyncStatusListener
+public class Tracks
 {
-
-	private static final String TRACKS_TABLE = "tracks";
-
 	public interface TrackListUpdateListener
 	{
 		public void onTrackListUpdated(Set<Track> tracks);
@@ -34,51 +25,52 @@ public class Tracks extends BaseAdapter implements AccountListener, PathListener
 
 	private static final String TAG = "Tracks";
 	private List<Track> tracks;
-	private static Tracks instance = null;
-	private DbxAccountManager mDbxAcctMgr = null;
-	private DbxDatastore mStore;
-	private DbxFileSystem mFs;
-	private DbxTable mTracksTable;
+	private static Map<Integer, Tracks> instances = null;
+	
+	static
+	{
+		instances = new HashMap<Integer, Tracks>();
+	}
 
 	private Tracks()
 	{
-	}
-
-	public static synchronized Tracks getInstance()
-	{
-		if (instance == null)
-			instance = new Tracks();
-
-		return instance;
-	}
-
-	public void linkToDropbox(Activity activity, int callbackTag)
-	{
-		if (mDbxAcctMgr == null)
+		this.tracks = new ArrayList<Track>();
+		Track track1 = new Track();
+		Track track2 = new Track();
+		TrackInstance[] trackInstances = new TrackInstance[3];
+			
+		for(int i = 0; i < 3; i++)
 		{
-			mDbxAcctMgr = DbxAccountManager.getInstance(activity.getApplicationContext(), "q2sr7uxe7l3b38n", "4byz83rhp7lt0ou");
-			mDbxAcctMgr.addListener(this);
+			trackInstances[i] = new TrackInstance();
+			for(int j = 0; j < 100; j++)
+			{
+				trackInstances[i].addWaypoint(new Location("My awesome provider"));
+			}
 		}
-		if (!mDbxAcctMgr.hasLinkedAccount())
-			mDbxAcctMgr.startLink(activity, callbackTag);
+		
+		track1.addTrackInstance(trackInstances[0]);
+		track1.addTrackInstance(trackInstances[1]);
+		track2.addTrackInstance(trackInstances[2]);
+		track1.setName("Track n°1");
+		track2.setName("Track with Ghost");
+		
+		addTrack(track1);
+		addTrack(track2);
 	}
 
-	/**
-	 * Unlink Dropbox account. Remember to immediately call linkToDropbox.
-	 */
-	public void unlinkDropbox()
+	public static synchronized Tracks getInstance(int sport)
 	{
-		mDbxAcctMgr.unlink();
+		if(instances.containsKey(sport))
+			return instances.get(sport);
+		else
+		{
+			Tracks tracks = new Tracks();
+			instances.put(sport, tracks);
+			return tracks;
+		}
 	}
 
-	public boolean isDropboxLinked()
-	{
-		if (mDbxAcctMgr == null)
-			return false;
-
-		return mDbxAcctMgr.hasLinkedAccount();
-	}
-
+	
 	public void addTrack(Track track)
 	{
 		tracks.add(track);
@@ -88,78 +80,60 @@ public class Tracks extends BaseAdapter implements AccountListener, PathListener
 	{
 		return tracks;
 	}
-
-	@Override
-	public void onLinkedAccountChange(DbxAccountManager dbxAccountManager, DbxAccount dbxAccount)
+	
+	public ListAdapter getAdapter(final Context c)
 	{
-		if (dbxAccountManager.hasLinkedAccount())
+		return new BaseAdapter()
 		{
-			Log.d(TAG, "Linked to Dropbox");
-			try
+			@Override
+			public int getCount()
 			{
-				mStore = DbxDatastore.openDefault(dbxAccount);
-				mStore.addSyncStatusListener(this);
-				mTracksTable = mStore.getTable(TRACKS_TABLE);
+				return tracks.size();
+			}
 
-				mFs = DbxFileSystem.forAccount(dbxAccount);
-				mFs.addPathListener(this, DbxPath.ROOT, Mode.PATH_OR_DESCENDANT);
-			}
-			catch (DbxException e)
+			@Override
+			public Object getItem(int position)
 			{
-				e.printStackTrace();
+				return tracks.get(position);
 			}
-		}
+
+			@Override
+			public long getItemId(int position)
+			{
+				return tracks.get(position).hashCode();
+			}
+
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent)
+			{
+				LayoutInflater inflater = (LayoutInflater)c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				Track track = tracks.get(position);
+				View v;
+		        if (convertView == null) {  // if it's not recycled, initialize some attributes
+		            v = inflater.inflate(R.layout.tile, null);
+		        } else {
+		            v = convertView;
+		        }
+		        
+		        TextView tv = (TextView)v.findViewById(R.id.textView);
+		        tv.setText(track.getName());
+		        
+		        TextView count = (TextView)v.findViewById(R.id.count);
+		        if(!track.isSingleInstance())
+		        {
+		        	count.setVisibility(View.VISIBLE);
+		        	count.setText(String.valueOf(track.getTrackInstances().size()));
+		        }
+		        else
+		        	count.setVisibility(View.INVISIBLE);
+		        return v;
+			}
+		};
 	}
 
-	@Override
-	public void onPathChange(DbxFileSystem dbxFs, DbxPath dbxPath, Mode dbxMode)
-	{
-		// Called on UI thread !
-
-	}
-
-	@Override
-	public void onDatastoreStatusChange(DbxDatastore dbxDatastore)
-	{
-		if (dbxDatastore.getSyncStatus().hasIncoming)
-		{
-			try
-			{
-				Map<String, Set<DbxRecord>> changes = mStore.sync();
-				for (DbxRecord change : changes.get(TRACKS_TABLE))
-				{
-					//if(change.isDeleted())
-				}
-			}
-			catch (DbxException e)
-			{
-				// Handle exception
-			}
-		}
-	}
-
-	@Override
-	public int getCount()
-	{
-		return tracks.size();
-	}
-
-	@Override
-	public Object getItem(int position)
+	public Track getTrack(int position)
 	{
 		return tracks.get(position);
-	}
-
-	@Override
-	public long getItemId(int position)
-	{
-		return tracks.get(position).hashCode();
-	}
-
-	@Override
-	public View getView(int position, View convertView, ViewGroup parent)
-	{
-		return null;
 	}
 
 }
