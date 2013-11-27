@@ -100,7 +100,7 @@ public class Tracks
 			@Override
 			public long getItemId(int position)
 			{
-				return tracks.get(position).hashCode();
+				return position;
 			}
 
 			@Override

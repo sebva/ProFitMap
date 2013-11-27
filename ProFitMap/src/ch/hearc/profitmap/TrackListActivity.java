@@ -38,7 +38,7 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.SpinnerAdapter;
 import android.widget.Toast;
 import ch.hearc.profitmap.gui.StartTrainingDialogFragment;
-import ch.hearc.profitmap.gui.TrackListTileFragment;
+import ch.hearc.profitmap.gui.TrackListTilesFragment;
 import ch.hearc.profitmap.gui.settings.SettingsActivity;
 import ch.hearc.profitmap.model.DropboxManager;
 
@@ -57,7 +57,7 @@ public class TrackListActivity extends Activity
 	private String[] mSportsImages;
 
 	private int mCurrentIndex = 0;
-	private TrackListTileFragment mTrackListFragment;
+	private TrackListTilesFragment mTrackListFragment;
 	private ProgressDialog mProgressDialog;
 
 	@Override
@@ -211,6 +211,13 @@ public class TrackListActivity extends Activity
 		// ActionBarDrawerToggle will take care of this.
 		return mDrawerToggle.onOptionsItemSelected(item);
 	}
+	
+	@Override
+	public void onBackPressed()
+	{
+		if(mTrackListFragment.onBackPressed())
+			super.onBackPressed();
+	}
 
 	/* The click listner for ListView in the navigation drawer */
 	private class DrawerItemClickListener implements ListView.OnItemClickListener
@@ -228,9 +235,9 @@ public class TrackListActivity extends Activity
 		mCurrentIndex = position;
 		if (mTrackListFragment == null)
 		{
-			mTrackListFragment = new TrackListTileFragment();
+			mTrackListFragment = new TrackListTilesFragment();
 			Bundle args = new Bundle();
-			args.putInt(TrackListTileFragment.ARG_SPORT_NUMBER, position);
+			args.putInt(TrackListTilesFragment.ARG_SPORT_NUMBER, position);
 			mTrackListFragment.setArguments(args);
 
 			FragmentManager fragmentManager = getFragmentManager();
