@@ -1,4 +1,4 @@
-package ch.hearc.profitmap.gui;
+package ch.hearc.profitmap.gui.training.fragments;
 
 import android.app.AlertDialog;
 import android.app.Dialog;

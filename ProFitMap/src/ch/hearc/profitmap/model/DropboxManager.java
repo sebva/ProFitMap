@@ -31,7 +31,6 @@ public class DropboxManager implements AccountListener, PathListener, SyncStatus
 
 	private DropboxManager()
 	{
-		// TODO Auto-generated constructor stub
 	}
 
 	public static synchronized DropboxManager getInstance()

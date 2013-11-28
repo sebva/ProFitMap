@@ -1,5 +1,6 @@
 package ch.hearc.profitmap.nfc;
 
-public class NFCImportActivity {
+public class NFCImportActivity
+{
 
 }

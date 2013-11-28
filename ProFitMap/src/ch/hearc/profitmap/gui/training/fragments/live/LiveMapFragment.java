@@ -1,5 +1,8 @@
 package ch.hearc.profitmap.gui.training.fragments.live;
 
-public class LiveMapFragment {
+import ch.hearc.profitmap.gui.training.fragments.MapFragment;
+
+public class LiveMapFragment extends MapFragment
+{
 
 }

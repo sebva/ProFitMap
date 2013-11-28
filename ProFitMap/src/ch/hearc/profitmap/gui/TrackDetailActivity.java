@@ -3,17 +3,19 @@ package ch.hearc.profitmap.gui;
 import java.util.Locale;
 
 import android.app.ActionBar;
+import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.app.FragmentTransaction;
 import android.support.v4.app.NavUtils;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
 import ch.hearc.profitmap.R;
+import ch.hearc.profitmap.gui.settings.SettingsActivity;
 import ch.hearc.profitmap.gui.training.fragments.GraphFragment;
 import ch.hearc.profitmap.gui.training.fragments.MapFragment;
 import ch.hearc.profitmap.gui.training.fragments.SummaryFragment;
@@ -45,7 +47,7 @@ public class TrackDetailActivity extends FragmentActivity implements ActionBar.T
 		this.tracks = Tracks.getInstance(0);
 		
 		Bundle params = getIntent().getExtras();
-		/* TODO
+		/* TODO Pass TrackInstance to detail activity
 		int trackId = params.getInt("trackId");
 		int trackInstanceId = params.getInt("trackInstanceId");
 		this.trackInstance = tracks.getTrack(trackId).getTrackInstance(trackInstanceId);
@@ -113,6 +115,9 @@ public class TrackDetailActivity extends FragmentActivity implements ActionBar.T
 				//
 				NavUtils.navigateUpFromSameTask(this);
 				return true;
+			case R.id.action_settings:
+				startActivity(new Intent(this, SettingsActivity.class));
+				break;
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -175,11 +180,11 @@ public class TrackDetailActivity extends FragmentActivity implements ActionBar.T
 			switch (position)
 			{
 				case 0:
-					return getString(R.string.title_section1).toUpperCase(l);
+					return getString(R.string.summary_section).toUpperCase(l);
 				case 1:
-					return getString(R.string.title_section2).toUpperCase(l);
+					return getString(R.string.map_section).toUpperCase(l);
 				case 2:
-					return getString(R.string.title_section3).toUpperCase(l);
+					return getString(R.string.graph_section).toUpperCase(l);
 			}
 			return null;
 		}

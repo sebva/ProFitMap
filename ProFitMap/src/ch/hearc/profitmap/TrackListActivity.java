@@ -37,9 +37,9 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.SpinnerAdapter;
 import android.widget.Toast;
-import ch.hearc.profitmap.gui.StartTrainingDialogFragment;
 import ch.hearc.profitmap.gui.TrackListTilesFragment;
 import ch.hearc.profitmap.gui.settings.SettingsActivity;
+import ch.hearc.profitmap.gui.training.fragments.StartTrainingDialogFragment;
 import ch.hearc.profitmap.model.DropboxManager;
 
 public class TrackListActivity extends Activity
@@ -58,7 +58,6 @@ public class TrackListActivity extends Activity
 
 	private int mCurrentIndex = 0;
 	private TrackListTilesFragment mTrackListFragment;
-	private ProgressDialog mProgressDialog;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -105,7 +104,6 @@ public class TrackListActivity extends Activity
 			@Override
 			public boolean onNavigationItemSelected(int itemPosition, long itemId)
 			{
-				// TODO Auto-generated method stub
 				return false;
 			}
 		});

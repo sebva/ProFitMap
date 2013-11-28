@@ -1,5 +1,8 @@
 package ch.hearc.profitmap.gui.training.fragments.live;
 
-public class LiveStatsFragment {
+import ch.hearc.profitmap.gui.training.fragments.SummaryFragment;
+
+public class LiveStatsFragment extends SummaryFragment
+{
 
 }
