@@ -1,15 +1,20 @@
 package ch.hearc.profitmap.gui.training.fragments;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.Random;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v4.app.Fragment;
@@ -19,47 +24,30 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import ch.hearc.profitmap.R;
-import ch.hearc.profitmap.gui.ActiveMapElements;
 import ch.hearc.profitmap.gui.MapElements;
+import ch.hearc.profitmap.gui.ActiveMapElements;
 import ch.hearc.profitmap.gui.training.LiveTrainingActivity;
 
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MapFragment extends Fragment
 {
 
-	private SupportMapFragment fragment;
+	protected SupportMapFragment fragment;
 
-	private MapElements mapElements;
+	protected MapElements mapElements;
 
-	private Activity parentActivity;
+	protected Activity parentActivity;
 
 	public MapFragment()
 	{
 
-	}
-
-	public boolean addPicMarkerToLocation(Location loc, String filePath)
-	{
-		if (mapElements != null)
-		{
-			MarkerOptions mo = new MarkerOptions().position(new LatLng(loc.getLatitude(), loc.getLongitude()));
-
-			Log.i("fp", filePath);
-			Bitmap micon = BitmapFactory.decodeFile(filePath);
-			Bitmap scaled = Bitmap.createScaledBitmap(micon, 120, 120, false);
-			Log.i("tt", micon.getWidth() + " widthBit");
-			mo.icon(BitmapDescriptorFactory.fromBitmap(scaled));
-			mapElements.map.addMarker(mo);
-			mapElements.moList.add(mo);
-			return true;
-		}
-		else
-			return false;
 	}
 
 	@Override
@@ -88,21 +76,16 @@ public class MapFragment extends Fragment
 	}
 
 	@Override
-	public void onResume()
-	{
+	public void onResume() {
 		Log.i("MSF", "onRes before");
 
-		if (mapElements != null)
-		{
-			if (mapElements.map == null)
-			{
-				Log.i("MSF", "onRes inif");
+		if (mapElements != null) {
+			if (mapElements.map == null) {
 				mapElements.map = fragment.getMap();
-				setupFakeGPS();
+				setupMap();
 			}
 
-			else
-			{
+			else {
 				mapElements.map = fragment.getMap();
 				mapElements.showMarkers();
 				mapElements.showPolyline();
@@ -125,113 +108,93 @@ public class MapFragment extends Fragment
 		}
 	}
 
-	public LatLng randomLatLng()
-	{
+	public void setupMap() {
+		mapElements.map.setOnMarkerClickListener(new OnMarkerClickListener() {
 
-		float minX = 0.0f;
-		float maxX = 40.0f;
-
-		Random rand = new Random();
-
-		float finalX = rand.nextFloat() * (maxX - minX) + minX;
-		float finalY = rand.nextFloat() * (maxX - minX) + minX;
-
-		return new LatLng(finalX, finalY);
-	}
-
-	@SuppressLint("NewApi")
-	public void fakeMapClick(LatLng l, LocationManager lm)
-	{
-		Log.i("fake click at", l.latitude + " ; " + l.longitude);
-
-		Location loc = new Location("Test");
-		loc.setLatitude(l.latitude);
-		loc.setLongitude(l.longitude);
-		loc.setAltitude(0);
-		loc.setAccuracy(1);
-		loc.setTime(System.currentTimeMillis());
-		loc.setElapsedRealtimeNanos(1000);
-		lm.setTestProviderLocation("Test", loc);
-	}
-
-	public void clickMapSleep(LocationManager lm)
-	{
-		int i = 0;
-		while (i < 10)
-		{
-			SystemClock.sleep(4000);
-			fakeMapClick(randomLatLng(), lm);
-			i++;
-		}
-	}
-
-	private void setupFakeGPS()
-	{
-		final LocationManager lm;
-		FakeLocationListener ll;
-		lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-		ll = new FakeLocationListener();
-		if (lm.getProvider("Test") == null)
-		{
-			lm.addTestProvider("Test", false, false, false, false, false, false, false, 0, 1);
-		}
-		lm.setTestProviderEnabled("Test", true);
-		lm.requestLocationUpdates("Test", 0, 0, ll);
-
-		/*
-		 * new Thread(new Runnable() {
-		 * 
-		 * @Override public void run() { clickMapSleep(lm); } }).start();
-		 */
-
-		mapElements.map.setOnMapClickListener(new GoogleMap.OnMapClickListener()
-		{
-			@SuppressLint("NewApi")
 			@Override
-			public void onMapClick(LatLng l)
-			{
-				Location loc = new Location("Test");
-				loc.setLatitude(l.latitude);
-				loc.setLongitude(l.longitude);
-				loc.setAltitude(0);
-				loc.setAccuracy(1);
-				loc.setTime(System.currentTimeMillis());
-				loc.setElapsedRealtimeNanos(1000);
-				lm.setTestProviderLocation("Test", loc);
+			public boolean onMarkerClick(Marker marker) {
+				if (marker.getTitle() != null) {
+					Log.i("testM", marker.getTitle());
+					Intent intent = new Intent();
+					intent.setAction(Intent.ACTION_VIEW);
+					intent.setDataAndType(
+							Uri.parse("file://" + marker.getTitle()), "image/*");
+					startActivity(intent);
+				}
+				return true;
 			}
 		});
 	}
 
-	private class FakeLocationListener implements LocationListener
+
+	public void endTraining()
 	{
-		@Override
-		public void onLocationChanged(Location location)
+		LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+		Location l = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+		LatLng endPosition = new LatLng(l.getLatitude(), l.getLongitude());
+		mapElements.end(endPosition);
+	}
+
+	public boolean addPicMarkerToLocation(Location loc, String filePath, int orientation)
+	{
+		if (mapElements != null)
 		{
+			MarkerOptions mo = new MarkerOptions().position(new LatLng(loc.getLatitude(), loc.getLongitude()));
+			mo.title(filePath);
 
-			if (!((LiveTrainingActivity) parentActivity).isPaused)
-				mapElements.addPointAndRefreshPolyline(new LatLng(location.getLatitude(), location.getLongitude()));
+			Log.i("fp", filePath);
 
+			/*
+			 * Bitmap micon = BitmapFactory.decodeFile(filePath); Matrix matrix = new Matrix(); matrix.postRotate(270); Bitmap rotated =
+			 * Bitmap.createBitmap(micon, 0, 0, micon.getWidth(), micon.getHeight(), matrix, true); micon.recycle(); int coeff = rotated.getWidth()/150;
+			 * 
+			 * Bitmap scaled = Bitmap.createScaledBitmap(rotated, rotated.getWidth()/coeff, rotated.getHeight()/coeff,false);
+			 */
+
+			Log.i("orientation", orientation + " ");
+			Bitmap scaled = decodeFile(new File(filePath));
+
+			mo.icon(BitmapDescriptorFactory.fromBitmap(scaled));
+
+			mapElements.map.addMarker(mo);
+			mapElements.moList.add(mo);
+			return true;
 		}
+		else
+			return false;
+	}
 
-		@Override
-		public void onProviderDisabled(String provider)
+	// decodes image and scales it to reduce memory consumption
+	private Bitmap decodeFile(File f)
+	{
+		try
 		{
-			// TODO Auto-generated method stub
+			// Decode image size
+			BitmapFactory.Options o = new BitmapFactory.Options();
+			o.inJustDecodeBounds = true;
+			BitmapFactory.decodeStream(new FileInputStream(f), null, o);
 
+			// The new size we want to scale to
+			final int REQUIRED_SIZE = 70;
+
+			// Find the correct scale value. It should be the power of 2.
+			int scale = 1;
+			while (o.outWidth / scale / 2 >= REQUIRED_SIZE && o.outHeight / scale / 2 >= REQUIRED_SIZE)
+				scale *= 2;
+
+			// Decode with inSampleSize
+			BitmapFactory.Options o2 = new BitmapFactory.Options();
+			o2.inSampleSize = scale;
+			Matrix matrix = new Matrix();
+			matrix.postRotate(270);
+			Bitmap scaled = BitmapFactory.decodeStream(new FileInputStream(f), null, o2);
+			Bitmap rotated = Bitmap.createBitmap(scaled, 0, 0, scaled.getWidth(), scaled.getHeight(), matrix, true);
+
+			return rotated;
 		}
-
-		@Override
-		public void onProviderEnabled(String provider)
+		catch (Exception e)
 		{
-			// TODO Auto-generated method stub
-
 		}
-
-		@Override
-		public void onStatusChanged(String provider, int status, Bundle extras)
-		{
-			// TODO Auto-generated method stub
-
-		}
+		return null;
 	}
 }

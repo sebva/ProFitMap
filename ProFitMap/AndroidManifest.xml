@@ -24,7 +24,6 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
-
         <!-- Main activity -->
         <activity
             android:name="ch.hearc.profitmap.TrackListActivity"
@@ -45,7 +44,7 @@
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
-
+            
         <!-- Our services -->
         <service
             android:name="ch.hearc.profitmap.LocationTrackService"
@@ -68,11 +67,6 @@
             </intent-filter>
         </activity>
 
-        <service
-            android:name="com.dropbox.sync.android.DbxSyncService"
-            android:enabled="true"
-            android:exported="false"
-            android:label="Dropbox Sync" />
 
         <!-- Our activities -->
         <activity

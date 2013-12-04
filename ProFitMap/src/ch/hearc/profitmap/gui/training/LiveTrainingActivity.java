@@ -29,6 +29,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import ch.hearc.profitmap.R;
 import ch.hearc.profitmap.gui.training.fragments.MapFragment;
+import ch.hearc.profitmap.gui.training.fragments.SummaryFragment;
+import ch.hearc.profitmap.gui.training.fragments.live.LiveMapFragment;
+import ch.hearc.profitmap.gui.training.fragments.live.LiveStatsFragment;
 
 public class LiveTrainingActivity extends FragmentActivity implements ActionBar.TabListener
 {
@@ -48,7 +51,8 @@ public class LiveTrainingActivity extends FragmentActivity implements ActionBar.
 	public boolean isCreated = false;
 	public boolean isPaused = false;
 
-	private MapFragment msf;
+	private MapFragment liveMapFragment;
+	private SummaryFragment liveStatsFragment;
 
 	private Uri mCapturedImageURI;
 
@@ -122,7 +126,8 @@ public class LiveTrainingActivity extends FragmentActivity implements ActionBar.
 		int column_index_data = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
 		cursor.moveToFirst();
 		String capturedImageFilePath = cursor.getString(column_index_data);
-		msf.addPicMarkerToLocation(l, capturedImageFilePath);
+		int orientation = 0; // TODO : change to correct orientation
+		liveMapFragment.addPicMarkerToLocation(l, capturedImageFilePath,orientation);
 
 		Log.i("Result i :", "" + l.toString() + capturedImageFilePath);
 		super.onActivityResult(arg0, arg1, intent);
@@ -218,11 +223,11 @@ public class LiveTrainingActivity extends FragmentActivity implements ActionBar.
 			Fragment fragment = null;
 			if (position == 1)
 			{
-				fragment = new MapFragment();
-				msf = (MapFragment) fragment;
+				fragment = new LiveMapFragment();
+				liveMapFragment = (MapFragment) fragment;
 			}
 			else
-				fragment = new DummySectionFragment();
+				fragment = new LiveStatsFragment();
 			Bundle args = new Bundle();
 			args.putInt("pos", position + 1);
 			fragment.setArguments(args);
