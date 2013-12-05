@@ -32,7 +32,7 @@ public class TrackListTilesFragment extends Fragment
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
-		View rootView = inflater.inflate(R.layout.fragment_trackinstance_grid, container, false);
+		View rootView = inflater.inflate(R.layout.fragment_grid, container, false);
 		int i = getArguments().getInt(ARG_SPORT_NUMBER);
 		
 		mGridView = (GridView) rootView.findViewById(R.id.trackinstance_grid);

@@ -19,6 +19,7 @@ import ch.hearc.profitmap.gui.settings.SettingsActivity;
 import ch.hearc.profitmap.gui.training.fragments.GraphFragment;
 import ch.hearc.profitmap.gui.training.fragments.MapFragment;
 import ch.hearc.profitmap.gui.training.fragments.SummaryFragment;
+import ch.hearc.profitmap.model.Statistics;
 import ch.hearc.profitmap.model.TrackInstance;
 import ch.hearc.profitmap.model.Tracks;
 
@@ -45,6 +46,7 @@ public class TrackDetailActivity extends FragmentActivity implements ActionBar.T
 		super.onCreate(savedInstanceState);
 		
 		this.tracks = Tracks.getInstance(0);
+		trackInstance = tracks.getTrack(0).getTrackInstance(0);
 		
 		Bundle params = getIntent().getExtras();
 		/* TODO Pass TrackInstance to detail activity
@@ -188,6 +190,11 @@ public class TrackDetailActivity extends FragmentActivity implements ActionBar.T
 			}
 			return null;
 		}
+	}
+
+	public Statistics getStatistics()
+	{
+		return trackInstance.getStatistics();
 	}
 
 }

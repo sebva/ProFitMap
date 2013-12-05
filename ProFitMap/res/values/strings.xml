@@ -60,5 +60,17 @@
     <string name="dismiss_training">Dismiss training</string>
     <string name="title_activity_track_detail">Training details</string>
     <string name="title_activity_stats_order">Order sports</string>
-
+    <string name="rating">Rating</string>
+    <string name="track_name">Track name</string>
+    
+    <string name="track_length">Distance</string>
+    <string name="track_duration">Duration</string>
+	<string name="track_ascent">Ascent</string>
+    <string name="track_descent">Descent</string>
+    <string name="track_start_time">Start time</string>
+    <string name="track_end_time">End time</string>
+    <string name="track_average_speed">Average speed</string>
+    <string name="track_max_speed">Max speed</string>
+    <string name="track_total_pause_time">Total pause time</string>
+    <string name="track_number_of_pauses">Number of pauses</string>
 </resources>

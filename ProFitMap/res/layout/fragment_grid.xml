@@ -9,7 +9,7 @@
         android:id="@+id/trackinstance_grid"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:columnWidth="130dp"
+        android:columnWidth="140dp"
         android:gravity="center"
         android:horizontalSpacing="10dp"
         android:numColumns="auto_fit"

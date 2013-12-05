@@ -12,7 +12,7 @@ public class TrackInstance
 	private Date timestampStart;
 	private Date timestampEnd;
 	private int rating;
-	private double totalPauseTime;
+	private long totalPauseTime;
 	private int numberOfPauses;
 	private Collection<GeoImage> images;
 	private GeoImage thumbnail;
@@ -24,6 +24,7 @@ public class TrackInstance
 		locations = new LinkedList<Location>();
 		statistics = new Statistics(this);
 		timestampStart = new Date();
+		timestampEnd = new Date();
 	}
 	
 	public static TrackInstance fromGpx(String gpx)
@@ -81,7 +82,7 @@ public class TrackInstance
 		return timestampEnd;
 	}
 
-	public double getTotalPauseTime()
+	public long getTotalPauseTime()
 	{
 		return totalPauseTime;
 	}

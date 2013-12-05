@@ -63,7 +63,8 @@ public class LiveTrainingActivity extends FragmentActivity implements ActionBar.
 	{
 		ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
 		RunningTaskInfo activity = am.getRunningTasks(1).get(0);
-		if(!activity.topActivity.getPackageName().startsWith("ch.hearc.profitmap"))
+		Log.d("LTA", activity.baseActivity.getPackageName());
+		if(!activity.baseActivity.getPackageName().startsWith("ch.hearc.profitmap"))
 			super.onBackPressed();
 	}
 

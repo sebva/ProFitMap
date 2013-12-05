@@ -21,7 +21,7 @@ public class GraphFragment extends Fragment
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
-		View rootView = inflater.inflate(R.layout.fragment_track_detail_dummy, container, false);
+		View rootView = inflater.inflate(R.layout.fragment_track_detail_summary, container, false);
 		return rootView;
 	}
 }
