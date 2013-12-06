@@ -8,9 +8,44 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".EndTrainingActivity" >
 
-    <TextView
+    <EditText
+        android:id="@+id/track_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!" />
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignRight="@+id/track_rating"
+        android:ems="10" >
+
+        <requestFocus />
+    </EditText>
+
+    <RatingBar
+        android:id="@+id/track_rating"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/track_name" />
+
+    <fragment
+        class="ch.hearc.profitmap.gui.training.fragments.SummaryFragment"
+        android:id="@+id/summary_fragment"
+        android:name="ch.hearc.profitmap.gui.training.fragments.SummaryFragment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/track_rating" />
+
+    <ImageButton
+        android:id="@+id/btn_choose_pic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/track_rating"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/track_rating"
+        android:src="@android:drawable/ic_menu_camera" />
 
 </RelativeLayout>

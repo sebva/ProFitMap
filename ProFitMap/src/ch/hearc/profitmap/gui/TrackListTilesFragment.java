@@ -1,8 +1,8 @@
 package ch.hearc.profitmap.gui;
 
-import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +13,7 @@ import android.widget.ListAdapter;
 import ch.hearc.profitmap.R;
 import ch.hearc.profitmap.model.Track;
 import ch.hearc.profitmap.model.Tracks;
+
 
 public class TrackListTilesFragment extends Fragment
 {

@@ -16,14 +16,14 @@ import android.app.ActionBar;
 import android.app.ActionBar.OnNavigationListener;
 import android.app.Activity;
 import android.app.DialogFragment;
-import android.app.FragmentManager;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.MatrixCursor;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
@@ -42,7 +42,7 @@ import ch.hearc.profitmap.gui.settings.SettingsActivity;
 import ch.hearc.profitmap.gui.training.fragments.StartTrainingDialogFragment;
 import ch.hearc.profitmap.model.DropboxManager;
 
-public class TrackListActivity extends Activity
+public class TrackListActivity extends FragmentActivity
 {
 	private DrawerLayout mDrawerLayout;
 	private ListView mDrawerList;
@@ -238,7 +238,7 @@ public class TrackListActivity extends Activity
 			args.putInt(TrackListTilesFragment.ARG_SPORT_NUMBER, position);
 			mTrackListFragment.setArguments(args);
 
-			FragmentManager fragmentManager = getFragmentManager();
+			FragmentManager fragmentManager = getSupportFragmentManager();
 			fragmentManager.beginTransaction().replace(R.id.content_frame, mTrackListFragment).commit();
 		}
 		else

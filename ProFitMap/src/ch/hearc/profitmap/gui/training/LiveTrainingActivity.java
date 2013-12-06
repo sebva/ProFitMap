@@ -57,14 +57,14 @@ public class LiveTrainingActivity extends FragmentActivity implements ActionBar.
 	private Uri mCapturedImageURI;
 
 	private Menu menu;
-	
+
 	@Override
 	public void onBackPressed()
 	{
 		ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
 		RunningTaskInfo activity = am.getRunningTasks(1).get(0);
 		Log.d("LTA", activity.baseActivity.getPackageName());
-		if(!activity.baseActivity.getPackageName().startsWith("ch.hearc.profitmap"))
+		if (!activity.baseActivity.getPackageName().startsWith("ch.hearc.profitmap"))
 			super.onBackPressed();
 	}
 
@@ -128,7 +128,7 @@ public class LiveTrainingActivity extends FragmentActivity implements ActionBar.
 		cursor.moveToFirst();
 		String capturedImageFilePath = cursor.getString(column_index_data);
 		int orientation = 0; // TODO : change to correct orientation
-		liveMapFragment.addPicMarkerToLocation(l, capturedImageFilePath,orientation);
+		liveMapFragment.addPicMarkerToLocation(l, capturedImageFilePath, orientation);
 
 		Log.i("Result i :", "" + l.toString() + capturedImageFilePath);
 		super.onActivityResult(arg0, arg1, intent);

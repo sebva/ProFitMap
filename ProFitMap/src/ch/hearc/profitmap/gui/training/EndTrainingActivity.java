@@ -1,18 +1,22 @@
 package ch.hearc.profitmap.gui.training;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.os.Bundle;
+//import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.NavUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import ch.hearc.profitmap.R;
 import ch.hearc.profitmap.TrackListActivity;
+import ch.hearc.profitmap.gui.training.fragments.SummaryFragment.StatisticsProvider;
+import ch.hearc.profitmap.model.Statistics;
+import ch.hearc.profitmap.model.TrackInstance;
 
-public class EndTrainingActivity extends Activity
+public class EndTrainingActivity extends FragmentActivity implements StatisticsProvider
 {
 
 	@Override
@@ -82,6 +86,13 @@ public class EndTrainingActivity extends Activity
 				return true;
 		}
 		return super.onOptionsItemSelected(item);
+	}
+
+	@Override
+	public Statistics getStatistics()
+	{
+		// TODO Return real statistics
+		return new Statistics(new TrackInstance());
 	}
 
 }

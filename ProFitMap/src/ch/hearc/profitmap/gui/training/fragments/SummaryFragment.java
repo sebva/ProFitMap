@@ -7,11 +7,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
 import ch.hearc.profitmap.R;
-import ch.hearc.profitmap.gui.TrackDetailActivity;
 import ch.hearc.profitmap.model.Statistics;
 
 public class SummaryFragment extends Fragment
 {
+	public interface StatisticsProvider
+	{
+		public Statistics getStatistics();
+	}
+
 	private Statistics mStatistics;
 	private GridView mGridView;
 
@@ -24,6 +28,7 @@ public class SummaryFragment extends Fragment
 	{
 		mStatistics = statistics;
 		mGridView.setAdapter(mStatistics.getAdapter(getActivity()));
+		mStatistics.computeStatistics();
 	}
 
 	@Override
@@ -32,7 +37,7 @@ public class SummaryFragment extends Fragment
 		View rootView = inflater.inflate(R.layout.fragment_grid, container, false);
 		
 		mGridView = (GridView) rootView.findViewById(R.id.trackinstance_grid);
-		mGridView.setAdapter(((TrackDetailActivity) getActivity()).getStatistics().getAdapter(getActivity()));
+		setStatistics(((StatisticsProvider)getActivity()).getStatistics());
 		
 		return rootView;
 	}

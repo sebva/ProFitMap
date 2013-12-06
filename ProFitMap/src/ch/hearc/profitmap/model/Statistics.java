@@ -1,8 +1,10 @@
 package ch.hearc.profitmap.model;
 
 import java.text.DateFormat;
-
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.location.Location;
+import android.os.Build;
 import android.text.format.DateUtils;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -35,9 +37,35 @@ public class Statistics
 		this.trackInstance = track;
 	}
 
-	private void computeStatistics()
+	@SuppressLint("NewApi")
+	public void computeStatistics()
 	{
-
+		length = ascent = descent = averageSpeed = maxSpeed = duration = 0;
+		if(trackInstance.getLocations().size() == 0)
+			return;
+		
+		Location previous = trackInstance.getLocations().get(0);
+		for(Location l : trackInstance.getLocations())
+		{
+			length += previous.distanceTo(l);
+			double deniv = l.getAltitude() - previous.getAltitude();
+			if(deniv >= 0)
+				ascent += deniv;
+			else
+				descent -= deniv;
+			
+			float speed = l.getSpeed();
+			if(speed > maxSpeed)
+				maxSpeed = speed;
+			
+			previous = l;
+		}
+		
+		// Better precision, but only since Jelly Bean
+		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)
+			duration = (previous.getElapsedRealtimeNanos() - trackInstance.getLocations().get(0).getElapsedRealtimeNanos()) / 1000000l;
+		else
+			duration = (previous.getTime() - trackInstance.getLocations().get(0).getTime()) / 1000l;
 	}
 	
 	private Pair<Integer, String> getStatisticForPosition(int position)
