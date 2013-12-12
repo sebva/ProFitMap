@@ -1,6 +1,10 @@
 package ch.hearc.profitmap.model;
 
 import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.Format;
+import java.text.NumberFormat;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.location.Location;
@@ -25,6 +29,7 @@ public class Statistics
 	private double descent;
 	private double averageSpeed;
 	private double maxSpeed;
+	private double effortKm;
 	/**
 	 * Duration in seconds
 	 */
@@ -66,35 +71,44 @@ public class Statistics
 			duration = (previous.getElapsedRealtimeNanos() - trackInstance.getLocations().get(0).getElapsedRealtimeNanos()) / 1000000l;
 		else
 			duration = (previous.getTime() - trackInstance.getLocations().get(0).getTime()) / 1000l;
+		
+		effortKm = (length + ascent * 10.0 + descent * 2.0) / 1000.0;
 	}
 	
 	private Pair<Integer, String> getStatisticForPosition(int position)
 	{
+		NumberFormat format = DecimalFormat.getNumberInstance();
 		switch(position)
 		{
 			default:
 			case 0:
-				return new Pair<Integer, String>(R.string.track_length, length / 1000.0 + " km");
+				format.setMaximumIntegerDigits(3);
+				return new Pair<Integer, String>(R.string.track_length, format.format(length / 1000.0) + " km");
 			case 1:
 				return new Pair<Integer, String>(R.string.track_duration, DateUtils.formatElapsedTime(duration));
 			case 2:
-				return new Pair<Integer, String>(R.string.track_ascent, ascent + " m");
+				return new Pair<Integer, String>(R.string.track_ascent, Math.round(ascent) + " m");
 			case 3:
-				return new Pair<Integer, String>(R.string.track_descent, descent + " m");
+				return new Pair<Integer, String>(R.string.track_descent, Math.round(descent) + " m");
 			case 4:
-				return new Pair<Integer, String>(R.string.track_average_speed, averageSpeed * 3.6 + " km/h");
+				format.setMaximumIntegerDigits(1);
+				return new Pair<Integer, String>(R.string.track_average_speed, format.format(averageSpeed * 3.6) + " km/h");
 			case 5:
 				return new Pair<Integer, String>(R.string.track_end_time, DateFormat.getDateTimeInstance().format(trackInstance.getTimestampEnd()));
 			case 6:
 				return new Pair<Integer, String>(R.string.track_start_time, DateFormat.getDateTimeInstance().format(trackInstance.getTimestampStart()));
 			case 7:
-				return new Pair<Integer, String>(R.string.track_max_speed, maxSpeed * 3.6 + " km/h");
+				format.setMaximumIntegerDigits(1);
+				return new Pair<Integer, String>(R.string.track_max_speed, format.format(maxSpeed * 3.6) + " km/h");
 			case 8:
 				return new Pair<Integer, String>(R.string.track_number_of_pauses, String.valueOf(trackInstance.getNumberOfPauses()));
 			case 9:
 				return new Pair<Integer, String>(R.string.track_total_pause_time, DateUtils.formatElapsedTime(trackInstance.getTotalPauseTime()));
 			case 10:
 				return new Pair<Integer, String>(R.string.rating, trackInstance.getRating() + " / 5");
+			case 11:
+				format.setMaximumIntegerDigits(3);
+				return new Pair<Integer, String>(R.string.track_km_effort, format.format(effortKm));
 		}
 	}
 
@@ -138,7 +152,7 @@ public class Statistics
 			@Override
 			public int getCount()
 			{
-				return 11;
+				return 12;
 			}
 		};
 	}

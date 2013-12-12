@@ -73,4 +73,5 @@
     <string name="track_max_speed">Max speed</string>
     <string name="track_total_pause_time">Total pause time</string>
     <string name="track_number_of_pauses">Number of pauses</string>
+    <string name="track_km_effort">Effort Kilometers</string>
 </resources>
