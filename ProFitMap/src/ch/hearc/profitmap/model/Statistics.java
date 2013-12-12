@@ -108,7 +108,7 @@ public class Statistics
 				return new Pair<Integer, String>(R.string.rating, trackInstance.getRating() + " / 5");
 			case 11:
 				format.setMaximumIntegerDigits(3);
-				return new Pair<Integer, String>(R.string.track_km_effort, format.format(effortKm));
+				return new Pair<Integer, String>(R.string.track_km_effort, format.format(effortKm) + " km");
 		}
 	}
 
