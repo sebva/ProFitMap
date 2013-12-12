@@ -18,7 +18,7 @@ public class Track
 {
 	private String name;
 	private double length;
-	private List<TrackInstance> trackInstances;
+	protected List<TrackInstance> trackInstances;
 
 	public Track()
 	{

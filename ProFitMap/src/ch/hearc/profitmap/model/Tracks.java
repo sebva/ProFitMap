@@ -1,15 +1,13 @@
 package ch.hearc.profitmap.model;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.android.gms.maps.model.LatLng;
-
 import android.content.Context;
-import android.location.Location;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,9 +15,19 @@ import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 import ch.hearc.profitmap.R;
-import ch.hearc.profitmap.gui.training.fragments.live.LiveMapFragment;
+import ch.hearc.profitmap.model.DropboxManager.DropboxReadyListener;
 
-public class Tracks
+import com.dropbox.sync.android.DbxException;
+import com.dropbox.sync.android.DbxFile;
+import com.dropbox.sync.android.DbxFileSystem;
+import com.dropbox.sync.android.DbxList;
+import com.dropbox.sync.android.DbxPath;
+import com.dropbox.sync.android.DbxRecord;
+import com.dropbox.sync.android.DbxTable;
+import com.dropbox.sync.android.DbxTable.QueryResult;
+import com.google.gson.Gson;
+
+public class Tracks implements DropboxReadyListener
 {
 	public interface TrackListUpdateListener
 	{
@@ -29,57 +37,23 @@ public class Tracks
 	private static final String TAG = "Tracks";
 	private List<Track> tracks;
 	private static Map<Integer, Tracks> instances = null;
+	private DropboxManager mDropbox;
+	private DbxTable mDbxTable;
+	private DbxFileSystem mDbxFs;
+	private int mSportId;
 	
 	static
 	{
 		instances = new HashMap<Integer, Tracks>();
 	}
 
-	private Tracks()
+	private Tracks(int sportId)
 	{
-		this.tracks = new ArrayList<Track>();
-		Track track1 = new Track();
-		Track track2 = new Track();
-		Track track3 = new Track();
-		Track track4 = new Track();
-		TrackInstance[] trackInstances = new TrackInstance[5];
-			
-		for(int i = 0; i < 5; i++)
-		{
-			trackInstances[i] = new TrackInstance();
-			for(int j = 0; j < 10; j++)
-			{
-				Location l = new Location("My awesome provider");
-				LatLng randomLatLng = LiveMapFragment.randomLatLng(); 
-				l.setLatitude(47.0045047 + Math.sin(j)*j/2000);
-				l.setLongitude(6.957424 + Math.cos(j)*j/2000);
-				trackInstances[i].addWaypoint(l);
-			}
-		}
+		this.mSportId = sportId;
 		
-		track1.addTrackInstance(trackInstances[0]);
-		track1.addTrackInstance(trackInstances[1]);
-		track2.addTrackInstance(trackInstances[2]);
-		
-		track3.addTrackInstance(trackInstances[0]);
-		track3.addTrackInstance(trackInstances[1]);
-		track3.addTrackInstance(trackInstances[2]);
-		track3.addTrackInstance(trackInstances[3]);
-		track3.addTrackInstance(trackInstances[4]);
-		
-		track4.addTrackInstance(trackInstances[0]);
-		track4.addTrackInstance(trackInstances[1]);
-		track4.addTrackInstance(trackInstances[2]);
-		
-		track1.setName("Track n°1");
-		track2.setName("Track with Ghost");
-		track3.setName("Everest climbing");
-		track4.setName("Going to Vaucher's house");
-		
-		addTrack(track1);
-		addTrack(track2);
-		addTrack(track3);
-		addTrack(track4);
+		tracks = new ArrayList<Track>();
+		mDropbox = DropboxManager.getInstance();
+		mDropbox.addListener(this);
 	}
 
 	public static synchronized Tracks getInstance(int sport)
@@ -88,7 +62,7 @@ public class Tracks
 			return instances.get(sport);
 		else
 		{
-			Tracks tracks = new Tracks();
+			Tracks tracks = new Tracks(sport);
 			instances.put(sport, tracks);
 			return tracks;
 		}
@@ -158,6 +132,44 @@ public class Tracks
 	public Track getTrack(int position)
 	{
 		return tracks.get(position);
+	}
+
+	@Override
+	public void onDropboxReady()
+	{
+		mDbxTable = mDropbox.getTable(mSportId);
+		mDbxFs = mDropbox.getFilesystem();
+		Gson gson = new Gson();
+		
+		try
+		{
+			QueryResult queryResult = mDbxTable.query();
+			for(DbxRecord record : queryResult)
+			{
+				Track track = new Track();
+				track.setName(record.getString("name"));
+				
+				DbxList list = record.getList("instances");
+				for(int i = 0; i < list.size(); i++)
+				{
+					DbxFile file = mDbxFs.open(new DbxPath(list.getString(i)));
+					TrackInstance trackInstance = gson.fromJson(file.readString(), TrackInstance.class);
+					track.trackInstances.add(trackInstance);
+				}
+				
+				tracks.add(track);
+			}
+		}
+		catch (DbxException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
 	}
 
 }

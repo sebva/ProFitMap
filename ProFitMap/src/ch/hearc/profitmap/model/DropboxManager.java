@@ -1,5 +1,6 @@
 package ch.hearc.profitmap.model;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -13,24 +14,29 @@ import com.dropbox.sync.android.DbxDatastore;
 import com.dropbox.sync.android.DbxDatastore.SyncStatusListener;
 import com.dropbox.sync.android.DbxException;
 import com.dropbox.sync.android.DbxFileSystem;
-import com.dropbox.sync.android.DbxFileSystem.PathListener;
-import com.dropbox.sync.android.DbxPath;
 import com.dropbox.sync.android.DbxRecord;
 import com.dropbox.sync.android.DbxTable;
 
-public class DropboxManager implements AccountListener, PathListener, SyncStatusListener
+public class DropboxManager implements AccountListener, SyncStatusListener
 {
 	private static DropboxManager instance = null;
 	private DbxAccountManager mDbxAcctMgr = null;
 	private DbxDatastore mStore;
 	private DbxFileSystem mFs;
-	private DbxTable mTracksTable;
 	
 	private static final String TRACKS_TABLE = "tracks";
 	private static final String TAG = "DropboxManager";
+	
+	private Set<DropboxReadyListener> listeners;
 
+	public interface DropboxReadyListener
+	{
+		public void onDropboxReady();
+	}
+	
 	private DropboxManager()
 	{
+		listeners = new HashSet<DropboxReadyListener>();
 	}
 
 	public static synchronized DropboxManager getInstance()
@@ -39,6 +45,16 @@ public class DropboxManager implements AccountListener, PathListener, SyncStatus
 			instance = new DropboxManager();
 
 		return instance;
+	}
+	
+	public DbxTable getTable(int tracksId)
+	{
+		return mStore.getTable(TRACKS_TABLE + tracksId);
+	}
+	
+	public DbxFileSystem getFilesystem()
+	{
+		return mFs;
 	}
 
 	public void linkToDropbox(Activity activity, int callbackTag)
@@ -50,6 +66,8 @@ public class DropboxManager implements AccountListener, PathListener, SyncStatus
 		}
 		if (!mDbxAcctMgr.hasLinkedAccount())
 			mDbxAcctMgr.startLink(activity, callbackTag);
+		else
+			open(mDbxAcctMgr.getLinkedAccount());
 	}
 
 	/**
@@ -67,34 +85,32 @@ public class DropboxManager implements AccountListener, PathListener, SyncStatus
 
 		return mDbxAcctMgr.hasLinkedAccount();
 	}
+	
+	private void open(DbxAccount dbxAccount)
+	{
+		Log.d(TAG, "Linked to Dropbox");
+		try
+		{
+			mStore = DbxDatastore.openDefault(dbxAccount);
+			mStore.addSyncStatusListener(this);
+
+			mFs = DbxFileSystem.forAccount(dbxAccount);
+			
+			for(DropboxReadyListener listener : listeners)
+				if(listener != null)
+					listener.onDropboxReady();
+		}
+		catch (DbxException e)
+		{
+			e.printStackTrace();
+		}
+	}
 
 	@Override
 	public void onLinkedAccountChange(DbxAccountManager dbxAccountManager, DbxAccount dbxAccount)
 	{
 		if (dbxAccountManager.hasLinkedAccount())
-		{
-			Log.d(TAG, "Linked to Dropbox");
-			try
-			{
-				mStore = DbxDatastore.openDefault(dbxAccount);
-				mStore.addSyncStatusListener(this);
-				mTracksTable = mStore.getTable(TRACKS_TABLE);
-
-				mFs = DbxFileSystem.forAccount(dbxAccount);
-				mFs.addPathListener(this, DbxPath.ROOT, Mode.PATH_OR_DESCENDANT);
-			}
-			catch (DbxException e)
-			{
-				e.printStackTrace();
-			}
-		}
-	}
-
-	@Override
-	public void onPathChange(DbxFileSystem dbxFs, DbxPath dbxPath, Mode dbxMode)
-	{
-		// Called on UI thread !
-
+			open(dbxAccount);
 	}
 
 	@Override
@@ -105,15 +121,22 @@ public class DropboxManager implements AccountListener, PathListener, SyncStatus
 			try
 			{
 				Map<String, Set<DbxRecord>> changes = mStore.sync();
-				for (DbxRecord change : changes.get(TRACKS_TABLE))
-				{
-					// if(change.isDeleted())
-				}
+				
 			}
 			catch (DbxException e)
 			{
 				// Handle exception
 			}
 		}
+	}
+	
+	public synchronized void addListener(DropboxReadyListener listener)
+	{
+		listeners.add(listener);
+	}
+	
+	public synchronized void removeListener(DropboxReadyListener listener)
+	{
+		listeners.remove(listener);
 	}
 }

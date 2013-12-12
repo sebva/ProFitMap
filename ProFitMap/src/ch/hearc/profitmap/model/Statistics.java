@@ -2,7 +2,6 @@ package ch.hearc.profitmap.model;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
-import java.text.Format;
 import java.text.NumberFormat;
 
 import android.annotation.SuppressLint;

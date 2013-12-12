@@ -27,16 +27,6 @@ public class TrackInstance
 		timestampEnd = new Date();
 	}
 	
-	public static TrackInstance fromGpx(String gpx)
-	{
-		return null;
-	}
-	
-	public String toGpx()
-	{
-		return null;
-	}
-	
 	public List<Location> getWaypoints()
 	{
 		return waypoints;
