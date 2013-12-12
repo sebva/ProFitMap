@@ -1,5 +1,7 @@
 package ch.hearc.profitmap.gui.training.fragments.live;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 
 import com.google.android.gms.maps.GoogleMap;
@@ -15,15 +17,17 @@ import android.os.SystemClock;
 import android.util.Log;
 import ch.hearc.profitmap.gui.training.LiveTrainingActivity;
 import ch.hearc.profitmap.gui.training.fragments.MapFragment;
+import ch.hearc.profitmap.model.TrackInstance;
 
 public class LiveMapFragment extends MapFragment
 {
-
+	List<Location> waypoints = new LinkedList<Location>();
 	@Override
 	public void onResume() {
 		Log.i("LiveMapFragment", "onRes before");
 
 		super.onResume();
+		trackInstance = new TrackInstance();
 		setupFakeGPS();
 		setupGPS();
 	}
@@ -99,7 +103,7 @@ public class LiveMapFragment extends MapFragment
 		}
 	}
 
-	public LatLng randomLatLng()
+	public static LatLng randomLatLng()
 	{
 
 		float minX = 0.0f;
@@ -157,8 +161,10 @@ public class LiveMapFragment extends MapFragment
 		public void onLocationChanged(Location location)
 		{
 
-			if (!((LiveTrainingActivity) parentActivity).isPaused)
+			if (!((LiveTrainingActivity) parentActivity).isPaused) {
 				mapElements.addPointAndRefreshPolyline(new LatLng(location.getLatitude(), location.getLongitude()));
+				trackInstance.addWaypoint(location);
+			}
 			mapElements.start(new LatLng(location.getLatitude(), location.getLongitude()));
 
 		}
@@ -184,4 +190,10 @@ public class LiveMapFragment extends MapFragment
 
 		}
 	}
+	
+	public TrackInstance getTrackInstance()
+	{
+		return trackInstance;
+	}
+	
 }

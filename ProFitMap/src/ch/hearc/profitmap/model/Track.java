@@ -50,7 +50,7 @@ public class Track
 		if(trackInstances.size() == 0)
 			return 0;
 		
-		List<Location> locations = trackInstances.get(0).getLocations();
+		List<Location> locations = trackInstances.get(0).getWaypoints();
 		Location current = locations.get(0);
 		double length = 0;
 		for (Location location : locations)

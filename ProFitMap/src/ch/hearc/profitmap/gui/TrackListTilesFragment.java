@@ -69,26 +69,30 @@ public class TrackListTilesFragment extends Fragment
 	        public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
 	            
 	            if(currentTracks.getTrack(position).isSingleInstance())
-	            {
+	            {	            	
 	            	Intent intent = new Intent(getActivity(), TrackDetailActivity.class);
+	            	intent.putExtra("trackId", position);
+	            	intent.putExtra("trackInstanceId", 0);
 	            	startActivity(intent);
 	            }
 	            else
-	            	showTrack(currentTracks.getTrack(position));
+	            	showTrack(currentTracks.getTrack(position),position);
 	        }
 	    });
 	}
 	
-	private void showTrack(Track track)
+	private void showTrack(Track track, final int position)
 	{
 		currentTrack = track;
 		
 		ListAdapter adapter = track.getAdapter(getActivity());
 		mGridView.setAdapter(adapter);
 		mGridView.setOnItemClickListener(new OnItemClickListener() {
-	        public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+	        public void onItemClick(AdapterView<?> parent, View v, int position2, long id) {
 	            
 	            Intent intent = new Intent(getActivity(), TrackDetailActivity.class);
+	            intent.putExtra("trackInstanceId", position2);
+	            intent.putExtra("trackId", position);
 	            startActivity(intent);
 	        }
 	    });

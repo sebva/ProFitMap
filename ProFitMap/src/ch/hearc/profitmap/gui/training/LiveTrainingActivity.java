@@ -1,6 +1,13 @@
 package ch.hearc.profitmap.gui.training;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Locale;
+
+import com.dropbox.sync.android.DbxException.Parent;
 
 import android.app.ActionBar;
 import android.app.ActivityManager;
@@ -32,6 +39,7 @@ import ch.hearc.profitmap.gui.training.fragments.MapFragment;
 import ch.hearc.profitmap.gui.training.fragments.SummaryFragment;
 import ch.hearc.profitmap.gui.training.fragments.live.LiveMapFragment;
 import ch.hearc.profitmap.gui.training.fragments.live.LiveStatsFragment;
+import ch.hearc.profitmap.model.TrackInstance;
 
 public class LiveTrainingActivity extends FragmentActivity implements ActionBar.TabListener
 {
@@ -78,6 +86,9 @@ public class LiveTrainingActivity extends FragmentActivity implements ActionBar.
 				switchStartPauseVisibility();
 				break;
 			case R.id.action_stoprec:
+				LiveMapFragment lmf = (LiveMapFragment) liveMapFragment;
+				TrackInstance trackInstance = lmf.getTrackInstance();
+				serializeTrackInstance(trackInstance);
 				startActivity(new Intent(this, EndTrainingActivity.class));
 				break;
 			case R.id.action_pause:
@@ -261,26 +272,53 @@ public class LiveTrainingActivity extends FragmentActivity implements ActionBar.
 
 	/**
 	 * A dummy fragment representing a section of the app, but that simply displays dummy text.
+	 * 
+	 * public static class DummySectionFragment extends Fragment { public static final String ARG_SECTION_NUMBER = "section_number";
+	 * 
+	 * public DummySectionFragment() { }
+	 * 
+	 * @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) { View rootView =
+	 *           inflater.inflate(R.layout.fragment_live_training_dummy, container, false); TextView dummyTextView = (TextView)
+	 *           rootView.findViewById(R.id.section_label); dummyTextView.setText(Integer.toString(getArguments().getInt(ARG_SECTION_NUMBER))); return rootView;
+	 *           } }
 	 */
-	public static class DummySectionFragment extends Fragment
+	private void serializeTrackInstance(TrackInstance ti)
 	{
-		/**
-		 * The fragment argument representing the section number for this fragment.
-		 */
-		public static final String ARG_SECTION_NUMBER = "section_number";
 
-		public DummySectionFragment()
+		/*try
 		{
+			FileOutputStream fos = this.openFileOutput("trackInstance.dat", Context.MODE_PRIVATE);
+			ObjectOutputStream os = new ObjectOutputStream(fos);
+			os.writeObject(this);
+			os.close();
+			Log.i("Seria","Serialized data is saved in trackinstance.dat");
 		}
-
-		@Override
-		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+		catch (IOException i)
 		{
-			View rootView = inflater.inflate(R.layout.fragment_live_training_dummy, container, false);
-			TextView dummyTextView = (TextView) rootView.findViewById(R.id.section_label);
-			dummyTextView.setText(Integer.toString(getArguments().getInt(ARG_SECTION_NUMBER)));
-			return rootView;
-		}
+			i.printStackTrace();
+		}*/
 	}
 
+	private TrackInstance deserializeTrackInstance()
+	{
+		TrackInstance ti = null;
+		try
+		{
+			FileInputStream fileIn = new FileInputStream("trackinstance.dat");
+			ObjectInputStream in = new ObjectInputStream(fileIn);
+			ti = (TrackInstance) in.readObject();
+			in.close();
+			fileIn.close();
+		}
+		catch (IOException i)
+		{
+			i.printStackTrace();
+		}
+		catch (ClassNotFoundException c)
+		{
+			System.out.println("Employee class not found");
+			c.printStackTrace();
+		}
+		return ti;
+	}
 }

@@ -3,9 +3,9 @@ package ch.hearc.profitmap.gui;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.R;
 import android.graphics.Color;
 import android.util.Log;
+import ch.hearc.profitmap.R;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -41,6 +41,7 @@ public class MapElements {
 		 * } });
 		 */
 		moList = new ArrayList<MarkerOptions>();
+		Log.i("mapE", hashCode()+"");
 
 	}
 
@@ -67,7 +68,7 @@ public class MapElements {
 	public void start(LatLng startPosition) {
 		if (!isStarted) {
 			BitmapDescriptor icon = BitmapDescriptorFactory
-					.fromResource(R.drawable.ic_popup_disk_full);
+					.fromResource(R.drawable.ic_start_flag);
 
 			MarkerOptions moS = new MarkerOptions().icon(icon).position(
 					startPosition);
@@ -84,7 +85,7 @@ public class MapElements {
 		
 		if (isStarted) {
 			BitmapDescriptor icon = BitmapDescriptorFactory
-					.fromResource(R.drawable.ic_popup_disk_full);
+					.fromResource(R.drawable.ic_end_flag);
 
 			MarkerOptions moS = new MarkerOptions().icon(icon).position(
 					startPosition);
@@ -93,5 +94,14 @@ public class MapElements {
 			
 			isStarted = false;
 		}
+	}
+
+	public void clearMap()
+	{
+		plo = new PolylineOptions().geodesic(true).color(
+				Color.parseColor("#AA66CC"));
+		pl = map.addPolyline(plo);
+		map.clear();
+		Log.i("mapE", hashCode()+"");
 	}
 }

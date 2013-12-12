@@ -49,7 +49,7 @@ public class StartTrainingDialogFragment extends DialogFragment
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id)
 			{
-				startActivity(new Intent(getActivity(), LiveTrainingActivity.class).setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY));
+				startActivity(new Intent(getActivity(), LiveTrainingActivity.class));
 				dismiss();
 			}
 		});

@@ -16,12 +16,12 @@ public class TrackInstance
 	private int numberOfPauses;
 	private Collection<GeoImage> images;
 	private GeoImage thumbnail;
-	private List<Location> locations;
+	private List<Location> waypoints;
 	private Statistics statistics;
 
 	public TrackInstance()
 	{
-		locations = new LinkedList<Location>();
+		waypoints = new LinkedList<Location>();
 		statistics = new Statistics(this);
 		timestampStart = new Date();
 		timestampEnd = new Date();
@@ -37,14 +37,14 @@ public class TrackInstance
 		return null;
 	}
 	
-	public List<Location> getLocations()
+	public List<Location> getWaypoints()
 	{
-		return locations;
+		return waypoints;
 	}
 	
 	public void addWaypoint(Location location)
 	{
-		locations.add(location);
+		waypoints.add(location);
 	}
 	
 	public void endInstance()

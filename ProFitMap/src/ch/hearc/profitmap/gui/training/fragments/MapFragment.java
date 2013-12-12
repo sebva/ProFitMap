@@ -27,6 +27,7 @@ import ch.hearc.profitmap.R;
 import ch.hearc.profitmap.gui.MapElements;
 import ch.hearc.profitmap.gui.ActiveMapElements;
 import ch.hearc.profitmap.gui.training.LiveTrainingActivity;
+import ch.hearc.profitmap.model.TrackInstance;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
@@ -44,6 +45,8 @@ public class MapFragment extends Fragment
 	protected MapElements mapElements;
 
 	protected Activity parentActivity;
+
+	protected TrackInstance trackInstance;
 
 	public MapFragment()
 	{
@@ -76,16 +79,21 @@ public class MapFragment extends Fragment
 	}
 
 	@Override
-	public void onResume() {
+	public void onResume()
+	{
 		Log.i("MSF", "onRes before");
 
-		if (mapElements != null) {
-			if (mapElements.map == null) {
+		if (mapElements != null)
+		{
+			if (mapElements.map == null)
+			{
 				mapElements.map = fragment.getMap();
 				setupMap();
+				addWaypoints();
 			}
 
-			else {
+			else
+			{
 				mapElements.map = fragment.getMap();
 				mapElements.showMarkers();
 				mapElements.showPolyline();
@@ -108,24 +116,27 @@ public class MapFragment extends Fragment
 		}
 	}
 
-	public void setupMap() {
-		mapElements.map.setOnMarkerClickListener(new OnMarkerClickListener() {
+	public void setupMap()
+	{
+		mapElements.clearMap();
+		mapElements.map.setOnMarkerClickListener(new OnMarkerClickListener()
+		{
 
 			@Override
-			public boolean onMarkerClick(Marker marker) {
-				if (marker.getTitle() != null) {
+			public boolean onMarkerClick(Marker marker)
+			{
+				if (marker.getTitle() != null)
+				{
 					Log.i("testM", marker.getTitle());
 					Intent intent = new Intent();
 					intent.setAction(Intent.ACTION_VIEW);
-					intent.setDataAndType(
-							Uri.parse("file://" + marker.getTitle()), "image/*");
+					intent.setDataAndType(Uri.parse("file://" + marker.getTitle()), "image/*");
 					startActivity(intent);
 				}
 				return true;
 			}
 		});
 	}
-
 
 	public void endTraining()
 	{
@@ -196,5 +207,25 @@ public class MapFragment extends Fragment
 		{
 		}
 		return null;
+	}
+
+	public void setTrackInstance(TrackInstance trackInstance)
+	{
+		this.trackInstance = trackInstance;
+	}
+
+	private void addWaypoints()
+	{
+		if (trackInstance != null)
+		{
+
+			for (Location l : trackInstance.getWaypoints())
+			{
+				mapElements.start(new LatLng(l.getLatitude(), l.getLongitude()));
+				mapElements.addPointAndRefreshPolyline(new LatLng(l.getLatitude(), l.getLongitude()));
+			}
+			Location l = trackInstance.getWaypoints().get(trackInstance.getWaypoints().size() - 1);
+			mapElements.end(new LatLng(l.getLatitude(), l.getLongitude()));
+		}
 	}
 }

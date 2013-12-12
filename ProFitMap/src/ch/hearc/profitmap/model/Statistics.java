@@ -46,11 +46,11 @@ public class Statistics
 	public void computeStatistics()
 	{
 		length = ascent = descent = averageSpeed = maxSpeed = duration = 0;
-		if(trackInstance.getLocations().size() == 0)
+		if(trackInstance.getWaypoints().size() == 0)
 			return;
 		
-		Location previous = trackInstance.getLocations().get(0);
-		for(Location l : trackInstance.getLocations())
+		Location previous = trackInstance.getWaypoints().get(0);
+		for(Location l : trackInstance.getWaypoints())
 		{
 			length += previous.distanceTo(l);
 			double deniv = l.getAltitude() - previous.getAltitude();
@@ -68,9 +68,9 @@ public class Statistics
 		
 		// Better precision, but only since Jelly Bean
 		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)
-			duration = (previous.getElapsedRealtimeNanos() - trackInstance.getLocations().get(0).getElapsedRealtimeNanos()) / 1000000l;
+			duration = (previous.getElapsedRealtimeNanos() - trackInstance.getWaypoints().get(0).getElapsedRealtimeNanos()) / 1000000l;
 		else
-			duration = (previous.getTime() - trackInstance.getLocations().get(0).getTime()) / 1000l;
+			duration = (previous.getTime() - trackInstance.getWaypoints().get(0).getTime()) / 1000l;
 		
 		effortKm = (length + ascent * 10.0 + descent * 2.0) / 1000.0;
 	}

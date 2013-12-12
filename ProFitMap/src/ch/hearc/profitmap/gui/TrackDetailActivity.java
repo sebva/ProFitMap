@@ -5,6 +5,7 @@ import java.util.Locale;
 import android.app.ActionBar;
 import android.app.FragmentTransaction;
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -12,6 +13,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.NavUtils;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import ch.hearc.profitmap.R;
@@ -35,6 +37,8 @@ public class TrackDetailActivity extends FragmentActivity implements ActionBar.T
 	SectionsPagerAdapter mSectionsPagerAdapter;
 	private TrackInstance trackInstance;
 	private Tracks tracks;
+	
+	private MapFragment mapFragment;
 
 	/*
 	 * The {@link ViewPager} that will host the section contents.
@@ -50,12 +54,18 @@ public class TrackDetailActivity extends FragmentActivity implements ActionBar.T
 		trackInstance = tracks.getTrack(0).getTrackInstance(0);
 		
 		Bundle params = getIntent().getExtras();
-		/* TODO Pass TrackInstance to detail activity
+
 		int trackId = params.getInt("trackId");
 		int trackInstanceId = params.getInt("trackInstanceId");
-		this.trackInstance = tracks.getTrack(trackId).getTrackInstance(trackInstanceId);
-		*/
 		
+		Log.i("TDA", "trackId : " + trackId);
+		Log.i("TDA","trackInstanceId : " + trackInstanceId);
+		this.trackInstance = tracks.getTrack(trackId).getTrackInstance(trackInstanceId);
+		
+		for (Location l : trackInstance.getWaypoints())
+		{
+			Log.i(l.getLatitude() + "",l.getLongitude() + "");
+		}
 		setContentView(R.layout.activity_track_detail);
 
 		// Set up the action bar.
@@ -162,7 +172,9 @@ public class TrackDetailActivity extends FragmentActivity implements ActionBar.T
 				case 0:
 					return new SummaryFragment();
 				case 1:
-					return new MapFragment();
+					mapFragment = new MapFragment();
+					mapFragment.setTrackInstance(trackInstance);
+					return mapFragment;
 				case 2:
 					return new GraphFragment();
 			}
