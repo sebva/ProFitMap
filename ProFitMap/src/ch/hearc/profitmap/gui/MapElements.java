@@ -67,6 +67,7 @@ public class MapElements {
 
 	public void start(LatLng startPosition) {
 		if (!isStarted) {
+			Log.i("mapE", "Starting map setup");
 			BitmapDescriptor icon = BitmapDescriptorFactory
 					.fromResource(R.drawable.ic_start_flag);
 
@@ -93,15 +94,17 @@ public class MapElements {
 			moList.add(moS);
 			
 			isStarted = false;
+			Log.i("mapE", "Ending map setup");
 		}
 	}
 
 	public void clearMap()
 	{
+		map.clear();
 		plo = new PolylineOptions().geodesic(true).color(
 				Color.parseColor("#AA66CC"));
-		pl = map.addPolyline(plo);
-		map.clear();
-		Log.i("mapE", hashCode()+"");
+		//pl = map.addPolyline(plo);
+		moList.clear();
+		Log.i("mapE", hashCode()+"c");
 	}
 }

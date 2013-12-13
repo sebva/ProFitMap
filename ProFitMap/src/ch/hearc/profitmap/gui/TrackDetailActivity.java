@@ -211,4 +211,8 @@ public class TrackDetailActivity extends FragmentActivity implements ActionBar.T
 		return trackInstance.getStatistics();
 	}
 
+	public TrackInstance getTrackInstance()
+	{
+		return trackInstance;
+	}
 }

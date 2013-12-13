@@ -65,6 +65,8 @@ public class LiveTrainingActivity extends FragmentActivity implements ActionBar.
 	private Uri mCapturedImageURI;
 
 	private Menu menu;
+	
+	private TrackInstance trackInstance;
 
 	@Override
 	public void onBackPressed()
@@ -86,9 +88,10 @@ public class LiveTrainingActivity extends FragmentActivity implements ActionBar.
 				switchStartPauseVisibility();
 				break;
 			case R.id.action_stoprec:
-				LiveMapFragment lmf = (LiveMapFragment) liveMapFragment;
-				TrackInstance trackInstance = lmf.getTrackInstance();
-				serializeTrackInstance(trackInstance);
+				//LiveMapFragment lmf = (LiveMapFragment) liveMapFragment;
+				//TrackInstance trackInstance = lmf.getTrackInstance();
+				//serializeTrackInstance(trackInstance);
+				liveMapFragment.endTraining();
 				startActivity(new Intent(this, EndTrainingActivity.class));
 				break;
 			case R.id.action_pause:
@@ -320,5 +323,10 @@ public class LiveTrainingActivity extends FragmentActivity implements ActionBar.
 			c.printStackTrace();
 		}
 		return ti;
+	}
+	
+	public TrackInstance getTrackInstance()
+	{
+		return trackInstance;
 	}
 }

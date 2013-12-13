@@ -26,6 +26,7 @@ import android.view.ViewGroup;
 import ch.hearc.profitmap.R;
 import ch.hearc.profitmap.gui.MapElements;
 import ch.hearc.profitmap.gui.ActiveMapElements;
+import ch.hearc.profitmap.gui.TrackDetailActivity;
 import ch.hearc.profitmap.gui.training.LiveTrainingActivity;
 import ch.hearc.profitmap.model.TrackInstance;
 
@@ -57,6 +58,16 @@ public class MapFragment extends Fragment
 	public void onAttach(Activity activity)
 	{
 		parentActivity = activity;
+		if (activity instanceof LiveTrainingActivity) 
+			{
+			LiveTrainingActivity lta = (LiveTrainingActivity)activity;
+			trackInstance = lta.getTrackInstance();
+			}
+		else if (activity instanceof TrackDetailActivity) 
+		{
+			TrackDetailActivity lta = (TrackDetailActivity)activity;
+		trackInstance = lta.getTrackInstance();
+		}
 		super.onAttach(activity);
 	}
 
@@ -95,6 +106,8 @@ public class MapFragment extends Fragment
 			else
 			{
 				mapElements.map = fragment.getMap();
+				setupMap();
+				addWaypoints();
 				mapElements.showMarkers();
 				mapElements.showPolyline();
 			}
@@ -119,6 +132,7 @@ public class MapFragment extends Fragment
 	public void setupMap()
 	{
 		mapElements.clearMap();
+		//ActiveMapElements.getInstance().getMapElements().clearMap();
 		mapElements.map.setOnMarkerClickListener(new OnMarkerClickListener()
 		{
 
@@ -218,14 +232,17 @@ public class MapFragment extends Fragment
 	{
 		if (trackInstance != null)
 		{
-
+			if (trackInstance.getWaypoints().size() != 0)
+			{
 			for (Location l : trackInstance.getWaypoints())
 			{
+				Log.i("mapF", "Adding waypoint");
 				mapElements.start(new LatLng(l.getLatitude(), l.getLongitude()));
 				mapElements.addPointAndRefreshPolyline(new LatLng(l.getLatitude(), l.getLongitude()));
 			}
 			Location l = trackInstance.getWaypoints().get(trackInstance.getWaypoints().size() - 1);
 			mapElements.end(new LatLng(l.getLatitude(), l.getLongitude()));
+			}
 		}
 	}
 }

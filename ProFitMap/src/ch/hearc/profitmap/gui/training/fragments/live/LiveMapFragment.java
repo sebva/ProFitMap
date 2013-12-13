@@ -22,12 +22,17 @@ import ch.hearc.profitmap.model.TrackInstance;
 public class LiveMapFragment extends MapFragment
 {
 	List<Location> waypoints = new LinkedList<Location>();
+	
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		trackInstance = new TrackInstance();
+	}
 	@Override
 	public void onResume() {
 		Log.i("LiveMapFragment", "onRes before");
 
 		super.onResume();
-		trackInstance = new TrackInstance();
 		setupFakeGPS();
 		setupGPS();
 	}
