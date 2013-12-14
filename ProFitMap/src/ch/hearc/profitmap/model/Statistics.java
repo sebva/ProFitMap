@@ -9,6 +9,7 @@ import android.content.Context;
 import android.location.Location;
 import android.os.Build;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -67,10 +68,11 @@ public class Statistics
 		
 		// Better precision, but only since Jelly Bean
 		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)
-			duration = (previous.getElapsedRealtimeNanos() - trackInstance.getWaypoints().get(0).getElapsedRealtimeNanos()) / 1000000l;
+			duration = (previous.getElapsedRealtimeNanos() - trackInstance.getWaypoints().get(0).getElapsedRealtimeNanos()) / 1000000000l;
 		else
 			duration = (previous.getTime() - trackInstance.getWaypoints().get(0).getTime()) / 1000l;
 		
+		Log.i("timeE",previous.getElapsedRealtimeNanos() + ":" + trackInstance.getWaypoints().get(0).getElapsedRealtimeNanos()+"");
 		effortKm = (length + ascent * 10.0 + descent * 2.0) / 1000.0;
 	}
 	
@@ -109,6 +111,34 @@ public class Statistics
 				format.setMaximumIntegerDigits(3);
 				return new Pair<Integer, String>(R.string.track_km_effort, format.format(effortKm) + " km");
 		}
+	}
+
+	public double getLength() {
+		return length;
+	}
+
+	public double getAscent() {
+		return ascent;
+	}
+
+	public double getDescent() {
+		return descent;
+	}
+
+	public double getAverageSpeed() {
+		return averageSpeed;
+	}
+
+	public double getMaxSpeed() {
+		return maxSpeed;
+	}
+
+	public double getEffortKm() {
+		return effortKm;
+	}
+
+	public long getDuration() {
+		return duration;
 	}
 
 	public ListAdapter getAdapter(final Context c)
@@ -154,6 +184,43 @@ public class Statistics
 				return 12;
 			}
 		};
+	}
+
+	public void setLength(double length) {
+		this.length = length;
+	}
+
+	public void setAscent(double ascent) {
+		this.ascent = ascent;
+	}
+
+	public void setDescent(double descent) {
+		this.descent = descent;
+	}
+
+	public void setAverageSpeed(double averageSpeed) {
+		this.averageSpeed = averageSpeed;
+	}
+
+	public void setMaxSpeed(double maxSpeed) {
+		this.maxSpeed = maxSpeed;
+	}
+
+	public void setEffortKm(double effortKm) {
+		this.effortKm = effortKm;
+	}
+
+	public void setDuration(long duration) {
+		this.duration = duration;
+	}
+
+	@Override
+	public String toString() {
+		return "Statistics [length=" + length + ", ascent=" + ascent
+				+ ", descent=" + descent + ", averageSpeed=" + averageSpeed
+				+ ", maxSpeed=" + maxSpeed + ", effortKm=" + effortKm
+				+ ", duration=" + duration + ", trackInstance=" + trackInstance
+				+ "]";
 	}
 
 }

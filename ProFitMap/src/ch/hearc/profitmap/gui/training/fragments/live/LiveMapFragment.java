@@ -21,12 +21,13 @@ import ch.hearc.profitmap.model.TrackInstance;
 
 public class LiveMapFragment extends MapFragment
 {
+
+	
 	List<Location> waypoints = new LinkedList<Location>();
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		trackInstance = new TrackInstance();
 	}
 	@Override
 	public void onResume() {
@@ -51,11 +52,9 @@ public class LiveMapFragment extends MapFragment
 		lm.setTestProviderEnabled("Test", true);
 		lm.requestLocationUpdates("Test", 0, 0, ll);
 
-		/*
-		 * new Thread(new Runnable() {
-		 * 
-		 * @Override public void run() { clickMapSleep(lm); } }).start();
-		 */
+		
+		//new Thread(new Runnable() { @Override public void run() { clickMapSleep(lm); } }).start();
+		 
 
 		mapElements.map.setOnMapClickListener(new GoogleMap.OnMapClickListener()
 		{
@@ -69,12 +68,26 @@ public class LiveMapFragment extends MapFragment
 				loc.setAltitude(0);
 				loc.setAccuracy(1);
 				loc.setTime(System.currentTimeMillis());
-				loc.setElapsedRealtimeNanos(1000);
+				loc.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
 				lm.setTestProviderLocation("Test", loc);
 			}
 		});
 	}
 
+	public static LatLng randomLatLng()
+	{
+
+		float minX = 0.0f;
+		float maxX = 40.0f;
+
+		Random rand = new Random();
+
+		float finalX = rand.nextFloat() * (maxX - minX) + minX;
+		float finalY = rand.nextFloat() * (maxX - minX) + minX;
+
+		return new LatLng(finalX, finalY);
+	}
+	
 	private class FakeLocationListener implements LocationListener
 	{
 		@Override
@@ -83,7 +96,10 @@ public class LiveMapFragment extends MapFragment
 
 			if (!((LiveTrainingActivity) parentActivity).isPaused)
 				mapElements.addPointAndRefreshPolyline(new LatLng(location.getLatitude(), location.getLongitude()));
-
+				trackInstance.addWaypoint(location);
+				trackInstance.getStatistics().computeStatistics();
+				Log.i("Stats", trackInstance.getStatistics().toString());
+				((LiveTrainingActivity) parentActivity).refreshStatsPanel();
 		}
 
 		@Override
@@ -108,19 +124,7 @@ public class LiveMapFragment extends MapFragment
 		}
 	}
 
-	public static LatLng randomLatLng()
-	{
 
-		float minX = 0.0f;
-		float maxX = 40.0f;
-
-		Random rand = new Random();
-
-		float finalX = rand.nextFloat() * (maxX - minX) + minX;
-		float finalY = rand.nextFloat() * (maxX - minX) + minX;
-
-		return new LatLng(finalX, finalY);
-	}
 
 	@SuppressLint("NewApi")
 	public void fakeMapClick(LatLng l, LocationManager lm)
@@ -133,7 +137,7 @@ public class LiveMapFragment extends MapFragment
 		loc.setAltitude(0);
 		loc.setAccuracy(1);
 		loc.setTime(System.currentTimeMillis());
-		loc.setElapsedRealtimeNanos(1000);
+		loc.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
 		lm.setTestProviderLocation("Test", loc);
 	}
 
@@ -158,6 +162,7 @@ public class LiveMapFragment extends MapFragment
 		// Register the listener with the Location Manager to receive location
 		// updates
 		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 	}
 
 	private class RealLocationListener implements LocationListener
@@ -169,6 +174,8 @@ public class LiveMapFragment extends MapFragment
 			if (!((LiveTrainingActivity) parentActivity).isPaused) {
 				mapElements.addPointAndRefreshPolyline(new LatLng(location.getLatitude(), location.getLongitude()));
 				trackInstance.addWaypoint(location);
+				trackInstance.getStatistics().computeStatistics();
+				((LiveTrainingActivity) parentActivity).refreshStatsPanel();
 			}
 			mapElements.start(new LatLng(location.getLatitude(), location.getLongitude()));
 
