@@ -24,10 +24,32 @@ public class LiveMapFragment extends MapFragment
 
 	
 	List<Location> waypoints = new LinkedList<Location>();
+
+	LocationManager lm = null;
+
+	private RealLocationListener realLocationListener;
+
+	private FakeLocationListener fakeLocationListener;
+	
+	@Override
+	public void onDestroyView() {
+		// TODO Auto-generated method stub
+		super.onDestroyView();
+		lm.removeUpdates(realLocationListener);
+		lm.removeUpdates(fakeLocationListener);
+	}
+	
+	@Override
+	public void onDestroy() {
+		// TODO Auto-generated method stub
+		super.onDestroy();
+	}
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		
 	}
 	@Override
 	public void onResume() {
@@ -38,19 +60,34 @@ public class LiveMapFragment extends MapFragment
 		setupGPS();
 	}
 
+	@Override
+	protected void addWaypoints() {
+		Log.i("LMF", "addW");
+		if (trackInstance != null) {
+			Log.i(this.getClass().getSimpleName(),
+					"addWaypoints:trackInstance not null");
+			if (trackInstance.getWaypoints().size() != 0) {
+				for (Location l : trackInstance.getWaypoints()) {
+					Log.i("mapF", "Adding waypoint");
+					mapElements.start(new LatLng(l.getLatitude(), l
+							.getLongitude()));
+					mapElements.addPointAndRefreshPolyline(new LatLng(l
+							.getLatitude(), l.getLongitude()));
+				}
+			}
+		}
+	};
 
 	private void setupFakeGPS()
 	{
-		final LocationManager lm;
-		FakeLocationListener ll;
 		lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-		ll = new FakeLocationListener();
+		fakeLocationListener = new FakeLocationListener();
 		if (lm.getProvider("Test") == null)
 		{
 			lm.addTestProvider("Test", false, false, false, false, false, false, false, 0, 1);
 		}
 		lm.setTestProviderEnabled("Test", true);
-		lm.requestLocationUpdates("Test", 0, 0, ll);
+		lm.requestLocationUpdates("Test", 0, 0, fakeLocationListener);
 
 		
 		//new Thread(new Runnable() { @Override public void run() { clickMapSleep(lm); } }).start();
@@ -157,12 +194,12 @@ public class LiveMapFragment extends MapFragment
 		LocationManager locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
 
 		// Define a listener that responds to location updates
-		LocationListener locationListener = new RealLocationListener();
+		realLocationListener = new RealLocationListener();
 
 		// Register the listener with the Location Manager to receive location
 		// updates
-		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, realLocationListener);
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, realLocationListener);
 	}
 
 	private class RealLocationListener implements LocationListener
@@ -171,7 +208,7 @@ public class LiveMapFragment extends MapFragment
 		public void onLocationChanged(Location location)
 		{
 
-			if (!((LiveTrainingActivity) parentActivity).isPaused) {
+			if (!((LiveTrainingActivity) parentActivity).isPaused && trackInstance != null) {
 				mapElements.addPointAndRefreshPolyline(new LatLng(location.getLatitude(), location.getLongitude()));
 				trackInstance.addWaypoint(location);
 				trackInstance.getStatistics().computeStatistics();
@@ -202,10 +239,5 @@ public class LiveMapFragment extends MapFragment
 
 		}
 	}
-	
-	public TrackInstance getTrackInstance()
-	{
-		return trackInstance;
-	}
-	
+		
 }

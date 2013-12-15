@@ -38,8 +38,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MapFragment extends Fragment
-{
+public class MapFragment extends Fragment {
 
 	protected SupportMapFragment fragment;
 
@@ -49,62 +48,63 @@ public class MapFragment extends Fragment
 
 	protected TrackInstance trackInstance;
 
-	public MapFragment()
-	{
+	public MapFragment() {
 
 	}
 
 	@Override
-	public void onAttach(Activity activity)
-	{
-		parentActivity = activity;
-		if (activity instanceof LiveTrainingActivity) 
-			{
-			LiveTrainingActivity lta = (LiveTrainingActivity)activity;
-			trackInstance = lta.getTrackInstance();
-			}
-		else if (activity instanceof TrackDetailActivity) 
-		{
-			TrackDetailActivity lta = (TrackDetailActivity)activity;
-		trackInstance = lta.getTrackInstance();
-		}
+	public void onAttach(Activity activity) {
 		super.onAttach(activity);
+		parentActivity = activity;
+
+		if (parentActivity instanceof LiveTrainingActivity) {
+			Log.i(getClass().getSimpleName(),"assigning Ti");
+			LiveTrainingActivity lta = (LiveTrainingActivity) parentActivity;
+			//trackInstance = lta.getTrackInstance();
+		} else if (parentActivity instanceof TrackDetailActivity) {
+			TrackDetailActivity tda = (TrackDetailActivity) parentActivity;
+			//trackInstance = tda.getTrackInstance();
+		}
 	}
 
 	@Override
-	public void onCreate(Bundle savedInstanceState)
-	{
+	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Log.i("MSF", "onC");
+
 
 		mapElements = ActiveMapElements.getInstance().getMapElements();
 
 	}
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
-	{
-		Log.i("MSF", "onCreateV");
-
-		return inflater.inflate(R.layout.fragment_live_training_map, container, false);
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		return inflater.inflate(R.layout.fragment_live_training_map, container,
+				false);
 	}
 
 	@Override
-	public void onResume()
-	{
+	public void onResume() {
 		Log.i("MSF", "onRes before");
-
-		if (mapElements != null)
+		if (parentActivity instanceof LiveTrainingActivity) {
+		LiveTrainingActivity lta = (LiveTrainingActivity)parentActivity;
+		trackInstance = lta.getTrackInstance();
+		}
+		else if (parentActivity instanceof TrackDetailActivity)
 		{
-			if (mapElements.map == null)
-			{
+			TrackDetailActivity tda = (TrackDetailActivity)parentActivity;
+			trackInstance = tda.getTrackInstance();
+		}
+		if (mapElements != null) {
+			if (mapElements.map == null) {
+				Log.i("MSF", "map is null");
 				mapElements.map = fragment.getMap();
 				setupMap();
 				addWaypoints();
 			}
 
-			else
-			{
+			else {
+				Log.i("MSF", "map is not null");
 				mapElements.map = fragment.getMap();
 				setupMap();
 				addWaypoints();
@@ -116,35 +116,30 @@ public class MapFragment extends Fragment
 	}
 
 	@Override
-	public void onActivityCreated(Bundle savedInstanceState)
-	{
+	public void onActivityCreated(Bundle savedInstanceState) {
 		Log.i("MSF", "onActivityC");
 		super.onActivityCreated(savedInstanceState);
 		FragmentManager fm = getChildFragmentManager();
 		fragment = (SupportMapFragment) fm.findFragmentById(R.id.map);
-		if (fragment == null)
-		{
+		if (fragment == null) {
 			fragment = SupportMapFragment.newInstance();
 			fm.beginTransaction().replace(R.id.map, fragment).commit();
 		}
 	}
 
-	public void setupMap()
-	{
+	public void setupMap() {
 		mapElements.clearMap();
-		//ActiveMapElements.getInstance().getMapElements().clearMap();
-		mapElements.map.setOnMarkerClickListener(new OnMarkerClickListener()
-		{
+		// ActiveMapElements.getInstance().getMapElements().clearMap();
+		mapElements.map.setOnMarkerClickListener(new OnMarkerClickListener() {
 
 			@Override
-			public boolean onMarkerClick(Marker marker)
-			{
-				if (marker.getTitle() != null)
-				{
+			public boolean onMarkerClick(Marker marker) {
+				if (marker.getTitle() != null) {
 					Log.i("testM", marker.getTitle());
 					Intent intent = new Intent();
 					intent.setAction(Intent.ACTION_VIEW);
-					intent.setDataAndType(Uri.parse("file://" + marker.getTitle()), "image/*");
+					intent.setDataAndType(
+							Uri.parse("file://" + marker.getTitle()), "image/*");
 					startActivity(intent);
 				}
 				return true;
@@ -152,28 +147,32 @@ public class MapFragment extends Fragment
 		});
 	}
 
-	public void endTraining()
-	{
-		LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+	public void endTraining() {
+		LocationManager lm = (LocationManager) getActivity().getSystemService(
+				Context.LOCATION_SERVICE);
 		Location l = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 		LatLng endPosition = new LatLng(l.getLatitude(), l.getLongitude());
 		mapElements.end(endPosition);
 	}
 
-	public boolean addPicMarkerToLocation(Location loc, String filePath, int orientation)
-	{
-		if (mapElements != null)
-		{
-			MarkerOptions mo = new MarkerOptions().position(new LatLng(loc.getLatitude(), loc.getLongitude()));
+	public boolean addPicMarkerToLocation(Location loc, String filePath,
+			int orientation) {
+		if (mapElements != null) {
+			MarkerOptions mo = new MarkerOptions().position(new LatLng(loc
+					.getLatitude(), loc.getLongitude()));
 			mo.title(filePath);
 
 			Log.i("fp", filePath);
 
 			/*
-			 * Bitmap micon = BitmapFactory.decodeFile(filePath); Matrix matrix = new Matrix(); matrix.postRotate(270); Bitmap rotated =
-			 * Bitmap.createBitmap(micon, 0, 0, micon.getWidth(), micon.getHeight(), matrix, true); micon.recycle(); int coeff = rotated.getWidth()/150;
+			 * Bitmap micon = BitmapFactory.decodeFile(filePath); Matrix matrix
+			 * = new Matrix(); matrix.postRotate(270); Bitmap rotated =
+			 * Bitmap.createBitmap(micon, 0, 0, micon.getWidth(),
+			 * micon.getHeight(), matrix, true); micon.recycle(); int coeff =
+			 * rotated.getWidth()/150;
 			 * 
-			 * Bitmap scaled = Bitmap.createScaledBitmap(rotated, rotated.getWidth()/coeff, rotated.getHeight()/coeff,false);
+			 * Bitmap scaled = Bitmap.createScaledBitmap(rotated,
+			 * rotated.getWidth()/coeff, rotated.getHeight()/coeff,false);
 			 */
 
 			Log.i("orientation", orientation + " ");
@@ -184,16 +183,13 @@ public class MapFragment extends Fragment
 			mapElements.map.addMarker(mo);
 			mapElements.moList.add(mo);
 			return true;
-		}
-		else
+		} else
 			return false;
 	}
 
 	// decodes image and scales it to reduce memory consumption
-	private Bitmap decodeFile(File f)
-	{
-		try
-		{
+	private Bitmap decodeFile(File f) {
+		try {
 			// Decode image size
 			BitmapFactory.Options o = new BitmapFactory.Options();
 			o.inJustDecodeBounds = true;
@@ -204,7 +200,8 @@ public class MapFragment extends Fragment
 
 			// Find the correct scale value. It should be the power of 2.
 			int scale = 1;
-			while (o.outWidth / scale / 2 >= REQUIRED_SIZE && o.outHeight / scale / 2 >= REQUIRED_SIZE)
+			while (o.outWidth / scale / 2 >= REQUIRED_SIZE
+					&& o.outHeight / scale / 2 >= REQUIRED_SIZE)
 				scale *= 2;
 
 			// Decode with inSampleSize
@@ -212,37 +209,39 @@ public class MapFragment extends Fragment
 			o2.inSampleSize = scale;
 			Matrix matrix = new Matrix();
 			matrix.postRotate(270);
-			Bitmap scaled = BitmapFactory.decodeStream(new FileInputStream(f), null, o2);
-			Bitmap rotated = Bitmap.createBitmap(scaled, 0, 0, scaled.getWidth(), scaled.getHeight(), matrix, true);
+			Bitmap scaled = BitmapFactory.decodeStream(new FileInputStream(f),
+					null, o2);
+			Bitmap rotated = Bitmap.createBitmap(scaled, 0, 0,
+					scaled.getWidth(), scaled.getHeight(), matrix, true);
 
 			return rotated;
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 		}
 		return null;
 	}
 
-	public void setTrackInstance(TrackInstance trackInstance)
-	{
+	public void setTrackInstance(TrackInstance trackInstance) {
 		this.trackInstance = trackInstance;
 	}
 
-	private void addWaypoints()
-	{
-		if (trackInstance != null)
-		{
-			if (trackInstance.getWaypoints().size() != 0)
-			{
-			for (Location l : trackInstance.getWaypoints())
-			{
-				Log.i("mapF", "Adding waypoint");
-				mapElements.start(new LatLng(l.getLatitude(), l.getLongitude()));
-				mapElements.addPointAndRefreshPolyline(new LatLng(l.getLatitude(), l.getLongitude()));
-			}
-			Location l = trackInstance.getWaypoints().get(trackInstance.getWaypoints().size() - 1);
-			mapElements.end(new LatLng(l.getLatitude(), l.getLongitude()));
+	protected void addWaypoints() {
+		if (trackInstance != null) {
+			Log.i(this.getClass().getSimpleName(),
+					"addWaypoints:trackInstance not null");
+			if (trackInstance.getWaypoints().size() != 0) {
+				for (Location l : trackInstance.getWaypoints()) {
+					Log.i("mapF", "Adding waypoint");
+					mapElements.start(new LatLng(l.getLatitude(), l
+							.getLongitude()));
+					mapElements.addPointAndRefreshPolyline(new LatLng(l
+							.getLatitude(), l.getLongitude()));
+				}
+				Location l = trackInstance.getWaypoints().get(
+						trackInstance.getWaypoints().size() - 1);
+				mapElements.end(new LatLng(l.getLatitude(), l.getLongitude()));
 			}
 		}
+		Log.i(this.getClass().getSimpleName(),
+				"addWaypoints:trackInstance null");
 	}
 }

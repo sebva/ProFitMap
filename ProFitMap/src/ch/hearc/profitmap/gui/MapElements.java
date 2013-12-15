@@ -41,7 +41,7 @@ public class MapElements {
 		 * } });
 		 */
 		moList = new ArrayList<MarkerOptions>();
-		Log.i("mapE", hashCode()+"");
+		Log.i("mapE", hashCode() + "");
 
 	}
 
@@ -83,7 +83,7 @@ public class MapElements {
 	}
 
 	public void end(LatLng startPosition) {
-		
+
 		if (isStarted) {
 			BitmapDescriptor icon = BitmapDescriptorFactory
 					.fromResource(R.drawable.ic_end_flag);
@@ -92,19 +92,18 @@ public class MapElements {
 					startPosition);
 			map.addMarker(moS);
 			moList.add(moS);
-			
+
 			isStarted = false;
 			Log.i("mapE", "Ending map setup");
 		}
 	}
 
-	public void clearMap()
-	{
+	public void clearMap() {
 		map.clear();
 		plo = new PolylineOptions().geodesic(true).color(
 				Color.parseColor("#AA66CC"));
-		//pl = map.addPolyline(plo);
+		// pl = map.addPolyline(plo);
 		moList.clear();
-		Log.i("mapE", hashCode()+"c");
+		Log.i("mapE", hashCode() + "c");
 	}
 }

@@ -41,7 +41,9 @@ import ch.hearc.profitmap.gui.training.fragments.SummaryFragment.StatisticsProvi
 import ch.hearc.profitmap.gui.training.fragments.live.LiveMapFragment;
 import ch.hearc.profitmap.gui.training.fragments.live.LiveStatsFragment;
 import ch.hearc.profitmap.model.Statistics;
+import ch.hearc.profitmap.model.Track;
 import ch.hearc.profitmap.model.TrackInstance;
+import ch.hearc.profitmap.model.Tracks;
 
 public class LiveTrainingActivity extends FragmentActivity implements
 		ActionBar.TabListener, StatisticsProvider {
@@ -73,12 +75,19 @@ public class LiveTrainingActivity extends FragmentActivity implements
 
 	private TrackInstance trackInstance;
 
+	private int trackInstancePosition;
+
+	private int trackPosition;
+
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		//outState.putSerializable("trackInstance",trackInstance); serialize trackInstance
+		outState.putInt("trackPosition", trackPosition);
+		outState.putInt("trackInstancePosition", trackInstancePosition);
+		if (liveMapFragment != null)
+			liveMapFragment.endTraining();
 	}
-	
+
 	@Override
 	public void onBackPressed() {
 		ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
@@ -159,7 +168,32 @@ public class LiveTrainingActivity extends FragmentActivity implements
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		trackInstance = new TrackInstance();
+		if (savedInstanceState == null) {
+			trackInstance = new TrackInstance();
+
+			Track track = new Track(); // TODO check if new track or existing
+										// track -> get track id from intent
+										// extras?
+			track.addTrackInstance(trackInstance);
+
+			Tracks.getInstance(0).addTrack(track); // TODO sport?
+
+			trackInstancePosition = track.getTrackInstances().size() - 1;
+			trackPosition = Tracks.getInstance(0).getTracks().size() - 1;
+
+			TrackInstance ci = Tracks.getInstance(0).getTrack(trackPosition)
+					.getTrackInstance(trackInstancePosition);
+			Log.i(getClass().getSimpleName(), "ci h : " + ci.hashCode() + " : "
+					+ trackInstance.hashCode());
+		} else {
+			Log.i(getClass().getSimpleName(), "Restoring bundle");
+			int trackPosition = savedInstanceState.getInt("trackPosition", 0);
+			int trackInstancePosition = savedInstanceState.getInt(
+					"trackInstancePosition", 0);
+			trackInstance = Tracks.getInstance(0).getTrack(trackPosition)
+					.getTrackInstance(trackInstancePosition);
+			Log.i(getClass().getSimpleName(), "ti h" + trackInstance.hashCode());
+		}
 		Log.i("onC", "creat");
 
 		setContentView(R.layout.activity_live_training);
@@ -243,10 +277,20 @@ public class LiveTrainingActivity extends FragmentActivity implements
 		}
 
 		@Override
+		public Object instantiateItem(ViewGroup container, int position) {
+
+			Fragment fragment = (Fragment) super.instantiateItem(container,
+					position);
+			if (fragment instanceof LiveStatsFragment)
+				liveStatsFragment = (SummaryFragment) fragment;
+			else if (fragment instanceof LiveMapFragment)
+				liveMapFragment = (MapFragment) fragment;
+			return fragment;
+		}
+
+		@Override
 		public Fragment getItem(int position) {
-			// getItem is called to instantiate the fragment for the given page.
-			// Return a DummySectionFragment (defined as a static inner class
-			// below) with the page number as its lone argument.
+
 			Fragment fragment = null;
 			if (position == 1) {
 				fragment = new LiveMapFragment();
@@ -254,11 +298,13 @@ public class LiveTrainingActivity extends FragmentActivity implements
 			} else if (position == 0) {
 				fragment = new LiveStatsFragment();
 				liveStatsFragment = (SummaryFragment) fragment;
-			} else
+			} else {
 				fragment = new DummySectionFragment(); // TODO Graph Fragment
-			Bundle args = new Bundle();
-			args.putInt("pos", position + 1);
-			fragment.setArguments(args);
+				Bundle args = new Bundle();
+				args.putInt("pos", position + 1);
+				fragment.setArguments(args);
+			}
+			fragment.setRetainInstance(true);
 			return fragment;
 		}
 
@@ -313,6 +359,11 @@ public class LiveTrainingActivity extends FragmentActivity implements
 
 	public void refreshStatsPanel() {
 		LiveStatsFragment lsf = (LiveStatsFragment) liveStatsFragment;
-		lsf.refreshPanel();
+
+		if (lsf != null)
+			lsf.refreshPanel();
+		else
+			Log.i("LTA", "lsf null");
 	}
+
 }

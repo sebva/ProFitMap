@@ -29,7 +29,7 @@ public class SummaryFragment extends Fragment
 	{
 		mStatistics = statistics;
 		mGridView.setAdapter(mStatistics.getAdapter(getActivity()));
-		//mStatistics.computeStatistics();
+		mStatistics.computeStatistics();
 	}
 
 	@Override
