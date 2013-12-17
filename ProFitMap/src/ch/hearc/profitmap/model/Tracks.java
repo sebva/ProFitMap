@@ -1,11 +1,15 @@
 package ch.hearc.profitmap.model;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -18,10 +22,12 @@ import ch.hearc.profitmap.R;
 import ch.hearc.profitmap.model.DropboxManager.DropboxReadyListener;
 
 import com.dropbox.sync.android.DbxException;
+import com.dropbox.sync.android.DbxFields;
 import com.dropbox.sync.android.DbxFile;
 import com.dropbox.sync.android.DbxFileSystem;
 import com.dropbox.sync.android.DbxList;
 import com.dropbox.sync.android.DbxPath;
+import com.dropbox.sync.android.DbxPath.InvalidPathException;
 import com.dropbox.sync.android.DbxRecord;
 import com.dropbox.sync.android.DbxTable;
 import com.dropbox.sync.android.DbxTable.QueryResult;
@@ -73,7 +79,13 @@ public class Tracks implements DropboxReadyListener
 	
 	public void addTrack(Track track)
 	{
+		track.setTracks(this);
 		tracks.add(track);
+		
+		mDbxTable.insert().set("id", tracks.size() -1).set("name", track.getName()).set("instances", new DbxList());
+		
+		for(TrackInstance ti : track.getTrackInstances())
+			saveTrackInstanceToDropbox(track, ti);
 	}
 	
 	public List<Track> getTracks()
@@ -153,13 +165,18 @@ public class Tracks implements DropboxReadyListener
 			for(DbxRecord record : queryResult)
 			{
 				Track track = new Track();
+				track.setTracks(this);
 				track.setName(record.getString("name"));
 				
 				DbxList list = record.getList("instances");
 				for(int i = 0; i < list.size(); i++)
 				{
 					DbxFile file = mDbxFs.open(new DbxPath(list.getString(i)));
-					TrackInstance trackInstance = gson.fromJson(file.readString(), TrackInstance.class);
+					Reader reader = new InputStreamReader(file.getReadStream());
+					TrackInstance trackInstance = gson.fromJson(reader, TrackInstance.class);
+					reader.close();
+					file.close();
+					
 					track.trackInstances.add(trackInstance);
 				}
 				
@@ -168,14 +185,70 @@ public class Tracks implements DropboxReadyListener
 		}
 		catch (DbxException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		catch (IOException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
+	}
+
+	void saveTrackInstanceToDropbox(Track track, TrackInstance trackInstance)
+	{
+		try
+		{
+			QueryResult result = mDbxTable.query(new DbxFields().set("id", tracks.indexOf(track)));
+			assert result.count() == 1;
+			
+			DbxRecord record = result.asList().get(0);
+			
+			DbxFile file = mDbxFs.create(new DbxPath(DbxPath.ROOT + UUID.randomUUID().toString()));
+			record.getList("instances").add(file.getPath().toString());
+			
+			PrintWriter writer = new PrintWriter(file.getWriteStream());
+			//LogWriter writer = new LogWriter("Gson");
+			new Gson().toJson(trackInstance, writer);
+			
+			writer.close();
+			file.close();
+			mDropbox.onDatastoreStatusChange(mDbxTable.getDatastore());
+		}
+		catch (DbxException e)
+		{
+			e.printStackTrace();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	void update(Set<DbxRecord> records) throws InvalidPathException, IOException
+	{
+		for(DbxRecord record : records)
+		{
+			if(record.isDeleted())
+				; // TODO Delete
+			else
+			{
+				Track track = new Track();
+				track.setName(record.getString("name"));
+				
+				DbxList list = record.getList("instances");
+				for(int i = 0; i < list.size(); i++)
+				{
+					DbxFile file = mDbxFs.open(new DbxPath(list.getString(i)));
+					Reader reader = new InputStreamReader(file.getReadStream());
+					TrackInstance trackInstance = new Gson().fromJson(reader, TrackInstance.class);
+					reader.close();
+					file.close();
+					
+					track.trackInstances.add(trackInstance);
+				}
+				
+				tracks.add(track);
+			}
+		}
 	}
 
 }

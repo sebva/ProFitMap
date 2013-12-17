@@ -17,7 +17,7 @@ public class TrackInstance
 	private Collection<GeoImage> images;
 	private GeoImage thumbnail;
 	private List<Location> waypoints;
-	private Statistics statistics;
+	private transient Statistics statistics;
 
 	public TrackInstance()
 	{

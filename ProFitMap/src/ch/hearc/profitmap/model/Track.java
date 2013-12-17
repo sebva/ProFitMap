@@ -19,6 +19,7 @@ public class Track
 	private String name;
 	private double length;
 	protected List<TrackInstance> trackInstances;
+	private Tracks mTracks;
 
 	public Track()
 	{
@@ -28,6 +29,8 @@ public class Track
 	public void addTrackInstance(TrackInstance trackInstance)
 	{
 		trackInstances.add(trackInstance);
+		if(mTracks != null)
+			mTracks.saveTrackInstanceToDropbox(this, trackInstance);
 	}
 
 	public String getName()
@@ -115,5 +118,10 @@ public class Track
 		        return v;
 			}
 		};
+	}
+
+	void setTracks(Tracks t)
+	{
+		mTracks = t;
 	}
 }

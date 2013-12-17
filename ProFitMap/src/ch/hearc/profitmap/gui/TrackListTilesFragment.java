@@ -11,11 +11,13 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 import android.widget.ListAdapter;
 import ch.hearc.profitmap.R;
+import ch.hearc.profitmap.model.DropboxManager;
+import ch.hearc.profitmap.model.DropboxManager.DropboxChangeListener;
 import ch.hearc.profitmap.model.Track;
 import ch.hearc.profitmap.model.Tracks;
 
 
-public class TrackListTilesFragment extends Fragment
+public class TrackListTilesFragment extends Fragment implements DropboxChangeListener
 {
 
 	public static final String ARG_SPORT_NUMBER = "sport_number";
@@ -39,6 +41,8 @@ public class TrackListTilesFragment extends Fragment
 		
 		mGridView = (GridView) rootView.findViewById(R.id.trackinstance_grid);
 		showTracks(Tracks.getInstance(mSport));
+		
+		DropboxManager.getInstance().registerView(this);
 		
 		return rootView;
 	}
@@ -117,6 +121,12 @@ public class TrackListTilesFragment extends Fragment
 	public void setSortMode(String sortMode)
 	{
 
+	}
+
+	@Override
+	public void onDropboxChanged()
+	{
+		mGridView.invalidateViews();
 	}
 
 }

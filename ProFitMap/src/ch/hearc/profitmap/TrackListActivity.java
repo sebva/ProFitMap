@@ -4,6 +4,9 @@ import android.app.ActionBar;
 import android.app.ActionBar.OnNavigationListener;
 import android.app.Activity;
 import android.app.DialogFragment;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.MatrixCursor;
@@ -29,6 +32,7 @@ import ch.hearc.profitmap.gui.TrackListTilesFragment;
 import ch.hearc.profitmap.gui.settings.SettingsActivity;
 import ch.hearc.profitmap.gui.training.fragments.StartTrainingDialogFragment;
 import ch.hearc.profitmap.model.DropboxManager;
+import ch.hearc.profitmap.model.DropboxManager.DropboxReadyListener;
 
 public class TrackListActivity extends FragmentActivity
 {
@@ -54,6 +58,30 @@ public class TrackListActivity extends FragmentActivity
 		setContentView(R.layout.activity_track_list);
 
 		mDropboxManager = DropboxManager.getInstance();
+		
+		final ProgressDialog dialog = new ProgressDialog(this);
+		dialog.setOnCancelListener(new OnCancelListener()
+		{
+			
+			@Override
+			public void onCancel(DialogInterface dialog)
+			{
+				TrackListActivity.this.finish();
+			}
+		});
+		dialog.setCancelable(true);
+		dialog.setTitle(R.string.waiting_dropbox);
+		dialog.show();
+		mDropboxManager.addListener(new DropboxReadyListener()
+		{
+			
+			@Override
+			public void onDropboxReady()
+			{
+				dialog.dismiss();
+			}
+		});
+		
 		mSportsCursor = new MatrixCursor(mColumns, 4);
 		mSports = getResources().getStringArray(R.array.sports_array);
 		mSportsImages = getResources().getStringArray(R.array.sports_images);

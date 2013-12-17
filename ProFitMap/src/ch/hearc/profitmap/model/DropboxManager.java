@@ -2,6 +2,7 @@ package ch.hearc.profitmap.model;
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import android.app.Activity;
@@ -19,6 +20,7 @@ import com.dropbox.sync.android.DbxTable;
 
 public class DropboxManager implements AccountListener, SyncStatusListener
 {
+
 	private static DropboxManager instance = null;
 	private DbxAccountManager mDbxAcctMgr = null;
 	private DbxDatastore mStore;
@@ -28,10 +30,16 @@ public class DropboxManager implements AccountListener, SyncStatusListener
 	private static final String TAG = "DropboxManager";
 	
 	private Set<DropboxReadyListener> listeners;
+	private DropboxChangeListener changeListener = null;
 
 	public interface DropboxReadyListener
 	{
 		public void onDropboxReady();
+	}
+	
+	public interface DropboxChangeListener
+	{
+		public void onDropboxChanged();
 	}
 	
 	private DropboxManager()
@@ -116,27 +124,53 @@ public class DropboxManager implements AccountListener, SyncStatusListener
 	@Override
 	public void onDatastoreStatusChange(DbxDatastore dbxDatastore)
 	{
-		if (dbxDatastore.getSyncStatus().hasIncoming)
+		try
 		{
-			try
+			Map<String, Set<DbxRecord>> changes = mStore.sync();
+			
+			for (Entry<String, Set<DbxRecord>> table : changes.entrySet())
 			{
-				Map<String, Set<DbxRecord>> changes = mStore.sync();
-				
-			}
-			catch (DbxException e)
-			{
-				// Handle exception
+				if(table.getKey().startsWith(TRACKS_TABLE))
+				{
+					try
+					{
+						int sport = Integer.parseInt(table.getKey().substring(TRACKS_TABLE.length()));
+						Tracks tracks = Tracks.getInstance(sport);
+						tracks.update(table.getValue());
+					}
+					catch(NumberFormatException e)
+					{
+					}
+					catch(Exception e)
+					{
+						e.printStackTrace();
+					}
+				}
 			}
 		}
+		catch (DbxException e)
+		{
+			// Handle exception
+		}
+		
+		if(changeListener != null)
+			changeListener.onDropboxChanged();
 	}
 	
 	public synchronized void addListener(DropboxReadyListener listener)
 	{
 		listeners.add(listener);
+		if(mDbxAcctMgr != null && mDbxAcctMgr.hasLinkedAccount())
+			listener.onDropboxReady();
 	}
 	
 	public synchronized void removeListener(DropboxReadyListener listener)
 	{
 		listeners.remove(listener);
+	}
+
+	public void registerView(DropboxChangeListener listener)
+	{
+		
 	}
 }
