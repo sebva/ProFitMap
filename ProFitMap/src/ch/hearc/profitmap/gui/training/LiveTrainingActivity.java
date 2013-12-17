@@ -1,13 +1,7 @@
 package ch.hearc.profitmap.gui.training;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.util.Date;
 import java.util.Locale;
-
-import com.dropbox.sync.android.DbxException.Parent;
 
 import android.app.ActionBar;
 import android.app.ActivityManager;
@@ -41,7 +35,6 @@ import ch.hearc.profitmap.gui.training.fragments.SummaryFragment.StatisticsProvi
 import ch.hearc.profitmap.gui.training.fragments.live.LiveMapFragment;
 import ch.hearc.profitmap.gui.training.fragments.live.LiveStatsFragment;
 import ch.hearc.profitmap.model.Statistics;
-import ch.hearc.profitmap.model.Track;
 import ch.hearc.profitmap.model.TrackInstance;
 import ch.hearc.profitmap.model.Tracks;
 
@@ -74,16 +67,16 @@ public class LiveTrainingActivity extends FragmentActivity implements
 	private Menu menu;
 
 	private TrackInstance trackInstance;
+	
+	private int mSport;
 
-	private int trackInstancePosition;
-
-	private int trackPosition;
+	private int mTrackId;
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		outState.putInt("trackPosition", trackPosition);
-		outState.putInt("trackInstancePosition", trackInstancePosition);
+		outState.putInt("sport", mSport);
+		outState.putInt("trackId", mTrackId);
 		if (liveMapFragment != null)
 			liveMapFragment.endTraining();
 	}
@@ -107,7 +100,12 @@ public class LiveTrainingActivity extends FragmentActivity implements
 			break;
 		case R.id.action_stoprec:
 			liveMapFragment.endTraining();
-			startActivity(new Intent(this, EndTrainingActivity.class));
+			Intent intent = new Intent(this, EndTrainingActivity.class);
+			trackInstance.setTimestampEnd(new Date());
+			Tracks.currentTrackInstance = trackInstance;
+			intent.putExtra("sport", mSport);
+			intent.putExtra("trackId", mTrackId);
+			startActivity(intent);
 			break;
 		case R.id.action_pause:
 			isPaused = true;
@@ -168,31 +166,19 @@ public class LiveTrainingActivity extends FragmentActivity implements
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
 		if (savedInstanceState == null) {
+			mSport = getIntent().getIntExtra("sport", 0);
+			mTrackId = getIntent().getIntExtra("trackId", -1);
+			
 			trackInstance = new TrackInstance();
-
-			Track track = new Track(); // TODO check if new track or existing
-										// track -> get track id from intent
-										// extras?
-			track.addTrackInstance(trackInstance);
-
-			Tracks.getInstance(0).addTrack(track); // TODO sport?
-
-			trackInstancePosition = track.getTrackInstances().size() - 1;
-			trackPosition = Tracks.getInstance(0).getTracks().size() - 1;
-
-			TrackInstance ci = Tracks.getInstance(0).getTrack(trackPosition)
-					.getTrackInstance(trackInstancePosition);
-			Log.i(getClass().getSimpleName(), "ci h : " + ci.hashCode() + " : "
-					+ trackInstance.hashCode());
+			Tracks.currentTrackInstance = trackInstance;
 		} else {
 			Log.i(getClass().getSimpleName(), "Restoring bundle");
-			int trackPosition = savedInstanceState.getInt("trackPosition", 0);
-			int trackInstancePosition = savedInstanceState.getInt(
-					"trackInstancePosition", 0);
-			trackInstance = Tracks.getInstance(0).getTrack(trackPosition)
-					.getTrackInstance(trackInstancePosition);
-			Log.i(getClass().getSimpleName(), "ti h" + trackInstance.hashCode());
+			
+			mSport = savedInstanceState.getInt("sport", 0);
+			mTrackId = savedInstanceState.getInt("trackId", -1);
+			trackInstance = Tracks.currentTrackInstance;
 		}
 		Log.i("onC", "creat");
 

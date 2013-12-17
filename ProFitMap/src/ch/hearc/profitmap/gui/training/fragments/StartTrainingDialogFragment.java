@@ -49,7 +49,9 @@ public class StartTrainingDialogFragment extends DialogFragment
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id)
 			{
-				startActivity(new Intent(getActivity(), LiveTrainingActivity.class));
+				Intent intent = new Intent(getActivity(), LiveTrainingActivity.class);
+				intent.putExtra("sport", position);
+				startActivity(intent);
 				dismiss();
 			}
 		});

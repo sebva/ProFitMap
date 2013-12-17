@@ -18,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import ch.hearc.profitmap.R;
 import ch.hearc.profitmap.gui.settings.SettingsActivity;
+import ch.hearc.profitmap.gui.training.LiveTrainingActivity;
 import ch.hearc.profitmap.gui.training.fragments.GraphFragment;
 import ch.hearc.profitmap.gui.training.fragments.MapFragment;
 import ch.hearc.profitmap.gui.training.fragments.SummaryFragment;
@@ -36,7 +37,6 @@ public class TrackDetailActivity extends FragmentActivity implements ActionBar.T
 	 */
 	SectionsPagerAdapter mSectionsPagerAdapter;
 	private TrackInstance trackInstance;
-	private Tracks tracks;
 	
 	private MapFragment mapFragment;
 
@@ -44,23 +44,24 @@ public class TrackDetailActivity extends FragmentActivity implements ActionBar.T
 	 * The {@link ViewPager} that will host the section contents.
 	 */
 	ViewPager mViewPager;
+	private int mTrackId;
+	private int mSport;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
 		
-		this.tracks = Tracks.getInstance(0);
-		trackInstance = tracks.getTrack(0).getTrackInstance(0);
-		
 		Bundle params = getIntent().getExtras();
 
-		int trackId = params.getInt("trackId");
+		mTrackId = params.getInt("trackId");
+		mSport = params.getInt("sport");
 		int trackInstanceId = params.getInt("trackInstanceId");
+		Tracks tracks = Tracks.getInstance(mSport);
 		
-		Log.i("TDA", "trackId : " + trackId);
+		Log.i("TDA", "trackId : " + mTrackId);
 		Log.i("TDA","trackInstanceId : " + trackInstanceId);
-		this.trackInstance = tracks.getTrack(trackId).getTrackInstance(trackInstanceId);
+		this.trackInstance = tracks.getTrack(mTrackId).getTrackInstance(trackInstanceId);
 		
 		for (Location l : trackInstance.getWaypoints())
 		{
@@ -130,6 +131,12 @@ public class TrackDetailActivity extends FragmentActivity implements ActionBar.T
 				return true;
 			case R.id.action_settings:
 				startActivity(new Intent(this, SettingsActivity.class));
+				break;
+			case R.id.action_ghost:
+				Intent intent = new Intent(this, LiveTrainingActivity.class);
+				intent.putExtra("sport", mSport);
+				intent.putExtra("trackId", mTrackId);
+				startActivity(intent);
 				break;
 		}
 		return super.onOptionsItemSelected(item);

@@ -91,6 +91,11 @@ public class TrackInstance
 	{
 		return statistics;
 	}
+
+	public void setTimestampEnd(Date timestampEnd)
+	{
+		this.timestampEnd = timestampEnd;
+	}
 	
 	
 }

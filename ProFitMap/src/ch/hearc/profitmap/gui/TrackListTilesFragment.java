@@ -24,6 +24,7 @@ public class TrackListTilesFragment extends Fragment
 	// Only 1 of the 2 following attributes has to be not null
 	private Tracks currentTracks = null;
 	private Track currentTrack = null;
+	private int mSport;
 
 	public TrackListTilesFragment()
 	{
@@ -34,12 +35,19 @@ public class TrackListTilesFragment extends Fragment
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
 		View rootView = inflater.inflate(R.layout.fragment_grid, container, false);
-		int i = getArguments().getInt(ARG_SPORT_NUMBER);
+		mSport = getArguments().getInt(ARG_SPORT_NUMBER);
 		
 		mGridView = (GridView) rootView.findViewById(R.id.trackinstance_grid);
-		showTracks(Tracks.getInstance(i));
+		showTracks(Tracks.getInstance(mSport));
 		
 		return rootView;
+	}
+	
+	@Override
+	public void onStart()
+	{
+		super.onStart();
+		mGridView.invalidateViews();
 	}
 	
 	/**
@@ -73,6 +81,7 @@ public class TrackListTilesFragment extends Fragment
 	            	Intent intent = new Intent(getActivity(), TrackDetailActivity.class);
 	            	intent.putExtra("trackId", position);
 	            	intent.putExtra("trackInstanceId", 0);
+	            	intent.putExtra("sport", mSport);
 	            	startActivity(intent);
 	            }
 	            else
@@ -93,6 +102,7 @@ public class TrackListTilesFragment extends Fragment
 	            Intent intent = new Intent(getActivity(), TrackDetailActivity.class);
 	            intent.putExtra("trackInstanceId", position2);
 	            intent.putExtra("trackId", position);
+	            intent.putExtra("sport", mSport);
 	            startActivity(intent);
 	        }
 	    });
@@ -100,7 +110,8 @@ public class TrackListTilesFragment extends Fragment
 	
 	public void setSport(int id)
 	{
-		showTracks(Tracks.getInstance(id));
+		mSport = id;
+		showTracks(Tracks.getInstance(mSport));
 	}
 
 	public void setSortMode(String sortMode)

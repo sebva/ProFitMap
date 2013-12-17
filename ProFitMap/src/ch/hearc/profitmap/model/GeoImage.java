@@ -1,13 +1,11 @@
 package ch.hearc.profitmap.model;
 
-import java.util.Collection;
-
 import android.location.Location;
+import android.media.Image;
 
 public class GeoImage
 {
 	private String imagePath;
 	private Location location;
-	private Collection<TrackInstance> images;
-	private TrackInstance thumbnail;
+	private transient Image thumbnail;
 }

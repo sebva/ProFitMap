@@ -5,19 +5,30 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.os.Bundle;
-//import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.NavUtils;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
+import android.widget.RatingBar;
 import ch.hearc.profitmap.R;
 import ch.hearc.profitmap.TrackListActivity;
+import ch.hearc.profitmap.gui.training.fragments.SummaryFragment;
 import ch.hearc.profitmap.gui.training.fragments.SummaryFragment.StatisticsProvider;
 import ch.hearc.profitmap.model.Statistics;
+import ch.hearc.profitmap.model.Track;
 import ch.hearc.profitmap.model.TrackInstance;
+import ch.hearc.profitmap.model.Tracks;
 
 public class EndTrainingActivity extends FragmentActivity implements StatisticsProvider
 {
+	
+	private TrackInstance mTrackInstance;
+	private int mSport;
+	private int mTrackId;
+	
+	private EditText mTrackTitle;
+	private RatingBar mRating;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -26,6 +37,22 @@ public class EndTrainingActivity extends FragmentActivity implements StatisticsP
 		setContentView(R.layout.activity_end_training);
 		// Show the Up button in the action bar.
 		setupActionBar();
+		
+		mTrackInstance = Tracks.currentTrackInstance;
+		mSport = getIntent().getIntExtra("sport", 0);
+		mTrackId = getIntent().getIntExtra("trackId", -1);
+		
+		mTrackTitle = (EditText) findViewById(R.id.track_name);
+		if(mTrackId != -1)
+		{
+			mTrackTitle.setText(Tracks.getInstance(mSport).getTrack(mTrackId).getName());
+			mTrackTitle.setEnabled(false);
+			mTrackTitle.setFocusable(false);
+		}
+		
+		mRating = (RatingBar) findViewById(R.id.track_rating);
+		SummaryFragment mStatsFragment = (SummaryFragment) getSupportFragmentManager().findFragmentById(R.id.summary_fragment);
+		mStatsFragment.setStatistics(mTrackInstance.getStatistics());
 	}
 
 	/**
@@ -70,6 +97,7 @@ public class EndTrainingActivity extends FragmentActivity implements StatisticsP
 					{
 						startActivity(new Intent(EndTrainingActivity.this, TrackListActivity.class));
 						dialog.dismiss();
+						finish();
 					}
 				}).setNegativeButton(android.R.string.cancel, new OnClickListener()
 				{
@@ -82,7 +110,21 @@ public class EndTrainingActivity extends FragmentActivity implements StatisticsP
 				}).show();
 				return true;
 			case R.id.action_save_training:
+				Tracks tracks = Tracks.getInstance(mSport);
+				Track track;
+				if(mTrackId == -1)
+					track = new Track();
+				else
+					track = tracks.getTrack(mTrackId);
+				
+				track.setName(mTrackTitle.getText().toString());
+				mTrackInstance.setRating((int) mRating.getRating());
+				
+				track.addTrackInstance(mTrackInstance);
+				if(mTrackId == -1)
+					tracks.addTrack(track);
 				startActivity(new Intent(this, TrackListActivity.class));
+				finish();
 				return true;
 		}
 		return super.onOptionsItemSelected(item);
@@ -91,8 +133,7 @@ public class EndTrainingActivity extends FragmentActivity implements StatisticsP
 	@Override
 	public Statistics getStatistics()
 	{
-		// TODO Return real statistics
-		return new Statistics(new TrackInstance());
+		return null;
 	}
 
 }

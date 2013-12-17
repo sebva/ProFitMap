@@ -42,6 +42,8 @@ public class Tracks implements DropboxReadyListener
 	private DbxFileSystem mDbxFs;
 	private int mSportId;
 	
+	public static TrackInstance currentTrackInstance;
+	
 	static
 	{
 		instances = new HashMap<Integer, Tracks>();
@@ -114,7 +116,11 @@ public class Tracks implements DropboxReadyListener
 		        }
 		        
 		        TextView tv = (TextView)v.findViewById(R.id.textView);
-		        tv.setText(track.getName());
+		        String trackName = track.getName();
+		        if(!"".equals(trackName))
+		        	tv.setText(trackName);
+		        else
+		        	tv.setVisibility(View.GONE);
 		        
 		        TextView count = (TextView)v.findViewById(R.id.count);
 		        if(!track.isSingleInstance())
