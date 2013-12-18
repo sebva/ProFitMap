@@ -4,6 +4,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesClient;
+import com.google.android.gms.location.LocationClient;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 
@@ -19,7 +23,9 @@ import ch.hearc.profitmap.gui.training.LiveTrainingActivity;
 import ch.hearc.profitmap.gui.training.fragments.MapFragment;
 import ch.hearc.profitmap.model.TrackInstance;
 
-public class LiveMapFragment extends MapFragment
+public class LiveMapFragment extends MapFragment implements com.google.android.gms.location.LocationListener,
+GooglePlayServicesClient.ConnectionCallbacks,
+GooglePlayServicesClient.OnConnectionFailedListener
 {
 
 	
@@ -27,6 +33,9 @@ public class LiveMapFragment extends MapFragment
 
 	LocationManager lm = null;
 
+	private LocationClient mLocationClient;
+	private LocationRequest mLocationRequest;
+	
 	private RealLocationListener realLocationListener;
 
 	private FakeLocationListener fakeLocationListener;
@@ -35,8 +44,9 @@ public class LiveMapFragment extends MapFragment
 	public void onDestroyView() {
 		// TODO Auto-generated method stub
 		super.onDestroyView();
-		lm.removeUpdates(realLocationListener);
+		//lm.removeUpdates(realLocationListener);
 		lm.removeUpdates(fakeLocationListener);
+		mLocationClient.disconnect();
 	}
 	
 	@Override
@@ -48,8 +58,35 @@ public class LiveMapFragment extends MapFragment
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
-		
+        initiateFusedLocation();
+
+	}
+
+	private void initiateFusedLocation() {
+		// Create a new global location parameters object
+        mLocationRequest = LocationRequest.create();
+
+        /*
+         * Set the update interval
+         */
+        mLocationRequest.setInterval(2000);
+
+        // Use high accuracy
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        // Set the interval ceiling to one minute
+        mLocationRequest.setFastestInterval(5000);
+
+        // Get an editor
+
+        /*
+         * Create a new location client, using the enclosing class to
+         * handle callbacks.
+         */
+        mLocationClient = new LocationClient(parentActivity, this, this);
+        
+        mLocationClient.connect();
+
 	}
 	@Override
 	public void onResume() {
@@ -57,7 +94,7 @@ public class LiveMapFragment extends MapFragment
 
 		super.onResume();
 		setupFakeGPS();
-		setupGPS();
+		//setupGPS();
 	}
 
 	@Override
@@ -239,5 +276,39 @@ public class LiveMapFragment extends MapFragment
 
 		}
 	}
+
+
+
+	@Override
+	public void onConnectionFailed(ConnectionResult result) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onConnected(Bundle connectionHint) {
+        mLocationClient.requestLocationUpdates(mLocationRequest, (com.google.android.gms.location.LocationListener) this);
+	}
+
+	@Override
+	public void onDisconnected() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onLocationChanged(Location location) {
+
+		Log.i("locFus", location.getLatitude() + " : " + location.getLongitude());
+		if (!((LiveTrainingActivity) parentActivity).isPaused && trackInstance != null) {
+			mapElements.addPointAndRefreshPolyline(new LatLng(location.getLatitude(), location.getLongitude()));
+			trackInstance.addWaypoint(location);
+			trackInstance.getStatistics().computeStatistics();
+			((LiveTrainingActivity) parentActivity).refreshStatsPanel();
+		}
+		mapElements.start(new LatLng(location.getLatitude(), location.getLongitude()));
+
+	}
+
 		
 }
