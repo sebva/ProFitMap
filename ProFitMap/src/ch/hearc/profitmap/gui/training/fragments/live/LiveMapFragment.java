@@ -45,14 +45,20 @@ GooglePlayServicesClient.OnConnectionFailedListener
 		// TODO Auto-generated method stub
 		super.onDestroyView();
 		//lm.removeUpdates(realLocationListener);
-		lm.removeUpdates(fakeLocationListener);
-		mLocationClient.disconnect();
 	}
 	
 	@Override
 	public void onDestroy() {
 		// TODO Auto-generated method stub
 		super.onDestroy();
+	}
+	
+	@Override
+	public void onStop() {
+		// TODO Auto-generated method stub
+		super.onStop();
+		lm.removeUpdates(fakeLocationListener);
+		mLocationClient.disconnect();
 	}
 	
 	@Override
