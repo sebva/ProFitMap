@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 import ch.hearc.profitmap.R;
@@ -112,6 +113,7 @@ public class Track
 		        
 		        TextView tv = (TextView)v.findViewById(R.id.textView);
 		        tv.setText(DateFormat.getDateTimeInstance().format(trackInstance.getTimestampStart()));
+		        ImageView iv = (ImageView) v.findViewById(R.id.imageView);
 		        
 		        TextView count = (TextView)v.findViewById(R.id.count);
 		        count.setVisibility(View.INVISIBLE);

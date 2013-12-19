@@ -34,6 +34,8 @@ import ch.hearc.profitmap.gui.training.fragments.SummaryFragment;
 import ch.hearc.profitmap.gui.training.fragments.SummaryFragment.StatisticsProvider;
 import ch.hearc.profitmap.gui.training.fragments.live.LiveMapFragment;
 import ch.hearc.profitmap.gui.training.fragments.live.LiveStatsFragment;
+import ch.hearc.profitmap.model.DropboxManager;
+import ch.hearc.profitmap.model.GeoImage;
 import ch.hearc.profitmap.model.Statistics;
 import ch.hearc.profitmap.model.TrackInstance;
 import ch.hearc.profitmap.model.Tracks;
@@ -146,7 +148,7 @@ public class LiveTrainingActivity extends FragmentActivity implements
 	@Override
 	protected void onActivityResult(int arg0, int arg1, Intent intent) {
 		LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		Location l = lm.getLastKnownLocation("Test"); // Fake GPS provider
+		Location l = lm.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER); // Fake GPS provider
 
 		String[] projection = { MediaStore.Images.Media.DATA };
 		Cursor cursor = getApplicationContext().getContentResolver().query(
@@ -155,6 +157,11 @@ public class LiveTrainingActivity extends FragmentActivity implements
 				.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
 		cursor.moveToFirst();
 		String capturedImageFilePath = cursor.getString(column_index_data);
+		
+		GeoImage geoImage = new GeoImage(DropboxManager.getInstance().copyFileToDropbox(this, mCapturedImageURI), l);
+		
+		trackInstance.addImage(geoImage);
+		
 		int orientation = 0; // TODO : change to correct orientation
 		liveMapFragment.addPicMarkerToLocation(l, capturedImageFilePath,
 				orientation);

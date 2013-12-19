@@ -1,5 +1,6 @@
 package ch.hearc.profitmap.model;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
@@ -14,14 +15,15 @@ public class TrackInstance
 	private int rating;
 	private long totalPauseTime;
 	private int numberOfPauses;
-	private Collection<GeoImage> images;
-	private GeoImage thumbnail;
+	private List<GeoImage> images;
+	private String thumbnail;
 	private List<Location> waypoints;
 	private transient Statistics statistics;
 
 	public TrackInstance()
 	{
 		waypoints = new LinkedList<Location>();
+		images = new ArrayList<GeoImage>();
 		statistics = new Statistics(this);
 		timestampStart = new Date();
 		timestampEnd = new Date();
@@ -52,12 +54,12 @@ public class TrackInstance
 		this.rating = rating;
 	}
 
-	public GeoImage getThumbnail()
+	public String getThumbnail()
 	{
 		return thumbnail;
 	}
 
-	public void setThumbnail(GeoImage thumbnail)
+	public void setThumbnail(String thumbnail)
 	{
 		this.thumbnail = thumbnail;
 	}
@@ -82,9 +84,14 @@ public class TrackInstance
 		return numberOfPauses;
 	}
 
-	public Collection<GeoImage> getImages()
+	public List<GeoImage> getImages()
 	{
 		return images;
+	}
+	
+	public void addImage(GeoImage image)
+	{
+		images.add(image);
 	}
 
 	public Statistics getStatistics()

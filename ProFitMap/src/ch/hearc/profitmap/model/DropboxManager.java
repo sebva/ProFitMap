@@ -1,11 +1,16 @@
 package ch.hearc.profitmap.model;
 
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import android.app.Activity;
+import android.content.Context;
+import android.net.Uri;
 import android.util.Log;
 
 import com.dropbox.sync.android.DbxAccount;
@@ -14,7 +19,9 @@ import com.dropbox.sync.android.DbxAccountManager.AccountListener;
 import com.dropbox.sync.android.DbxDatastore;
 import com.dropbox.sync.android.DbxDatastore.SyncStatusListener;
 import com.dropbox.sync.android.DbxException;
+import com.dropbox.sync.android.DbxFile;
 import com.dropbox.sync.android.DbxFileSystem;
+import com.dropbox.sync.android.DbxPath;
 import com.dropbox.sync.android.DbxRecord;
 import com.dropbox.sync.android.DbxTable;
 
@@ -172,5 +179,37 @@ public class DropboxManager implements AccountListener, SyncStatusListener
 	public void registerView(DropboxChangeListener listener)
 	{
 		
+	}
+
+	public String copyFileToDropbox(Context context, Uri srcUri)
+	{
+		DbxFile file = null;
+		try
+		{
+			List<String> pathSegments = srcUri.getPathSegments();
+			String dstPath = pathSegments.get(pathSegments.size() - 1);
+			file = mFs.create(new DbxPath(DbxPath.ROOT + dstPath));
+			
+			final int bufSize = 2048;
+			byte[] buffer = new byte[bufSize];
+			InputStream inputStream = context.getContentResolver().openInputStream(srcUri);
+			FileOutputStream writeStream = file.getWriteStream();
+			while(inputStream.available() > 0)
+			{
+				inputStream.read(buffer);
+				writeStream.write(buffer);
+			}
+			inputStream.close();
+			writeStream.close();
+			
+			String path = file.getPath().toString();
+			file.close();
+			return path;
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			return null;
+		}
 	}
 }

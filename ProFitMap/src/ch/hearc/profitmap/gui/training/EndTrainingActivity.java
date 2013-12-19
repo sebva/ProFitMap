@@ -1,34 +1,48 @@
 package ch.hearc.profitmap.gui.training;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.NavUtils;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.RatingBar;
 import ch.hearc.profitmap.R;
 import ch.hearc.profitmap.TrackListActivity;
 import ch.hearc.profitmap.gui.training.fragments.SummaryFragment;
 import ch.hearc.profitmap.gui.training.fragments.SummaryFragment.StatisticsProvider;
+import ch.hearc.profitmap.model.DropboxManager;
 import ch.hearc.profitmap.model.Statistics;
 import ch.hearc.profitmap.model.Track;
 import ch.hearc.profitmap.model.TrackInstance;
 import ch.hearc.profitmap.model.Tracks;
 
+import com.dropbox.chooser.android.DbxChooser;
+import com.dropbox.chooser.android.DbxChooser.ResultType;
+
 public class EndTrainingActivity extends FragmentActivity implements StatisticsProvider
 {
 	
+	protected static final int kChooserCode = 109;
 	private TrackInstance mTrackInstance;
 	private int mSport;
 	private int mTrackId;
 	
 	private EditText mTrackTitle;
 	private RatingBar mRating;
+	private DbxChooser mChooser;
+	private ImageButton mBtnChoosePic;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -37,6 +51,19 @@ public class EndTrainingActivity extends FragmentActivity implements StatisticsP
 		setContentView(R.layout.activity_end_training);
 		// Show the Up button in the action bar.
 		setupActionBar();
+		
+		mChooser = new DbxChooser("q2sr7uxe7l3b38n");
+		
+		mBtnChoosePic = (ImageButton) findViewById(R.id.btn_choose_pic);
+		mBtnChoosePic.setOnClickListener(new android.view.View.OnClickListener()
+		{
+			
+			@Override
+			public void onClick(View v)
+			{
+				mChooser.forResultType(ResultType.FILE_CONTENT).launch(EndTrainingActivity.this, kChooserCode);
+			}
+		});
 		
 		mTrackInstance = Tracks.currentTrackInstance;
 		mSport = getIntent().getIntExtra("sport", 0);
@@ -63,6 +90,33 @@ public class EndTrainingActivity extends FragmentActivity implements StatisticsP
 
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
+		if(requestCode == kChooserCode && resultCode == RESULT_OK)
+		{
+			DbxChooser.Result result = new DbxChooser.Result(data);
+			try
+			{
+				Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), result.getLink());
+				bitmap = Bitmap.createScaledBitmap(bitmap, 100, 100, false);
+				mBtnChoosePic.setImageBitmap(bitmap);
+			}
+			catch (FileNotFoundException e)
+			{
+				e.printStackTrace();
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+			
+			DropboxManager dropbox = DropboxManager.getInstance();
+			
+			mTrackInstance.setThumbnail(dropbox.copyFileToDropbox(this, result.getLink()));
+		}
 	}
 
 	@Override
