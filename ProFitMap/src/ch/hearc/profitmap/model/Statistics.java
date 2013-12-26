@@ -9,7 +9,6 @@ import android.content.Context;
 import android.location.Location;
 import android.os.Build;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,7 +38,21 @@ public class Statistics
 
 	public enum TypeStatistics
 	{
-		LIVE, END, SUMMARY
+		LIVE, END, SUMMARY;
+		
+		public int[] getShownStats()
+		{
+			switch(this)
+			{
+				case END:
+					return new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11 };
+				case LIVE:
+					return new int[] { 0, 1, 2, 3, 4, 6, 7, 8, 9, 11 };
+				default:
+				case SUMMARY:
+					return new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
+			}
+		}
 	}
 	
 	public Statistics(TrackInstance track)
@@ -109,7 +122,7 @@ public class Statistics
 		lastLocation = l;
 	}
 	
-	private Pair<Integer, String> getStatisticForPosition(int position, TypeStatistics typeStatistics)
+	private Pair<Integer, String> getStatisticForPosition(int position)
 	{
 		NumberFormat format = DecimalFormat.getNumberInstance();
 		switch(position)
@@ -145,9 +158,10 @@ public class Statistics
 				return new Pair<Integer, String>(R.string.track_km_effort, format.format(effortKm) + " km");
 		}
 	}
-
+	
 	public ListAdapter getAdapter(final Context c, final TypeStatistics typeStatistics)
 	{
+		final int[] shownStats = typeStatistics.getShownStats();
 		return new BaseAdapter()
 		{
 
@@ -163,7 +177,7 @@ public class Statistics
 				else
 					v = convertView;
 
-				Pair<Integer, String> pair = getStatisticForPosition(position, typeStatistics);
+				Pair<Integer, String> pair = getStatisticForPosition(shownStats[position]);
 				TextView value = (TextView) v.findViewById(R.id.stat_tile_value_text);
 				value.setText(pair.second);
 				TextView detail = (TextView) v.findViewById(R.id.stat_tile_detail_text);
@@ -174,7 +188,7 @@ public class Statistics
 			@Override
 			public long getItemId(int position)
 			{
-				return 0;
+				return position;
 			}
 
 			@Override
@@ -186,7 +200,7 @@ public class Statistics
 			@Override
 			public int getCount()
 			{
-				return 12;
+				return shownStats.length;
 			}
 		};
 	}
