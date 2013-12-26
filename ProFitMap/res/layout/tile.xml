@@ -1,42 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:layout_height="wrap_content" >
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+    <ch.hearc.profitmap.gui.DropboxImageView
+        android:id="@+id/imageView"
+        android:background="@android:color/holo_green_dark"
+        android:layout_width="128dp"
+        android:layout_height="128dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
 
-        <ImageView
-            android:id="@+id/imageView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:src="@drawable/ic_launcher" />
-
-        <TextView
-            android:id="@+id/count"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_alignRight="@+id/imageView"
-            android:alpha="0.6"
-            android:background="#000000"
-            android:gravity="right"
-            android:padding="2dp"
-            android:text="Small Text"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="@android:color/white" />
-
-    </RelativeLayout>
+    <TextView
+        android:id="@+id/count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignRight="@+id/imageView"
+        android:alpha="0.6"
+        android:background="#000000"
+        android:gravity="right"
+        android:padding="2dp"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="@android:color/white" />
 
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="TextView" />
+        android:layout_alignBottom="@+id/imageView"
+        android:layout_alignLeft="@+id/imageView"
+        android:layout_alignRight="@+id/imageView"
+        android:background="#ae000000"
+        android:gravity="center_horizontal"
+        android:text="Text"
+        android:textColor="@android:color/primary_text_dark" />
 
-</LinearLayout>
+</RelativeLayout>

@@ -10,12 +10,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 import ch.hearc.profitmap.R;
+import ch.hearc.profitmap.gui.DropboxImageView;
 
-public class Track
+import com.dropbox.sync.android.DbxPath;
+
+public class Track implements Comparable<Track>
 {
 	private String name;
 	private double length;
@@ -114,7 +116,9 @@ public class Track
 		        
 		        TextView tv = (TextView)v.findViewById(R.id.textView);
 		        tv.setText(DateFormat.getDateTimeInstance().format(trackInstance.getTimestampStart()));
-		        ImageView iv = (ImageView) v.findViewById(R.id.imageView);
+		        DropboxImageView iv = (DropboxImageView) v.findViewById(R.id.imageView);
+		        if(trackInstance.getThumbnail() != null)
+		        	iv.loadImageFromDropbox(new DbxPath(trackInstance.getThumbnail()), DropboxManager.getInstance().getFilesystem());
 		        
 		        TextView count = (TextView)v.findViewById(R.id.count);
 		        count.setVisibility(View.INVISIBLE);
@@ -136,5 +140,11 @@ public class Track
 	void setDropboxId(String mDropboxId)
 	{
 		this.mDropboxId = mDropboxId;
+	}
+
+	@Override
+	public int compareTo(Track another)
+	{
+		return trackInstances.get(trackInstances.size() -1).getTimestampEnd().compareTo(another.trackInstances.get(another.trackInstances.size() -1).getTimestampEnd());
 	}
 }

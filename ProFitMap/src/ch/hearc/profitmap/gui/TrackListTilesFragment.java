@@ -139,12 +139,6 @@ public class TrackListTilesFragment extends Fragment implements TrackListUpdateL
 	        }
 	    });
 	}
-	
-	public void setSport(int id)
-	{
-		mSport = id;
-		showTracks(Tracks.getInstance(mSport));
-	}
 
 	public void setSortMode(int sortMode)
 	{

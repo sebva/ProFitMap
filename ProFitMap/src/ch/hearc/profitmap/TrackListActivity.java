@@ -15,6 +15,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -46,6 +47,8 @@ public class TrackListActivity extends FragmentActivity
 
 	private int mCurrentIndex = 0;
 	private TrackListTilesFragment mTrackListFragment;
+	
+	private SparseArray<TrackListTilesFragment> listFragments = new SparseArray<TrackListTilesFragment>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -232,19 +235,19 @@ public class TrackListActivity extends FragmentActivity
 	private void selectItem(int position)
 	{
 		mCurrentIndex = position;
-		if (mTrackListFragment == null)
+		TrackListTilesFragment fragment = listFragments.get(position);
+		if(fragment == null)
 		{
-			mTrackListFragment = new TrackListTilesFragment();
+			fragment = new TrackListTilesFragment();
 			Bundle args = new Bundle();
 			args.putInt(TrackListTilesFragment.ARG_SPORT_NUMBER, position);
-			mTrackListFragment.setArguments(args);
-
-			FragmentManager fragmentManager = getSupportFragmentManager();
-			fragmentManager.beginTransaction().replace(R.id.content_frame, mTrackListFragment).commit();
+			fragment.setArguments(args);
 		}
-		else
-			mTrackListFragment.setSport(position);
 
+		mTrackListFragment = fragment;
+		FragmentManager fragmentManager = getSupportFragmentManager();
+		fragmentManager.beginTransaction().replace(R.id.content_frame, mTrackListFragment).commit();
+		
 		// update selected item and title, then close the drawer
 		mDrawerList.setItemChecked(position, true);
 		getActionBar().setIcon(getSportImageIdentifier(mCurrentIndex));

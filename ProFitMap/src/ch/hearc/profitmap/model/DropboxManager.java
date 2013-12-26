@@ -176,6 +176,8 @@ public class DropboxManager implements AccountListener, SyncStatusListener, Path
 	public synchronized void addListener(DropboxListener listener)
 	{
 		listeners.add(listener);
+		if(mDbxAcctMgr != null && mDbxAcctMgr.hasLinkedAccount())
+			listener.onDropboxChange();
 	}
 	
 	public synchronized void addLinkedListener(DropboxLinkedListener listener)

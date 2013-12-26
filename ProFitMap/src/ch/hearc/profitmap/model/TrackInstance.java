@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import android.location.Location;
+import android.util.Log;
 
 public class TrackInstance
 {
@@ -62,6 +63,7 @@ public class TrackInstance
 
 	public void setThumbnail(String thumbnail)
 	{
+		Log.i("thumb", "Thumb = " + thumbnail);
 		this.thumbnail = thumbnail;
 	}
 

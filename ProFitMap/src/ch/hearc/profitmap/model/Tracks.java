@@ -23,6 +23,7 @@ import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 import ch.hearc.profitmap.R;
+import ch.hearc.profitmap.gui.DropboxImageView;
 import ch.hearc.profitmap.model.DropboxManager.DropboxLinkedListener;
 import ch.hearc.profitmap.model.DropboxManager.DropboxListener;
 
@@ -146,6 +147,19 @@ public class Tracks implements DropboxListener, DropboxLinkedListener
 		        else
 		        	tv.setText(DateFormat.getDateTimeInstance().format(track.getTrackInstance(0).getTimestampStart()));
 		        
+		        DropboxImageView iv = (DropboxImageView) v.findViewById(R.id.imageView);
+		        List<TrackInstance> ti = track.getTrackInstances();
+		        if(ti != null)
+				{
+		        	String path = null;
+					for(TrackInstance trackInstance : ti)
+						if(trackInstance != null && trackInstance.getThumbnail() != null)
+							path = trackInstance.getThumbnail();
+					
+					if(path != null)
+						iv.loadImageFromDropbox(new DbxPath(path), mDbxFs);
+				}
+		        
 		        TextView count = (TextView)v.findViewById(R.id.count);
 		        if(!track.isSingleInstance())
 		        {
@@ -172,6 +186,8 @@ public class Tracks implements DropboxListener, DropboxLinkedListener
 	public void setListener(TrackListUpdateListener listener)
 	{
 		this.listener = listener;
+		if(listener != null)
+			listener.onTrackListUpdated();
 	}
 
 	@Override
@@ -193,7 +209,6 @@ public class Tracks implements DropboxListener, DropboxLinkedListener
 					{
 						queryResult = mDbxTable.query();
 						tracks.clear();
-						mDbxFs.syncNowAndWait();
 						for (DbxRecord record : queryResult)
 						{
 							Track track = new Track();
@@ -259,7 +274,8 @@ public class Tracks implements DropboxListener, DropboxLinkedListener
 	
 	private void syncToSorted()
 	{
-		sortedTracks = new ArrayList<Track>(tracks.values());
+		sortedTracks.clear();
+		sortedTracks.addAll(tracks.values());
 		Collections.sort(sortedTracks, comparator);
 		if(listener != null)
 			listener.onTrackListUpdated();
