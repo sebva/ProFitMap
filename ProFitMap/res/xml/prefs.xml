@@ -1,0 +1,22 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+	<PreferenceCategory
+	    android:title="@string/pref_header_stats_order">
+	    <ch.hearc.profitmap.gui.settings.StatsOrderPreference
+	        android:key="stats_order_running"
+	        android:title="@string/running"
+	        android:icon="@drawable/running" />
+	    <ch.hearc.profitmap.gui.settings.StatsOrderPreference
+	        android:key="stats_order_biking"
+	        android:title="@string/biking"
+	        android:icon="@drawable/biking" />
+	    <ch.hearc.profitmap.gui.settings.StatsOrderPreference
+	        android:key="stats_order_skiing"
+	        android:title="@string/skiing"
+			android:icon="@drawable/ski" />
+	    <ch.hearc.profitmap.gui.settings.StatsOrderPreference
+	        android:key="stats_order_kayaking"
+	        android:title="@string/kayaking"
+	        android:icon="@drawable/kayak" />
+	        
+	</PreferenceCategory>
+</PreferenceScreen>

@@ -20,12 +20,17 @@
     <string name="app_name" translatable="false">ProFitMap</string>
 
     <string-array name="sports_array">
-        <item>Running</item>
-        <item>Biking</item>
-        <item>Skiing</item>
-        <item>Kayaking</item>
+        <item>@string/running</item>
+        <item>@string/biking</item>
+        <item>@string/skiing</item>
+        <item>@string/kayaking</item>
     </string-array>
 
+    <string name="running">Running</string>
+    <string name="biking">Biking</string>
+    <string name="skiing">Skiing</string>
+    <string name="kayaking">Kayaking</string>
+    
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
 
