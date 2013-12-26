@@ -4,9 +4,6 @@ import android.app.ActionBar;
 import android.app.ActionBar.OnNavigationListener;
 import android.app.Activity;
 import android.app.DialogFragment;
-import android.app.ProgressDialog;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.MatrixCursor;
@@ -32,7 +29,6 @@ import ch.hearc.profitmap.gui.TrackListTilesFragment;
 import ch.hearc.profitmap.gui.settings.SettingsActivity;
 import ch.hearc.profitmap.gui.training.fragments.StartTrainingDialogFragment;
 import ch.hearc.profitmap.model.DropboxManager;
-import ch.hearc.profitmap.model.DropboxManager.DropboxReadyListener;
 
 public class TrackListActivity extends FragmentActivity
 {
@@ -58,29 +54,6 @@ public class TrackListActivity extends FragmentActivity
 		setContentView(R.layout.activity_track_list);
 
 		mDropboxManager = DropboxManager.getInstance();
-		
-		final ProgressDialog dialog = new ProgressDialog(this);
-		dialog.setOnCancelListener(new OnCancelListener()
-		{
-			
-			@Override
-			public void onCancel(DialogInterface dialog)
-			{
-				TrackListActivity.this.finish();
-			}
-		});
-		dialog.setCancelable(true);
-		dialog.setTitle(R.string.waiting_dropbox);
-		dialog.show();
-		mDropboxManager.addListener(new DropboxReadyListener()
-		{
-			
-			@Override
-			public void onDropboxReady()
-			{
-				dialog.dismiss();
-			}
-		});
 		
 		mSportsCursor = new MatrixCursor(mColumns, 4);
 		mSports = getResources().getStringArray(R.array.sports_array);
@@ -112,15 +85,16 @@ public class TrackListActivity extends FragmentActivity
 		actionBar.setHomeButtonEnabled(true);
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
 
-		String[] sports = getResources().getStringArray(R.array.sort_modes);
-		SpinnerAdapter mSpinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, sports);
+		String[] sortModes = getResources().getStringArray(R.array.sort_modes);
+		SpinnerAdapter mSpinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, sortModes);
 		actionBar.setListNavigationCallbacks(mSpinnerAdapter, new OnNavigationListener()
 		{
 
 			@Override
 			public boolean onNavigationItemSelected(int itemPosition, long itemId)
 			{
-				return false;
+				mTrackListFragment.setSortMode(itemPosition);
+				return true;
 			}
 		});
 
@@ -153,15 +127,18 @@ public class TrackListActivity extends FragmentActivity
 		}
 	}
 	
+	public void hideSortModes()
+	{
+		getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+	}
+	
 	@Override
 	protected void onStart()
 	{
 		super.onStart();
 		
 		if(!mDropboxManager.isDropboxLinked())
-		{
 			mDropboxManager.linkToDropbox(this, DROPBOX_LINK_CALLBACK);
-		}
 	}
 	
 	@Override
@@ -169,7 +146,13 @@ public class TrackListActivity extends FragmentActivity
 	{
 		if(requestCode == DROPBOX_LINK_CALLBACK)
 		{
-			Toast.makeText(this, (resultCode == Activity.RESULT_OK) ? getString(R.string.dropbox_connected) : getString(R.string.dropbox_error), Toast.LENGTH_LONG).show();
+			if(resultCode == Activity.RESULT_OK)
+				Toast.makeText(this, R.string.dropbox_connected, Toast.LENGTH_SHORT).show();
+			else
+			{
+				Toast.makeText(this, R.string.dropbox_error, Toast.LENGTH_SHORT).show();
+				mDropboxManager.linkToDropbox(this, DROPBOX_LINK_CALLBACK);
+			}
 		}
 		else
 			super.onActivityResult(requestCode, resultCode, data);
@@ -229,7 +212,9 @@ public class TrackListActivity extends FragmentActivity
 	@Override
 	public void onBackPressed()
 	{
-		if(mTrackListFragment.onBackPressed())
+		if(!mTrackListFragment.onBackPressed())
+			getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+		else
 			super.onBackPressed();
 	}
 

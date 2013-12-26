@@ -21,6 +21,7 @@ public class Track
 	private double length;
 	protected List<TrackInstance> trackInstances;
 	private Tracks mTracks;
+	private String mDropboxId;
 
 	public Track()
 	{
@@ -31,7 +32,7 @@ public class Track
 	{
 		trackInstances.add(trackInstance);
 		if(mTracks != null)
-			mTracks.saveTrackInstanceToDropbox(this, trackInstance);
+			mTracks.saveTrackInstanceToDropbox(this, trackInstance, mDropboxId);
 	}
 
 	public String getName()
@@ -125,5 +126,15 @@ public class Track
 	void setTracks(Tracks t)
 	{
 		mTracks = t;
+	}
+
+	public String getDropboxId()
+	{
+		return mDropboxId;
+	}
+
+	void setDropboxId(String mDropboxId)
+	{
+		this.mDropboxId = mDropboxId;
 	}
 }

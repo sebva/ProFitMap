@@ -177,7 +177,6 @@ GooglePlayServicesClient.OnConnectionFailedListener
 			if (!((LiveTrainingActivity) parentActivity).isPaused)
 				mapElements.addPointAndRefreshPolyline(new LatLng(location.getLatitude(), location.getLongitude()));
 				trackInstance.addWaypoint(location);
-				trackInstance.getStatistics().computeStatistics();
 				Log.i("Stats", trackInstance.getStatistics().toString());
 				((LiveTrainingActivity) parentActivity).refreshStatsPanel();
 		}
@@ -254,7 +253,6 @@ GooglePlayServicesClient.OnConnectionFailedListener
 			if (!((LiveTrainingActivity) parentActivity).isPaused && trackInstance != null) {
 				mapElements.addPointAndRefreshPolyline(new LatLng(location.getLatitude(), location.getLongitude()));
 				trackInstance.addWaypoint(location);
-				trackInstance.getStatistics().computeStatistics();
 				((LiveTrainingActivity) parentActivity).refreshStatsPanel();
 			}
 			mapElements.start(new LatLng(location.getLatitude(), location.getLongitude()));
@@ -309,7 +307,6 @@ GooglePlayServicesClient.OnConnectionFailedListener
 		if (!((LiveTrainingActivity) parentActivity).isPaused && trackInstance != null) {
 			mapElements.addPointAndRefreshPolyline(new LatLng(location.getLatitude(), location.getLongitude()));
 			trackInstance.addWaypoint(location);
-			trackInstance.getStatistics().computeStatistics();
 			((LiveTrainingActivity) parentActivity).refreshStatsPanel();
 		}
 		mapElements.start(new LatLng(location.getLatitude(), location.getLongitude()));

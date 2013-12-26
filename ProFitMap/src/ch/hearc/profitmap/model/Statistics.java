@@ -28,15 +28,20 @@ public class Statistics
 	private double ascent;
 	private double descent;
 	private double averageSpeed;
-	private double maxSpeed;
+	private float maxSpeed;
 	private double effortKm;
 	/**
 	 * Duration in seconds
 	 */
 	private long duration;
 	private TrackInstance trackInstance;
-	
+	private transient Location lastLocation;
 
+	public enum TypeStatistics
+	{
+		LIVE, END, SUMMARY
+	}
+	
 	public Statistics(TrackInstance track)
 	{
 		this.trackInstance = track;
@@ -72,11 +77,39 @@ public class Statistics
 		else
 			duration = (previous.getTime() - trackInstance.getWaypoints().get(0).getTime()) / 1000l;
 		
-		Log.i("timeE",previous.getElapsedRealtimeNanos() + ":" + trackInstance.getWaypoints().get(0).getElapsedRealtimeNanos()+"");
+		averageSpeed = length / (double)duration;
 		effortKm = (length + ascent * 10.0 + descent * 2.0) / 1000.0;
 	}
 	
-	private Pair<Integer, String> getStatisticForPosition(int position)
+	@SuppressLint("NewApi")
+	void addLocation(Location l)
+	{
+		if(lastLocation != null)
+		{
+			length += lastLocation.distanceTo(l);
+			double deniv = l.getAltitude() - lastLocation.getAltitude();
+			if(deniv >= 0)
+				ascent += deniv;
+			else
+				descent -= deniv;
+			
+			if(l.getSpeed() > maxSpeed)
+				maxSpeed = l.getSpeed();
+			
+			if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)
+				duration += (l.getElapsedRealtimeNanos() - lastLocation.getElapsedRealtimeNanos()) / 1000000000l;
+			else
+				duration += (l.getTime() - lastLocation.getTime()) / 1000l;
+		}
+		else
+			maxSpeed = l.getSpeed();
+		
+		averageSpeed = length / (double)duration;
+		effortKm = (length + ascent * 10.0 + descent * 2.0) / 1000.0;
+		lastLocation = l;
+	}
+	
+	private Pair<Integer, String> getStatisticForPosition(int position, TypeStatistics typeStatistics)
 	{
 		NumberFormat format = DecimalFormat.getNumberInstance();
 		switch(position)
@@ -113,35 +146,7 @@ public class Statistics
 		}
 	}
 
-	public double getLength() {
-		return length;
-	}
-
-	public double getAscent() {
-		return ascent;
-	}
-
-	public double getDescent() {
-		return descent;
-	}
-
-	public double getAverageSpeed() {
-		return averageSpeed;
-	}
-
-	public double getMaxSpeed() {
-		return maxSpeed;
-	}
-
-	public double getEffortKm() {
-		return effortKm;
-	}
-
-	public long getDuration() {
-		return duration;
-	}
-
-	public ListAdapter getAdapter(final Context c)
+	public ListAdapter getAdapter(final Context c, final TypeStatistics typeStatistics)
 	{
 		return new BaseAdapter()
 		{
@@ -158,7 +163,7 @@ public class Statistics
 				else
 					v = convertView;
 
-				Pair<Integer, String> pair = getStatisticForPosition(position);
+				Pair<Integer, String> pair = getStatisticForPosition(position, typeStatistics);
 				TextView value = (TextView) v.findViewById(R.id.stat_tile_value_text);
 				value.setText(pair.second);
 				TextView detail = (TextView) v.findViewById(R.id.stat_tile_detail_text);
@@ -184,34 +189,6 @@ public class Statistics
 				return 12;
 			}
 		};
-	}
-
-	public void setLength(double length) {
-		this.length = length;
-	}
-
-	public void setAscent(double ascent) {
-		this.ascent = ascent;
-	}
-
-	public void setDescent(double descent) {
-		this.descent = descent;
-	}
-
-	public void setAverageSpeed(double averageSpeed) {
-		this.averageSpeed = averageSpeed;
-	}
-
-	public void setMaxSpeed(double maxSpeed) {
-		this.maxSpeed = maxSpeed;
-	}
-
-	public void setEffortKm(double effortKm) {
-		this.effortKm = effortKm;
-	}
-
-	public void setDuration(long duration) {
-		this.duration = duration;
 	}
 
 	@Override

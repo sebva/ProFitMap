@@ -26,6 +26,7 @@ import ch.hearc.profitmap.gui.training.fragments.SummaryFragment.StatisticsProvi
 import ch.hearc.profitmap.model.Statistics;
 import ch.hearc.profitmap.model.TrackInstance;
 import ch.hearc.profitmap.model.Tracks;
+import ch.hearc.profitmap.model.Statistics.TypeStatistics;
 
 public class TrackDetailActivity extends FragmentActivity implements ActionBar.TabListener, StatisticsProvider
 {
@@ -35,7 +36,7 @@ public class TrackDetailActivity extends FragmentActivity implements ActionBar.T
 	 * {@link android.support.v4.app.FragmentPagerAdapter} derivative, which will keep every loaded fragment in memory. If this becomes too memory intensive, it
 	 * may be best to switch to a {@link android.support.v4.app.FragmentStatePagerAdapter}.
 	 */
-	SectionsPagerAdapter mSectionsPagerAdapter;
+	private SectionsPagerAdapter mSectionsPagerAdapter;
 	private TrackInstance trackInstance;
 	
 	private MapFragment mapFragment;
@@ -43,7 +44,7 @@ public class TrackDetailActivity extends FragmentActivity implements ActionBar.T
 	/*
 	 * The {@link ViewPager} that will host the section contents.
 	 */
-	ViewPager mViewPager;
+	private ViewPager mViewPager;
 	private int mTrackId;
 	private int mSport;
 
@@ -218,6 +219,12 @@ public class TrackDetailActivity extends FragmentActivity implements ActionBar.T
 		return trackInstance.getStatistics();
 	}
 
+	@Override
+	public TypeStatistics getTypeStatistics()
+	{
+		return TypeStatistics.SUMMARY;
+	}
+	
 	public TrackInstance getTrackInstance()
 	{
 		return trackInstance;

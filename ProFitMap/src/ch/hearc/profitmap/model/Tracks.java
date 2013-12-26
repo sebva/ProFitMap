@@ -4,14 +4,18 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Semaphore;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,35 +23,39 @@ import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 import ch.hearc.profitmap.R;
-import ch.hearc.profitmap.model.DropboxManager.DropboxReadyListener;
+import ch.hearc.profitmap.model.DropboxManager.DropboxLinkedListener;
+import ch.hearc.profitmap.model.DropboxManager.DropboxListener;
 
 import com.dropbox.sync.android.DbxException;
-import com.dropbox.sync.android.DbxFields;
 import com.dropbox.sync.android.DbxFile;
 import com.dropbox.sync.android.DbxFileSystem;
 import com.dropbox.sync.android.DbxList;
 import com.dropbox.sync.android.DbxPath;
-import com.dropbox.sync.android.DbxPath.InvalidPathException;
 import com.dropbox.sync.android.DbxRecord;
 import com.dropbox.sync.android.DbxTable;
 import com.dropbox.sync.android.DbxTable.QueryResult;
 import com.google.gson.Gson;
 
-public class Tracks implements DropboxReadyListener
+public class Tracks implements DropboxListener, DropboxLinkedListener
 {
 	public interface TrackListUpdateListener
 	{
-		public void onTrackListUpdated(Set<Track> tracks);
+		public void onTrackListUpdated();
 	}
 
 	private static final String TAG = "Tracks";
-	private List<Track> tracks;
+	private Map<String, Track> tracks;
 	private static Map<Integer, Tracks> instances = null;
 	private DropboxManager mDropbox;
 	private DbxTable mDbxTable;
 	private DbxFileSystem mDbxFs;
 	private int mSportId;
+	private TrackListUpdateListener listener = null;
+	private Semaphore semaphore = new Semaphore(1);
+	private List<Track> sortedTracks;
+	private Comparator<Track> comparator;
 	
+	private static final DbxPath kDbxRoot = new DbxPath("/tracks");
 	public static TrackInstance currentTrackInstance;
 	
 	static
@@ -59,9 +67,10 @@ public class Tracks implements DropboxReadyListener
 	{
 		this.mSportId = sportId;
 		
-		tracks = new ArrayList<Track>();
+		tracks = new HashMap<String, Track>();
+		sortedTracks = new ArrayList<Track>(0);
 		mDropbox = DropboxManager.getInstance();
-		mDropbox.addListener(this);
+		mDropbox.addLinkedListener(this);
 	}
 
 	public static synchronized Tracks getInstance(int sport)
@@ -75,22 +84,25 @@ public class Tracks implements DropboxReadyListener
 			return tracks;
 		}
 	}
-
+	
+	public void sortTracks(Comparator<Track> comparator)
+	{
+		this.comparator = comparator;
+		syncToSorted();
+	}
 	
 	public void addTrack(Track track)
 	{
 		track.setTracks(this);
-		tracks.add(track);
 		
-		mDbxTable.insert().set("id", tracks.size() -1).set("name", track.getName()).set("instances", new DbxList());
+		DbxRecord record = mDbxTable.insert().set("name", track.getName()).set("instances", new DbxList());
+		tracks.put(record.getId(), track);
+		track.setDropboxId(record.getId());
+		
+		syncToSorted();
 		
 		for(TrackInstance ti : track.getTrackInstances())
-			saveTrackInstanceToDropbox(track, ti);
-	}
-	
-	public List<Track> getTracks()
-	{
-		return tracks;
+			saveTrackInstanceToDropbox(track, ti, record);
 	}
 	
 	public ListAdapter getAdapter(final Context c)
@@ -100,13 +112,13 @@ public class Tracks implements DropboxReadyListener
 			@Override
 			public int getCount()
 			{
-				return tracks.size();
+				return sortedTracks.size();
 			}
 
 			@Override
 			public Object getItem(int position)
 			{
-				return tracks.get(position);
+				return sortedTracks.get(position);
 			}
 
 			@Override
@@ -119,7 +131,7 @@ public class Tracks implements DropboxReadyListener
 			public View getView(int position, View convertView, ViewGroup parent)
 			{
 				LayoutInflater inflater = (LayoutInflater)c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				Track track = tracks.get(position);
+				Track track = sortedTracks.get(position);
 				View v;
 		        if (convertView == null) {  // if it's not recycled, initialize some attributes
 		            v = inflater.inflate(R.layout.tile, null);
@@ -132,7 +144,7 @@ public class Tracks implements DropboxReadyListener
 		        if(!"".equals(trackName))
 		        	tv.setText(trackName);
 		        else
-		        	tv.setVisibility(View.GONE);
+		        	tv.setText(DateFormat.getDateTimeInstance().format(track.getTrackInstance(0).getTimestampStart()));
 		        
 		        TextView count = (TextView)v.findViewById(R.id.count);
 		        if(!track.isSingleInstance())
@@ -147,63 +159,131 @@ public class Tracks implements DropboxReadyListener
 		};
 	}
 
+	public Track getTrack(String id)
+	{
+		return tracks.get(id);
+	}
+	
 	public Track getTrack(int position)
 	{
-		return tracks.get(position);
+		return sortedTracks.get(position);
+	}
+	
+	public void setListener(TrackListUpdateListener listener)
+	{
+		this.listener = listener;
 	}
 
 	@Override
-	public void onDropboxReady()
+	public void onDropboxChange()
 	{
-		mDbxTable = mDropbox.getTable(mSportId);
-		mDbxFs = mDropbox.getFilesystem();
-		Gson gson = new Gson();
-		
+		new AsyncTask<Void, Void, Void>()
+		{
+			
+			@Override
+			protected Void doInBackground(Void... params)
+			{
+				try
+				{
+					semaphore.acquire();
+					Gson gson = new Gson();
+	
+					QueryResult queryResult = null;
+					try
+					{
+						queryResult = mDbxTable.query();
+						tracks.clear();
+						mDbxFs.syncNowAndWait();
+						for (DbxRecord record : queryResult)
+						{
+							Track track = new Track();
+							track.setTracks(Tracks.this);
+							track.setName(record.getString("name"));
+	
+							DbxList list = record.getList("instances");
+							for (int i = 0; i < list.size(); i++)
+							{
+								try
+								{
+									DbxPath path = new DbxPath(kDbxRoot, list.getString(i));
+									TrackInstance trackInstance;
+									if (mDbxFs.exists(path))
+									{
+										DbxFile file = mDbxFs.open(path);
+										Reader reader = new InputStreamReader(file.getReadStream());
+										trackInstance = gson.fromJson(reader, TrackInstance.class);
+										reader.close();
+										file.close();
+									}
+									else
+										trackInstance = new TrackInstance();
+									
+									track.trackInstances.add(trackInstance);
+								}
+								catch (DbxException e)
+								{
+									e.printStackTrace();
+								}
+								catch (IOException e)
+								{
+									e.printStackTrace();
+								}
+							}
+	
+							tracks.put(record.getId(), track);
+						}
+					}
+					catch (DbxException e)
+					{
+						e.printStackTrace();
+					}
+					finally
+					{
+						semaphore.release();
+					}
+				}
+				catch(InterruptedException e)
+				{
+					
+				}
+				return null;
+			}
+			
+			@Override
+			protected void onPostExecute(Void result)
+			{
+				syncToSorted();
+			}
+		}.execute();
+	}
+	
+	private void syncToSorted()
+	{
+		sortedTracks = new ArrayList<Track>(tracks.values());
+		Collections.sort(sortedTracks, comparator);
+		if(listener != null)
+			listener.onTrackListUpdated();
+	}
+	
+	void saveTrackInstanceToDropbox(Track track, TrackInstance trackInstance, String mDropboxId)
+	{
 		try
 		{
-			QueryResult queryResult = mDbxTable.query();
-			for(DbxRecord record : queryResult)
-			{
-				Track track = new Track();
-				track.setTracks(this);
-				track.setName(record.getString("name"));
-				
-				DbxList list = record.getList("instances");
-				for(int i = 0; i < list.size(); i++)
-				{
-					DbxFile file = mDbxFs.open(new DbxPath(list.getString(i)));
-					Reader reader = new InputStreamReader(file.getReadStream());
-					TrackInstance trackInstance = gson.fromJson(reader, TrackInstance.class);
-					reader.close();
-					file.close();
-					
-					track.trackInstances.add(trackInstance);
-				}
-				
-				tracks.add(track);
-			}
+			saveTrackInstanceToDropbox(track, trackInstance, mDbxTable.get(mDropboxId));
 		}
 		catch (DbxException e)
 		{
 			e.printStackTrace();
 		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}		
 	}
 
-	void saveTrackInstanceToDropbox(Track track, TrackInstance trackInstance)
+	void saveTrackInstanceToDropbox(Track track, TrackInstance trackInstance, DbxRecord record)
 	{
 		try
 		{
-			QueryResult result = mDbxTable.query(new DbxFields().set("id", tracks.indexOf(track)));
-			assert result.count() == 1;
-			
-			DbxRecord record = result.asList().get(0);
-			
-			DbxFile file = mDbxFs.create(new DbxPath(DbxPath.ROOT + UUID.randomUUID().toString()));
-			record.getList("instances").add(file.getPath().toString());
+			String uuid = UUID.randomUUID().toString();
+			DbxFile file = mDbxFs.create(new DbxPath(kDbxRoot, uuid));
+			record.getList("instances").add(uuid);
 			
 			PrintWriter writer = new PrintWriter(file.getWriteStream());
 			//LogWriter writer = new LogWriter("Gson");
@@ -223,32 +303,12 @@ public class Tracks implements DropboxReadyListener
 		}
 	}
 
-	void update(Set<DbxRecord> records) throws InvalidPathException, IOException
+	@Override
+	public void onAccountLinked()
 	{
-		for(DbxRecord record : records)
-		{
-			if(record.isDeleted())
-				; // TODO Delete
-			else
-			{
-				Track track = new Track();
-				track.setName(record.getString("name"));
-				
-				DbxList list = record.getList("instances");
-				for(int i = 0; i < list.size(); i++)
-				{
-					DbxFile file = mDbxFs.open(new DbxPath(list.getString(i)));
-					Reader reader = new InputStreamReader(file.getReadStream());
-					TrackInstance trackInstance = new Gson().fromJson(reader, TrackInstance.class);
-					reader.close();
-					file.close();
-					
-					track.trackInstances.add(trackInstance);
-				}
-				
-				tracks.add(track);
-			}
-		}
+		mDbxFs = mDropbox.getFilesystem();
+		mDbxTable = mDropbox.getTable(mSportId);
+		mDropbox.addListener(this);
 	}
 
 }

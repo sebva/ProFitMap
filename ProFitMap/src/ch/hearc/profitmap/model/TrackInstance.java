@@ -37,6 +37,7 @@ public class TrackInstance
 	public void addWaypoint(Location location)
 	{
 		waypoints.add(location);
+		statistics.addLocation(location);
 	}
 	
 	public void endInstance()

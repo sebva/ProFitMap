@@ -8,11 +8,13 @@ import android.view.ViewGroup;
 import android.widget.GridView;
 import ch.hearc.profitmap.R;
 import ch.hearc.profitmap.model.Statistics;
+import ch.hearc.profitmap.model.Statistics.TypeStatistics;
 public class SummaryFragment extends Fragment
 {
 	public interface StatisticsProvider
 	{
 		public Statistics getStatistics();
+		public TypeStatistics getTypeStatistics();
 	}
 
 	private Statistics mStatistics;
@@ -23,10 +25,10 @@ public class SummaryFragment extends Fragment
 		// Empty constructor required for fragment subclasses
 	}
 	
-	public void setStatistics(Statistics statistics)
+	public void setStatistics(Statistics statistics, TypeStatistics typeStatistics)
 	{
 		mStatistics = statistics;
-		mGridView.setAdapter(mStatistics.getAdapter(getActivity()));
+		mGridView.setAdapter(mStatistics.getAdapter(getActivity(), typeStatistics));
 		mStatistics.computeStatistics();
 	}
 
@@ -37,8 +39,9 @@ public class SummaryFragment extends Fragment
 		
 		mGridView = (GridView) rootView.findViewById(R.id.trackinstance_grid);
 		Statistics statistics = ((StatisticsProvider)getActivity()).getStatistics();
+		TypeStatistics typeStatistics = ((StatisticsProvider)getActivity()).getTypeStatistics();
 		if(statistics != null)
-			setStatistics(statistics);
+			setStatistics(statistics, typeStatistics);
 		
 		return rootView;
 	}

@@ -27,6 +27,7 @@ import ch.hearc.profitmap.model.Statistics;
 import ch.hearc.profitmap.model.Track;
 import ch.hearc.profitmap.model.TrackInstance;
 import ch.hearc.profitmap.model.Tracks;
+import ch.hearc.profitmap.model.Statistics.TypeStatistics;
 
 import com.dropbox.chooser.android.DbxChooser;
 import com.dropbox.chooser.android.DbxChooser.ResultType;
@@ -79,7 +80,7 @@ public class EndTrainingActivity extends FragmentActivity implements StatisticsP
 		
 		mRating = (RatingBar) findViewById(R.id.track_rating);
 		SummaryFragment mStatsFragment = (SummaryFragment) getSupportFragmentManager().findFragmentById(R.id.summary_fragment);
-		mStatsFragment.setStatistics(mTrackInstance.getStatistics());
+		mStatsFragment.setStatistics(mTrackInstance.getStatistics(), TypeStatistics.END);
 	}
 
 	/**
@@ -115,7 +116,7 @@ public class EndTrainingActivity extends FragmentActivity implements StatisticsP
 			
 			DropboxManager dropbox = DropboxManager.getInstance();
 			
-			mTrackInstance.setThumbnail(dropbox.copyFileToDropbox(this, result.getLink()));
+			mTrackInstance.setThumbnail(dropbox.copyPictureToDropbox(this, result.getLink()));
 		}
 	}
 
@@ -190,4 +191,9 @@ public class EndTrainingActivity extends FragmentActivity implements StatisticsP
 		return null;
 	}
 
+	@Override
+	public TypeStatistics getTypeStatistics()
+	{
+		return TypeStatistics.END;
+	}
 }

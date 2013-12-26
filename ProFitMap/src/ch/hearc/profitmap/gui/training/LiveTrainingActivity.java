@@ -39,6 +39,7 @@ import ch.hearc.profitmap.model.GeoImage;
 import ch.hearc.profitmap.model.Statistics;
 import ch.hearc.profitmap.model.TrackInstance;
 import ch.hearc.profitmap.model.Tracks;
+import ch.hearc.profitmap.model.Statistics.TypeStatistics;
 
 public class LiveTrainingActivity extends FragmentActivity implements
 		ActionBar.TabListener, StatisticsProvider {
@@ -158,7 +159,7 @@ public class LiveTrainingActivity extends FragmentActivity implements
 		cursor.moveToFirst();
 		String capturedImageFilePath = cursor.getString(column_index_data);
 		
-		GeoImage geoImage = new GeoImage(DropboxManager.getInstance().copyFileToDropbox(this, mCapturedImageURI), l);
+		GeoImage geoImage = new GeoImage(DropboxManager.getInstance().copyPictureToDropbox(this, mCapturedImageURI), l);
 		
 		trackInstance.addImage(geoImage);
 		
@@ -347,7 +348,16 @@ public class LiveTrainingActivity extends FragmentActivity implements
 
 	@Override
 	public Statistics getStatistics() {
-		return trackInstance.getStatistics();
+		if(trackInstance != null)
+			return trackInstance.getStatistics();
+		else
+			return null;
+	}
+	
+	@Override
+	public TypeStatistics getTypeStatistics()
+	{
+		return TypeStatistics.LIVE;
 	}
 
 	public void refreshStatsPanel() {

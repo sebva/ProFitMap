@@ -1,6 +1,12 @@
 package ch.hearc.profitmap.gui;
 
+import java.util.Comparator;
+import java.util.List;
+
+import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -10,14 +16,16 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 import android.widget.ListAdapter;
+import android.widget.Toast;
 import ch.hearc.profitmap.R;
-import ch.hearc.profitmap.model.DropboxManager;
-import ch.hearc.profitmap.model.DropboxManager.DropboxChangeListener;
+import ch.hearc.profitmap.TrackListActivity;
 import ch.hearc.profitmap.model.Track;
+import ch.hearc.profitmap.model.TrackInstance;
 import ch.hearc.profitmap.model.Tracks;
+import ch.hearc.profitmap.model.Tracks.TrackListUpdateListener;
 
 
-public class TrackListTilesFragment extends Fragment implements DropboxChangeListener
+public class TrackListTilesFragment extends Fragment implements TrackListUpdateListener
 {
 
 	public static final String ARG_SPORT_NUMBER = "sport_number";
@@ -40,9 +48,10 @@ public class TrackListTilesFragment extends Fragment implements DropboxChangeLis
 		mSport = getArguments().getInt(ARG_SPORT_NUMBER);
 		
 		mGridView = (GridView) rootView.findViewById(R.id.trackinstance_grid);
-		showTracks(Tracks.getInstance(mSport));
-		
-		DropboxManager.getInstance().registerView(this);
+		Tracks tracks = Tracks.getInstance(mSport);
+		setSortMode(0);
+		showTracks(tracks);
+		tracks.setListener(this);
 		
 		return rootView;
 	}
@@ -79,23 +88,42 @@ public class TrackListTilesFragment extends Fragment implements DropboxChangeLis
 		mGridView.setAdapter(adapter);
 		mGridView.setOnItemClickListener(new OnItemClickListener() {
 	        public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-	            
-	            if(currentTracks.getTrack(position).isSingleInstance())
-	            {	            	
-	            	Intent intent = new Intent(getActivity(), TrackDetailActivity.class);
-	            	intent.putExtra("trackId", position);
-	            	intent.putExtra("trackInstanceId", 0);
-	            	intent.putExtra("sport", mSport);
-	            	startActivity(intent);
+	            boolean isTrackReady = true;
+	            Track track = currentTracks.getTrack(position);
+	            if(track != null)
+	            {
+	            	for(TrackInstance trackInstance : track.getTrackInstances())
+	            		if(trackInstance == null || trackInstance.getTimestampStart() == null)
+	            		{
+	            			isTrackReady = false;
+	            			break;
+	            		}
 	            }
 	            else
-	            	showTrack(currentTracks.getTrack(position),position);
+	            	isTrackReady = false;
+	            
+	            if(isTrackReady)
+	            {
+					if(track.isSingleInstance())
+		            {
+		            	Intent intent = new Intent(getActivity(), TrackDetailActivity.class);
+		            	intent.putExtra("trackId", position);
+		            	intent.putExtra("trackInstanceId", 0);
+		            	intent.putExtra("sport", mSport);
+		            	startActivity(intent);
+		            }
+		            else
+		            	showTrack(track,position);
+	            }
+	            else
+		            Toast.makeText(getActivity(), R.string.track_not_ready, Toast.LENGTH_LONG).show();
 	        }
 	    });
 	}
 	
 	private void showTrack(Track track, final int position)
 	{
+		((TrackListActivity)getActivity()).hideSortModes();
 		currentTrack = track;
 		
 		ListAdapter adapter = track.getAdapter(getActivity());
@@ -118,13 +146,56 @@ public class TrackListTilesFragment extends Fragment implements DropboxChangeLis
 		showTracks(Tracks.getInstance(mSport));
 	}
 
-	public void setSortMode(String sortMode)
+	public void setSortMode(int sortMode)
 	{
-
+		if(currentTracks != null)
+		{
+			Comparator<Track> comparator;
+			switch(sortMode)
+			{
+				default:
+				case 0: // By name
+					comparator = new Comparator<Track>()
+					{
+						@Override
+						public int compare(Track lhs, Track rhs)
+						{
+							return lhs.getName().compareToIgnoreCase(rhs.getName());
+						}
+					};
+					break;
+				case 1: // By date
+					comparator = new Comparator<Track>()
+					{
+						@Override
+						public int compare(Track lhs, Track rhs)
+						{
+							List<TrackInstance> lhsi = lhs.getTrackInstances();
+							List<TrackInstance> rhsi = lhs.getTrackInstances();
+							return lhsi.get(lhsi.size() -1).getTimestampEnd().compareTo(rhsi.get(rhsi.size() -1).getTimestampEnd());
+						}
+					};
+					break;
+				case 2: // By distance
+					final Location location = ((LocationManager)getActivity().getSystemService(Context.LOCATION_SERVICE)).getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
+					comparator = new Comparator<Track>()
+					{
+						@Override
+						public int compare(Track lhs, Track rhs)
+						{
+							Location lhsLoc = lhs.getTrackInstance(0).getWaypoints().get(0);
+							Location rhsLoc = rhs.getTrackInstance(0).getWaypoints().get(0);
+							return Float.compare(lhsLoc.distanceTo(location), rhsLoc.distanceTo(location));
+						}
+					};
+					break;
+			}
+			currentTracks.sortTracks(comparator);
+		}
 	}
 
 	@Override
-	public void onDropboxChanged()
+	public void onTrackListUpdated()
 	{
 		mGridView.invalidateViews();
 	}
