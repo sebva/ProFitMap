@@ -65,7 +65,7 @@
     <string name="track_max_speed">Vitesse maximale</string>
     <string name="track_total_pause_time">Temps de pause total</string>
     <string name="track_number_of_pauses">Nombres de pauses</string>
-    <string name="track_km_effort">Kilometrès-effort</string>
+    <string name="track_km_effort">Kilomètres-effort</string>
     <string name="start_ghost">Démarrer un fantôme</string>
     <string name="track_not_ready">Cet entraînement n\'a pas encore été rapatrié depuis le Cloud. Veuillez réessayer plus tard</string>
     <string name="title_activity_nfcimport">Importer un entraînement</string>
