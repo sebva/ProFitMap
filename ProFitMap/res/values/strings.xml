@@ -12,7 +12,7 @@
   distributed under the License is distributed on an "AS IS" BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
-  limitations under the License.
+  limitations under the License.
 -->
 
 <resources>
@@ -30,7 +30,6 @@
     <string name="biking">Biking</string>
     <string name="skiing">Skiing</string>
     <string name="kayaking">Kayaking</string>
-    
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
 
@@ -44,9 +43,9 @@
     <string name="action_settings">Settings</string>
 
     <string-array name="sort_modes">
-        <item>Name</item><item>Date</item>
+        <item>Name</item>
+        <item>Date</item>
         <item>Distance</item>
-        
     </string-array>
 
     <string name="takepic">Take a picture</string>
@@ -61,17 +60,16 @@
     <string name="dropbox_connected">Your Dropbox account has been successfully linked !</string>
     <string name="dropbox_error">Error while linking Dropbox</string>
     <string name="start_training">Start training</string>
-    <string name="title_activity_end_training">End training</string>
+    <string name="title_activity_end_training">Save training</string>
     <string name="save_activity">Save training</string>
     <string name="dismiss_training">Dismiss training</string>
     <string name="title_activity_track_detail">Training details</string>
     <string name="title_activity_stats_order">Order sports</string>
     <string name="rating">Rating</string>
     <string name="track_name">Track name</string>
-    
     <string name="track_length">Distance</string>
     <string name="track_duration">Duration</string>
-	<string name="track_ascent">Ascent</string>
+    <string name="track_ascent">Ascent</string>
     <string name="track_descent">Descent</string>
     <string name="track_start_time">Start time</string>
     <string name="track_end_time">End time</string>
@@ -83,4 +81,7 @@
     <string name="start_ghost">Start a ghost</string>
     <string name="waiting_dropbox">Waiting for Dropbox…</string>
     <string name="track_not_ready">This track has not yet been downloaded from the cloud. Please try later</string>
+    <string name="title_activity_nfcimport">Import track</string>
+    <string name="nfc_track_sent">Your track has been sent via Beam</string>
+
 </resources>

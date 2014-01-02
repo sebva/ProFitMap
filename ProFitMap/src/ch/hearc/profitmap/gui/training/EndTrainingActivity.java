@@ -67,9 +67,17 @@ public class EndTrainingActivity extends FragmentActivity implements StatisticsP
 			}
 		});
 		
+		mRating = (RatingBar) findViewById(R.id.track_rating);
+		
 		mTrackInstance = Tracks.currentTrackInstance;
 		mSport = getIntent().getIntExtra("sport", 0);
 		mTrackId = getIntent().getIntExtra("trackId", -1);
+		int rating = getIntent().getIntExtra("rating", -1);
+		if(rating != -1)
+		{
+			mRating.setRating(rating);
+			mRating.setEnabled(false);
+		}
 		
 		mTrackTitle = (EditText) findViewById(R.id.track_name);
 		if(mTrackId != -1)
@@ -79,7 +87,6 @@ public class EndTrainingActivity extends FragmentActivity implements StatisticsP
 			mTrackTitle.setFocusable(false);
 		}
 		
-		mRating = (RatingBar) findViewById(R.id.track_rating);
 		SummaryFragment mStatsFragment = (SummaryFragment) getSupportFragmentManager().findFragmentById(R.id.summary_fragment);
 		mStatsFragment.setStatistics(mTrackInstance.getStatistics(), TypeStatistics.END);
 	}

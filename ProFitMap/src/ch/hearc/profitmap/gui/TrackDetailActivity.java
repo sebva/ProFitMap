@@ -1,12 +1,25 @@
 package ch.hearc.profitmap.gui;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Locale;
+import java.util.zip.GZIPOutputStream;
 
 import android.app.ActionBar;
 import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.location.Location;
+import android.nfc.NdefMessage;
+import android.nfc.NdefRecord;
+import android.nfc.NfcAdapter;
+import android.nfc.NfcAdapter.CreateNdefMessageCallback;
+import android.nfc.NfcAdapter.OnNdefPushCompleteCallback;
+import android.nfc.NfcEvent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -16,6 +29,7 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 import ch.hearc.profitmap.R;
 import ch.hearc.profitmap.gui.settings.SettingsActivity;
 import ch.hearc.profitmap.gui.training.LiveTrainingActivity;
@@ -25,11 +39,14 @@ import ch.hearc.profitmap.gui.training.fragments.SummaryFragment;
 import ch.hearc.profitmap.gui.training.fragments.SummaryFragment.StatisticsProvider;
 import ch.hearc.profitmap.gui.training.interfaces.TrackInstanceProvider;
 import ch.hearc.profitmap.model.Statistics;
+import ch.hearc.profitmap.model.Statistics.TypeStatistics;
 import ch.hearc.profitmap.model.TrackInstance;
 import ch.hearc.profitmap.model.Tracks;
-import ch.hearc.profitmap.model.Statistics.TypeStatistics;
 
-public class TrackDetailActivity extends FragmentActivity implements ActionBar.TabListener, StatisticsProvider, TrackInstanceProvider
+import com.google.gson.Gson;
+
+public class TrackDetailActivity extends FragmentActivity implements ActionBar.TabListener, StatisticsProvider, TrackInstanceProvider,
+		CreateNdefMessageCallback, OnNdefPushCompleteCallback
 {
 
 	/**
@@ -39,7 +56,7 @@ public class TrackDetailActivity extends FragmentActivity implements ActionBar.T
 	 */
 	private SectionsPagerAdapter mSectionsPagerAdapter;
 	private TrackInstance trackInstance;
-	
+
 	private MapFragment mapFragment;
 
 	/*
@@ -48,26 +65,27 @@ public class TrackDetailActivity extends FragmentActivity implements ActionBar.T
 	private ViewPager mViewPager;
 	private int mTrackId;
 	private int mSport;
+	private NfcAdapter mNfcAdapter;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		
+
 		Bundle params = getIntent().getExtras();
 
 		mTrackId = params.getInt("trackId");
 		mSport = params.getInt("sport");
 		int trackInstanceId = params.getInt("trackInstanceId");
 		Tracks tracks = Tracks.getInstance(mSport);
-		
+
 		Log.i("TDA", "trackId : " + mTrackId);
-		Log.i("TDA","trackInstanceId : " + trackInstanceId);
+		Log.i("TDA", "trackInstanceId : " + trackInstanceId);
 		this.trackInstance = tracks.getTrack(mTrackId).getTrackInstance(trackInstanceId);
-		
+
 		for (Location l : trackInstance.getWaypoints())
 		{
-			Log.i(l.getLatitude() + "",l.getLongitude() + "");
+			Log.i(l.getLatitude() + "", l.getLongitude() + "");
 		}
 		setContentView(R.layout.activity_track_detail);
 
@@ -105,6 +123,13 @@ public class TrackDetailActivity extends FragmentActivity implements ActionBar.T
 			// the TabListener interface, as the callback (listener) for when
 			// this tab is selected.
 			actionBar.addTab(actionBar.newTab().setText(mSectionsPagerAdapter.getPageTitle(i)).setTabListener(this));
+		}
+
+		mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
+		if (mNfcAdapter != null) // NFC available
+		{
+			// Register callback to set NDEF message
+			mNfcAdapter.setNdefPushMessageCallback(this, this);
 		}
 	}
 
@@ -176,7 +201,7 @@ public class TrackDetailActivity extends FragmentActivity implements ActionBar.T
 		@Override
 		public Fragment getItem(int position)
 		{
-			switch(position)
+			switch (position)
 			{
 				case 0:
 					return new SummaryFragment();
@@ -225,9 +250,70 @@ public class TrackDetailActivity extends FragmentActivity implements ActionBar.T
 	{
 		return TypeStatistics.SUMMARY;
 	}
-	
+
 	public TrackInstance getTrackInstance()
 	{
 		return trackInstance;
+	}
+
+	@Override
+	public NdefMessage createNdefMessage(NfcEvent event)
+	{
+		Log.i("NFC", "Sending track via Beam");
+		NdefRecord aar = NdefRecord.createApplicationRecord("ch.hearc.profitmap");
+
+		String json = new Gson().toJson(trackInstance);
+		
+		NdefRecord sportNdef = NdefRecord.createExternal("ch.hearc.profitmap", "sport", intToByteArray(mSport));
+		
+		try
+		{
+			NdefRecord trackInstanceNdef = NdefRecord.createExternal("ch.hearc.profitmap", "trackinstance", compress(json));
+			return new NdefMessage(trackInstanceNdef, sportNdef, aar);
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	// From: http://stackoverflow.com/a/6718707
+	public static byte[] compress(String string) throws IOException
+	{
+		ByteArrayOutputStream os = new ByteArrayOutputStream(string.length());
+		GZIPOutputStream gos = new GZIPOutputStream(os);
+		gos.write(string.getBytes());
+		gos.close();
+		byte[] compressed = os.toByteArray();
+		os.close();
+		return compressed;
+	}
+	
+	// From: http://stackoverflow.com/a/10380460
+	public static byte[] intToByteArray(int myInteger)
+	{
+	    return ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(myInteger).array();
+	}
+
+	@Override
+	public void onNdefPushComplete(NfcEvent event)
+	{
+		Log.i("NFC", "Track sent via Beam");
+		// A handler is needed to send messages to the activity when this
+		// callback occurs, because it happens from a binder thread
+		new Handler()
+		{
+			@Override
+			public void handleMessage(Message msg)
+			{
+				switch (msg.what)
+				{
+					case 1:
+						Toast.makeText(getApplicationContext(), R.string.nfc_track_sent, Toast.LENGTH_LONG).show();
+						break;
+				}
+			}
+		}.obtainMessage(1).sendToTarget();
 	}
 }
