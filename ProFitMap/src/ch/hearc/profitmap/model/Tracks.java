@@ -16,6 +16,7 @@ import java.util.concurrent.Semaphore;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,9 +45,8 @@ public class Tracks implements DropboxListener, DropboxLinkedListener
 		public void onTrackListUpdated();
 	}
 
-	private static final String TAG = "Tracks";
 	private Map<String, Track> tracks;
-	private static Map<Integer, Tracks> instances = null;
+	private static SparseArray<Tracks> instances = null;
 	private DropboxManager mDropbox;
 	private DbxTable mDbxTable;
 	private DbxFileSystem mDbxFs;
@@ -61,7 +61,7 @@ public class Tracks implements DropboxListener, DropboxLinkedListener
 	
 	static
 	{
-		instances = new HashMap<Integer, Tracks>();
+		instances = new SparseArray<Tracks>();
 	}
 
 	private Tracks(int sportId)
@@ -76,14 +76,13 @@ public class Tracks implements DropboxListener, DropboxLinkedListener
 
 	public static synchronized Tracks getInstance(int sport)
 	{
-		if(instances.containsKey(sport))
-			return instances.get(sport);
-		else
+		Tracks tracks = instances.get(sport, null);
+		if(tracks == null)
 		{
-			Tracks tracks = new Tracks(sport);
+			tracks = new Tracks(sport);
 			instances.put(sport, tracks);
-			return tracks;
 		}
+		return tracks;
 	}
 	
 	public void sortTracks(Comparator<Track> comparator)

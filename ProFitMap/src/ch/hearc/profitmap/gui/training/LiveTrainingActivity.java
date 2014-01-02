@@ -22,12 +22,9 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import ch.hearc.profitmap.R;
 import ch.hearc.profitmap.gui.training.fragments.GraphFragment;
 import ch.hearc.profitmap.gui.training.fragments.MapFragment;
@@ -40,9 +37,9 @@ import ch.hearc.profitmap.gui.training.interfaces.TrackInstanceProvider;
 import ch.hearc.profitmap.model.DropboxManager;
 import ch.hearc.profitmap.model.GeoImage;
 import ch.hearc.profitmap.model.Statistics;
+import ch.hearc.profitmap.model.Statistics.TypeStatistics;
 import ch.hearc.profitmap.model.TrackInstance;
 import ch.hearc.profitmap.model.Tracks;
-import ch.hearc.profitmap.model.Statistics.TypeStatistics;
 
 public class LiveTrainingActivity extends FragmentActivity implements
 		ActionBar.TabListener, StatisticsProvider, TrackInstanceProvider {

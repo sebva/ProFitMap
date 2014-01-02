@@ -2,9 +2,7 @@ package ch.hearc.profitmap.gui.training.fragments;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.Random;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -12,11 +10,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
@@ -24,13 +20,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import ch.hearc.profitmap.R;
-import ch.hearc.profitmap.gui.MapElements;
 import ch.hearc.profitmap.gui.ActiveMapElements;
+import ch.hearc.profitmap.gui.MapElements;
 import ch.hearc.profitmap.gui.TrackDetailActivity;
 import ch.hearc.profitmap.gui.training.LiveTrainingActivity;
 import ch.hearc.profitmap.model.TrackInstance;
 
-import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -56,15 +51,6 @@ public class MapFragment extends Fragment {
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
 		parentActivity = activity;
-
-		if (parentActivity instanceof LiveTrainingActivity) {
-			Log.i(getClass().getSimpleName(),"assigning Ti");
-			LiveTrainingActivity lta = (LiveTrainingActivity) parentActivity;
-			//trackInstance = lta.getTrackInstance();
-		} else if (parentActivity instanceof TrackDetailActivity) {
-			TrackDetailActivity tda = (TrackDetailActivity) parentActivity;
-			//trackInstance = tda.getTrackInstance();
-		}
 	}
 
 	@Override

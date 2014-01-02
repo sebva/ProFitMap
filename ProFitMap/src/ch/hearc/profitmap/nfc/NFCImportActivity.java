@@ -38,9 +38,6 @@ public class NFCImportActivity extends Activity
 		setIntent(intent);
 	}
 
-	/**
-	 * Parses the NDEF Message from the intent and prints to the TextView
-	 */
 	private void processIntent(Intent intent)
 	{
 		Log.i("NFC", "Processing track received via Beam");

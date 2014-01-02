@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     
-    <item android:id="@+id/action_takepic" android:showAsAction="ifRoom" android:title="@string/takepic" android:icon="@drawable/ic_action_photo"></item><item android:id="@+id/action_startrec" android:showAsAction="always" android:title="@string/start" android:icon="@drawable/ic_action_start" android:visible="false"></item><item android:id="@+id/action_pause" android:showAsAction="always" android:title="@string/pause" android:icon="@drawable/ic_action_pause" android:visible="true"></item><item android:id="@+id/action_stoprec" android:showAsAction="always" android:title="@string/stop" android:icon="@drawable/ic_action_stop"></item>
+    <item android:id="@+id/action_takepic" android:showAsAction="ifRoom" android:title="@string/takepic" android:icon="@drawable/ic_action_photo"></item><item android:id="@+id/action_startrec" android:showAsAction="ifRoom" android:title="@string/start" android:icon="@drawable/ic_action_start" android:visible="false"></item><item android:id="@+id/action_pause" android:showAsAction="ifRoom" android:title="@string/pause" android:icon="@drawable/ic_action_pause" android:visible="true"></item><item android:id="@+id/action_stoprec" android:showAsAction="always" android:title="@string/stop" android:icon="@drawable/ic_action_stop"></item>
     
     
     

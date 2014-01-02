@@ -152,7 +152,7 @@ public class EndTrainingActivity extends FragmentActivity implements StatisticsP
 				NavUtils.navigateUpFromSameTask(this);
 				return true;
 			case R.id.action_dismiss_training:
-				new AlertDialog.Builder(this).setTitle(R.string.dismiss_training).setPositiveButton(R.string.dismiss_training, new OnClickListener()
+				new AlertDialog.Builder(this).setTitle(R.string.dismiss_training).setMessage(R.string.dismiss_training_message).setPositiveButton(R.string.dismiss_training, new OnClickListener()
 				{
 					
 					@Override

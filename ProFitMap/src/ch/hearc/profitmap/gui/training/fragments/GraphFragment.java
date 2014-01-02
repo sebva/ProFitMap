@@ -1,23 +1,19 @@
 package ch.hearc.profitmap.gui.training.fragments;
 
-import javax.microedition.khronos.opengles.GL;
-
-import com.jjoe64.graphview.GraphView.*;
-import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.GraphViewSeries;
-import com.jjoe64.graphview.LineGraphView;
-
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.GridLayout;
 import android.widget.LinearLayout;
 import ch.hearc.profitmap.R;
 import ch.hearc.profitmap.gui.training.interfaces.TrackInstanceProvider;
 import ch.hearc.profitmap.model.TrackInstance;
+
+import com.jjoe64.graphview.GraphView.GraphViewData;
+import com.jjoe64.graphview.GraphViewSeries;
+import com.jjoe64.graphview.LineGraphView;
 
 public class GraphFragment extends Fragment {
 	/**
@@ -41,7 +37,7 @@ public class GraphFragment extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		View rootView = inflater.inflate(R.layout.fragment_live_training_graph,
+		View rootView = inflater.inflate(R.layout.fragment_graph,
 				container, false);
 		
 		System.out.println("oCV Graph");

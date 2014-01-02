@@ -20,7 +20,6 @@ import com.dropbox.sync.android.DbxPath;
 public class Track implements Comparable<Track>
 {
 	private String name;
-	private double length;
 	protected List<TrackInstance> trackInstances;
 	private Tracks mTracks;
 	private String mDropboxId;

@@ -15,11 +15,8 @@ import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
 import android.nfc.NfcAdapter.CreateNdefMessageCallback;
-import android.nfc.NfcAdapter.OnNdefPushCompleteCallback;
 import android.nfc.NfcEvent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -29,7 +26,6 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 import ch.hearc.profitmap.R;
 import ch.hearc.profitmap.gui.settings.SettingsActivity;
 import ch.hearc.profitmap.gui.training.LiveTrainingActivity;
@@ -46,7 +42,7 @@ import ch.hearc.profitmap.model.Tracks;
 import com.google.gson.Gson;
 
 public class TrackDetailActivity extends FragmentActivity implements ActionBar.TabListener, StatisticsProvider, TrackInstanceProvider,
-		CreateNdefMessageCallback, OnNdefPushCompleteCallback
+		CreateNdefMessageCallback
 {
 
 	/**
@@ -294,26 +290,5 @@ public class TrackDetailActivity extends FragmentActivity implements ActionBar.T
 	public static byte[] intToByteArray(int myInteger)
 	{
 	    return ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(myInteger).array();
-	}
-
-	@Override
-	public void onNdefPushComplete(NfcEvent event)
-	{
-		Log.i("NFC", "Track sent via Beam");
-		// A handler is needed to send messages to the activity when this
-		// callback occurs, because it happens from a binder thread
-		new Handler()
-		{
-			@Override
-			public void handleMessage(Message msg)
-			{
-				switch (msg.what)
-				{
-					case 1:
-						Toast.makeText(getApplicationContext(), R.string.nfc_track_sent, Toast.LENGTH_LONG).show();
-						break;
-				}
-			}
-		}.obtainMessage(1).sendToTarget();
 	}
 }

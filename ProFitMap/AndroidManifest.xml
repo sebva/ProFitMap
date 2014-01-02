@@ -51,13 +51,6 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <!-- Our services -->
-        <service
-            android:name="ch.hearc.profitmap.LocationTrackService"
-            android:enabled="true"
-            android:exported="false" >
-        </service>
-
         <!-- Dropbox related -->
         <activity android:name="com.dropbox.sync.android.DbxAuthActivity" />
         <activity

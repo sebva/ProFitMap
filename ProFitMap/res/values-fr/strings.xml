@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2013 The Android Open Source Project
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+
+
+
+-->
+
+<resources>
+
+    <string name="running">Course à pied</string>
+    <string name="biking">Vélo</string>
+    <string name="skiing">Ski</string>
+    <string name="kayaking">Kayak</string>
+    <string name="drawer_open">Ouvrir le menu de navigation</string>
+    <string name="drawer_close">Fermer le menu de navigation</string>
+
+    <string name="action_settings">Settings</string>
+
+    <string-array name="sort_modes">
+        <item>Nom</item>
+        <item>Date</item>
+        <item>Distance</item>
+    </string-array>
+
+    <string name="takepic">Prendre une photo</string>
+    <string name="summary_section">Sommaire</string>
+    <string name="map_section">Carte</string>
+    <string name="graph_section">Graphes</string>
+    <string name="title_activity_live_training">Entraînement</string>
+    <string name="start">Démarrer</string>
+    <string name="stop">Arrêter</string>
+    <string name="pause">Pause</string>
+    <string name="unlink_dropbox">Dissocier Dropbox</string>
+    <string name="dropbox_connected">Votre compte Dropbox a été lié avec succès !</string>
+    <string name="dropbox_error">Impossible de lier votre compte Dropbox. Veuillez réessayer.</string>
+    <string name="start_training">Démarrer l\'entraînement</string>
+    <string name="title_activity_end_training">Sauvegarde de l\'entraînement</string>
+    <string name="save_activity">Sauvegarder l\'entraînement</string>
+    <string name="dismiss_training">Abandonner l\'entraînement</string>
+    <string name="dismiss_training_message">Vous êtes sur le point de supprimer l\'entraînement courant. Est-ce bien ce que vous souahaitez faire ?</string>
+    <string name="title_activity_track_detail">Détails de l\'entraînement</string>
+    <string name="title_activity_stats_order">Ordre des informations par sport</string>
+    <string name="rating">Note</string>
+    <string name="track_length">Distance</string>
+    <string name="track_duration">Durée</string>
+    <string name="track_ascent">Dénivelé positif</string>
+    <string name="track_descent">Dénivelé négatif</string>
+    <string name="track_start_time">Heure de départ</string>
+    <string name="track_end_time">Heure d\'arrivée</string>
+    <string name="track_average_speed">Vitesse moyenne</string>
+    <string name="track_max_speed">Vitesse maximale</string>
+    <string name="track_total_pause_time">Temps de pause total</string>
+    <string name="track_number_of_pauses">Nombres de pauses</string>
+    <string name="track_km_effort">Kilometrès-effort</string>
+    <string name="start_ghost">Démarrer un fantôme</string>
+    <string name="track_not_ready">Cet entraînement n\'a pas encore été rapatrié depuis le Cloud. Veuillez réessayer plus tard</string>
+    <string name="title_activity_nfcimport">Importer un entraînement</string>
+
+</resources>

@@ -34,7 +34,6 @@
         android:layout_alignRight="@+id/imageView"
         android:background="#ae000000"
         android:gravity="center_horizontal"
-        android:text="Text"
         android:textColor="@android:color/primary_text_dark" />
 
 </RelativeLayout>

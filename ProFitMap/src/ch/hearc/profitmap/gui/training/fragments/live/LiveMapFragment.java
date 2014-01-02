@@ -4,13 +4,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesClient;
-import com.google.android.gms.location.LocationClient;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.LatLng;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.location.Location;
@@ -21,7 +14,13 @@ import android.os.SystemClock;
 import android.util.Log;
 import ch.hearc.profitmap.gui.training.LiveTrainingActivity;
 import ch.hearc.profitmap.gui.training.fragments.MapFragment;
-import ch.hearc.profitmap.model.TrackInstance;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesClient;
+import com.google.android.gms.location.LocationClient;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.LatLng;
 
 public class LiveMapFragment extends MapFragment implements com.google.android.gms.location.LocationListener,
 GooglePlayServicesClient.ConnectionCallbacks,
@@ -35,8 +34,6 @@ GooglePlayServicesClient.OnConnectionFailedListener
 
 	private LocationClient mLocationClient;
 	private LocationRequest mLocationRequest;
-	
-	private RealLocationListener realLocationListener;
 
 	private FakeLocationListener fakeLocationListener;
 	
@@ -232,58 +229,6 @@ GooglePlayServicesClient.OnConnectionFailedListener
 			i++;
 		}
 	}
-	private void setupGPS()
-	{// Acquire a reference to the system Location
-		// Manager
-		LocationManager locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-
-		// Define a listener that responds to location updates
-		realLocationListener = new RealLocationListener();
-
-		// Register the listener with the Location Manager to receive location
-		// updates
-		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, realLocationListener);
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, realLocationListener);
-	}
-
-	private class RealLocationListener implements LocationListener
-	{
-		@Override
-		public void onLocationChanged(Location location)
-		{
-
-			if (!((LiveTrainingActivity) parentActivity).isPaused && trackInstance != null) {
-				mapElements.addPointAndRefreshPolyline(new LatLng(location.getLatitude(), location.getLongitude()));
-				trackInstance.addWaypoint(location);
-				((LiveTrainingActivity) parentActivity).refreshStatsPanel();
-			}
-			mapElements.start(new LatLng(location.getLatitude(), location.getLongitude()));
-
-		}
-
-		@Override
-		public void onProviderDisabled(String provider)
-		{
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public void onProviderEnabled(String provider)
-		{
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public void onStatusChanged(String provider, int status, Bundle extras)
-		{
-			// TODO Auto-generated method stub
-
-		}
-	}
-
-
 
 	@Override
 	public void onConnectionFailed(ConnectionResult result) {
