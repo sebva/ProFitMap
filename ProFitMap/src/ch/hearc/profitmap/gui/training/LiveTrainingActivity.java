@@ -29,11 +29,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import ch.hearc.profitmap.R;
+import ch.hearc.profitmap.gui.training.fragments.GraphFragment;
 import ch.hearc.profitmap.gui.training.fragments.MapFragment;
 import ch.hearc.profitmap.gui.training.fragments.SummaryFragment;
 import ch.hearc.profitmap.gui.training.fragments.SummaryFragment.StatisticsProvider;
+import ch.hearc.profitmap.gui.training.fragments.live.LiveGraphFragment;
 import ch.hearc.profitmap.gui.training.fragments.live.LiveMapFragment;
 import ch.hearc.profitmap.gui.training.fragments.live.LiveStatsFragment;
+import ch.hearc.profitmap.gui.training.interfaces.TrackInstanceProvider;
 import ch.hearc.profitmap.model.DropboxManager;
 import ch.hearc.profitmap.model.GeoImage;
 import ch.hearc.profitmap.model.Statistics;
@@ -42,7 +45,7 @@ import ch.hearc.profitmap.model.Tracks;
 import ch.hearc.profitmap.model.Statistics.TypeStatistics;
 
 public class LiveTrainingActivity extends FragmentActivity implements
-		ActionBar.TabListener, StatisticsProvider {
+		ActionBar.TabListener, StatisticsProvider, TrackInstanceProvider {
 
 	/**
 	 * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -64,6 +67,7 @@ public class LiveTrainingActivity extends FragmentActivity implements
 
 	private MapFragment liveMapFragment;
 	private SummaryFragment liveStatsFragment;
+	private GraphFragment liveGraphFragment;
 
 	private Uri mCapturedImageURI;
 
@@ -150,7 +154,6 @@ public class LiveTrainingActivity extends FragmentActivity implements
 	protected void onActivityResult(int arg0, int arg1, Intent intent) {
 		LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		Location l = lm.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER); // Fake GPS provider
-
 		String[] projection = { MediaStore.Images.Media.DATA };
 		Cursor cursor = getApplicationContext().getContentResolver().query(
 				mCapturedImageURI, projection, null, null, null);
@@ -167,7 +170,7 @@ public class LiveTrainingActivity extends FragmentActivity implements
 		liveMapFragment.addPicMarkerToLocation(l, capturedImageFilePath,
 				orientation);
 
-		Log.i("Result i :", "" + l.toString() + capturedImageFilePath);
+		Log.i("Result i :", "" + l.toString() + capturedImageFilePath + " " + mCapturedImageURI);
 		super.onActivityResult(arg0, arg1, intent);
 	}
 
@@ -266,6 +269,7 @@ public class LiveTrainingActivity extends FragmentActivity implements
 	 */
 	public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
+
 		public SectionsPagerAdapter(FragmentManager fm) {
 			super(fm);
 		}
@@ -279,6 +283,8 @@ public class LiveTrainingActivity extends FragmentActivity implements
 				liveStatsFragment = (SummaryFragment) fragment;
 			else if (fragment instanceof LiveMapFragment)
 				liveMapFragment = (MapFragment) fragment;
+			else if (fragment instanceof LiveGraphFragment)
+				liveGraphFragment = (GraphFragment) fragment;
 			return fragment;
 		}
 
@@ -293,10 +299,8 @@ public class LiveTrainingActivity extends FragmentActivity implements
 				fragment = new LiveStatsFragment();
 				liveStatsFragment = (SummaryFragment) fragment;
 			} else {
-				fragment = new DummySectionFragment(); // TODO Graph Fragment
-				Bundle args = new Bundle();
-				args.putInt("pos", position + 1);
-				fragment.setArguments(args);
+				fragment = new LiveGraphFragment();
+				liveGraphFragment = (LiveGraphFragment) fragment;
 			}
 			fragment.setRetainInstance(true);
 			return fragment;
@@ -323,7 +327,7 @@ public class LiveTrainingActivity extends FragmentActivity implements
 		}
 	}
 
-	public static class DummySectionFragment extends Fragment {
+	/*public static class DummySectionFragment extends Fragment {
 		public static final String ARG_SECTION_NUMBER = "section_number";
 
 		public DummySectionFragment() {
@@ -340,7 +344,7 @@ public class LiveTrainingActivity extends FragmentActivity implements
 					ARG_SECTION_NUMBER)));
 			return rootView;
 		}
-	}
+	}*/
 
 	public TrackInstance getTrackInstance() {
 		return trackInstance;
@@ -367,6 +371,10 @@ public class LiveTrainingActivity extends FragmentActivity implements
 			lsf.refreshPanel();
 		else
 			Log.i("LTA", "lsf null");
+	}
+
+	public void addDataToGraph() {
+		((LiveGraphFragment)liveGraphFragment).refreshGraphs();
 	}
 
 }

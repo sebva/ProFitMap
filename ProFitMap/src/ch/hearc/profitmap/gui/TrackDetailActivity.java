@@ -23,12 +23,13 @@ import ch.hearc.profitmap.gui.training.fragments.GraphFragment;
 import ch.hearc.profitmap.gui.training.fragments.MapFragment;
 import ch.hearc.profitmap.gui.training.fragments.SummaryFragment;
 import ch.hearc.profitmap.gui.training.fragments.SummaryFragment.StatisticsProvider;
+import ch.hearc.profitmap.gui.training.interfaces.TrackInstanceProvider;
 import ch.hearc.profitmap.model.Statistics;
 import ch.hearc.profitmap.model.TrackInstance;
 import ch.hearc.profitmap.model.Tracks;
 import ch.hearc.profitmap.model.Statistics.TypeStatistics;
 
-public class TrackDetailActivity extends FragmentActivity implements ActionBar.TabListener, StatisticsProvider
+public class TrackDetailActivity extends FragmentActivity implements ActionBar.TabListener, StatisticsProvider, TrackInstanceProvider
 {
 
 	/**

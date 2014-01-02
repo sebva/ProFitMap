@@ -51,14 +51,15 @@ GooglePlayServicesClient.OnConnectionFailedListener
 	public void onDestroy() {
 		// TODO Auto-generated method stub
 		super.onDestroy();
+		Log.i("LMF", "Destroyed");
+		lm.removeUpdates(fakeLocationListener);
+		mLocationClient.disconnect();
 	}
 	
 	@Override
 	public void onStop() {
 		// TODO Auto-generated method stub
 		super.onStop();
-		lm.removeUpdates(fakeLocationListener);
-		mLocationClient.disconnect();
 	}
 	
 	@Override
@@ -179,6 +180,7 @@ GooglePlayServicesClient.OnConnectionFailedListener
 				trackInstance.addWaypoint(location);
 				Log.i("Stats", trackInstance.getStatistics().toString());
 				((LiveTrainingActivity) parentActivity).refreshStatsPanel();
+				((LiveTrainingActivity) parentActivity).addDataToGraph();
 		}
 
 		@Override
@@ -308,6 +310,7 @@ GooglePlayServicesClient.OnConnectionFailedListener
 			mapElements.addPointAndRefreshPolyline(new LatLng(location.getLatitude(), location.getLongitude()));
 			trackInstance.addWaypoint(location);
 			((LiveTrainingActivity) parentActivity).refreshStatsPanel();
+			((LiveTrainingActivity) parentActivity).addDataToGraph();
 		}
 		mapElements.start(new LatLng(location.getLatitude(), location.getLongitude()));
 

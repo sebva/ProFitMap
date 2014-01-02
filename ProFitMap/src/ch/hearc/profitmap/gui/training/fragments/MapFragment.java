@@ -158,8 +158,7 @@ public class MapFragment extends Fragment {
 	public boolean addPicMarkerToLocation(Location loc, String filePath,
 			int orientation) {
 		if (mapElements != null) {
-			MarkerOptions mo = new MarkerOptions().position(new LatLng(loc
-					.getLatitude(), loc.getLongitude()));
+			MarkerOptions mo = new MarkerOptions().position(MapElements.NEUCH_LOC);
 			mo.title(filePath);
 
 			Log.i("fp", filePath);
@@ -226,11 +225,9 @@ public class MapFragment extends Fragment {
 
 	protected void addWaypoints() {
 		if (trackInstance != null) {
-			Log.i(this.getClass().getSimpleName(),
-					"addWaypoints:trackInstance not null");
 			if (trackInstance.getWaypoints().size() != 0) {
 				for (Location l : trackInstance.getWaypoints()) {
-					Log.i("mapF", "Adding waypoint");
+					//Log.i("mapF", "Adding waypoint");
 					mapElements.start(new LatLng(l.getLatitude(), l
 							.getLongitude()));
 					mapElements.addPointAndRefreshPolyline(new LatLng(l
@@ -241,7 +238,7 @@ public class MapFragment extends Fragment {
 				mapElements.end(new LatLng(l.getLatitude(), l.getLongitude()));
 			}
 		}
-		Log.i(this.getClass().getSimpleName(),
-				"addWaypoints:trackInstance null");
+		//Log.i(this.getClass().getSimpleName(),
+		//		"addWaypoints:trackInstance null");
 	}
 }

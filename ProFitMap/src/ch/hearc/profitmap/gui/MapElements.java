@@ -61,8 +61,8 @@ public class MapElements {
 			pl.remove();
 		}
 		pl = map.addPolyline(plo);
-		Log.i("MapElements", "Added point " + loc.latitude + ", "
-				+ loc.longitude);
+		/*Log.i("MapElements", "Added point " + loc.latitude + ", "
+				+ loc.longitude);*/
 	}
 
 	public void start(LatLng startPosition) {
