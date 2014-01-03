@@ -71,11 +71,15 @@ public class LiveTrainingActivity extends FragmentActivity implements
 	private Menu menu;
 
 	private TrackInstance trackInstance;
-	
+
 	private int mSport;
 
 	private int mTrackId;
+	
+	private int mGhostTrackInstanceId;
 
+	private boolean mHasGhost;
+	
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
@@ -150,7 +154,9 @@ public class LiveTrainingActivity extends FragmentActivity implements
 	@Override
 	protected void onActivityResult(int arg0, int arg1, Intent intent) {
 		LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		Location l = lm.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER); // Fake GPS provider
+		Location l = lm.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER); // Fake
+																				// GPS
+																				// provider
 		String[] projection = { MediaStore.Images.Media.DATA };
 		Cursor cursor = getApplicationContext().getContentResolver().query(
 				mCapturedImageURI, projection, null, null, null);
@@ -158,37 +164,45 @@ public class LiveTrainingActivity extends FragmentActivity implements
 				.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
 		cursor.moveToFirst();
 		String capturedImageFilePath = cursor.getString(column_index_data);
-		
-		GeoImage geoImage = new GeoImage(DropboxManager.getInstance().copyPictureToDropbox(this, mCapturedImageURI), l);
-		
+
+		GeoImage geoImage = new GeoImage(DropboxManager.getInstance()
+				.copyPictureToDropbox(this, mCapturedImageURI), l);
+
 		trackInstance.addImage(geoImage);
-		
+
 		int orientation = 0; // TODO : change to correct orientation
 		liveMapFragment.addPicMarkerToLocation(l, capturedImageFilePath,
 				orientation);
 
-		Log.i("Result i :", "" + l.toString() + capturedImageFilePath + " " + mCapturedImageURI);
+		Log.i("Result i :", "" + l.toString() + capturedImageFilePath + " "
+				+ mCapturedImageURI);
 		super.onActivityResult(arg0, arg1, intent);
 	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		if (savedInstanceState == null) {
+			Log.i("onC", "No bundle");
 			mSport = getIntent().getIntExtra("sport", 0);
 			mTrackId = getIntent().getIntExtra("trackId", -1);
+			
+			mHasGhost = getIntent().getBooleanExtra("hasGhost", false);
+			mGhostTrackInstanceId = getIntent().getIntExtra("ghostTrackInstanceId", 0);
 			
 			trackInstance = new TrackInstance();
 			Tracks.currentTrackInstance = trackInstance;
 		} else {
 			Log.i(getClass().getSimpleName(), "Restoring bundle");
-			
+
 			mSport = savedInstanceState.getInt("sport", 0);
 			mTrackId = savedInstanceState.getInt("trackId", -1);
+			
+			mHasGhost = getIntent().getBooleanExtra("hasGhost", false);
+			mGhostTrackInstanceId = getIntent().getIntExtra("ghostTrackInstanceId", 0);
 			trackInstance = Tracks.currentTrackInstance;
 		}
-		Log.i("onC", "creat");
 
 		setContentView(R.layout.activity_live_training);
 
@@ -266,7 +280,6 @@ public class LiveTrainingActivity extends FragmentActivity implements
 	 */
 	public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
-
 		public SectionsPagerAdapter(FragmentManager fm) {
 			super(fm);
 		}
@@ -324,40 +337,49 @@ public class LiveTrainingActivity extends FragmentActivity implements
 		}
 	}
 
-	/*public static class DummySectionFragment extends Fragment {
-		public static final String ARG_SECTION_NUMBER = "section_number";
-
-		public DummySectionFragment() {
-		}
-
-		@Override
-		public View onCreateView(LayoutInflater inflater, ViewGroup container,
-				Bundle savedInstanceState) {
-			View rootView = inflater.inflate(
-					R.layout.fragment_live_training_dummy, container, false);
-			TextView dummyTextView = (TextView) rootView
-					.findViewById(R.id.section_label);
-			dummyTextView.setText(Integer.toString(getArguments().getInt(
-					ARG_SECTION_NUMBER)));
-			return rootView;
-		}
-	}*/
+	/*
+	 * public static class DummySectionFragment extends Fragment { public static
+	 * final String ARG_SECTION_NUMBER = "section_number";
+	 * 
+	 * public DummySectionFragment() { }
+	 * 
+	 * @Override public View onCreateView(LayoutInflater inflater, ViewGroup
+	 * container, Bundle savedInstanceState) { View rootView = inflater.inflate(
+	 * R.layout.fragment_live_training_dummy, container, false); TextView
+	 * dummyTextView = (TextView) rootView .findViewById(R.id.section_label);
+	 * dummyTextView.setText(Integer.toString(getArguments().getInt(
+	 * ARG_SECTION_NUMBER))); return rootView; } }
+	 */
 
 	public TrackInstance getTrackInstance() {
 		return trackInstance;
 	}
+	
+	public boolean getHasGhost()
+	{
+		return mHasGhost;
+	}
+	
+	public int getGhostTrackInstanceId()
+	{
+		return mGhostTrackInstanceId;
+	}
+	
+	public int getTrackId()
+	{
+		return mTrackId;
+	}
 
 	@Override
 	public Statistics getStatistics() {
-		if(trackInstance != null)
+		if (trackInstance != null)
 			return trackInstance.getStatistics();
 		else
 			return null;
 	}
-	
+
 	@Override
-	public TypeStatistics getTypeStatistics()
-	{
+	public TypeStatistics getTypeStatistics() {
 		return TypeStatistics.LIVE;
 	}
 
@@ -370,8 +392,13 @@ public class LiveTrainingActivity extends FragmentActivity implements
 			Log.i("LTA", "lsf null");
 	}
 
-	public void addDataToGraph() {
-		((LiveGraphFragment)liveGraphFragment).refreshGraphs();
+	public void refreshGraphPanel() {
+		LiveGraphFragment lgf = (LiveGraphFragment) liveGraphFragment;
+
+		if (lgf != null)
+			lgf.refreshGraphs();
+		else
+			Log.i("LTA", "lgf null");
 	}
 
 }

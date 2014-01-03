@@ -61,6 +61,7 @@ public class TrackDetailActivity extends FragmentActivity implements ActionBar.T
 	private ViewPager mViewPager;
 	private int mTrackId;
 	private int mSport;
+	private int mTrackInstanceId;
 	private NfcAdapter mNfcAdapter;
 
 	@Override
@@ -72,12 +73,10 @@ public class TrackDetailActivity extends FragmentActivity implements ActionBar.T
 
 		mTrackId = params.getInt("trackId");
 		mSport = params.getInt("sport");
-		int trackInstanceId = params.getInt("trackInstanceId");
+		mTrackInstanceId = params.getInt("trackInstanceId");
 		Tracks tracks = Tracks.getInstance(mSport);
 
-		Log.i("TDA", "trackId : " + mTrackId);
-		Log.i("TDA", "trackInstanceId : " + trackInstanceId);
-		this.trackInstance = tracks.getTrack(mTrackId).getTrackInstance(trackInstanceId);
+		this.trackInstance = tracks.getTrack(mTrackId).getTrackInstance(mTrackInstanceId);
 
 		for (Location l : trackInstance.getWaypoints())
 		{
@@ -159,6 +158,9 @@ public class TrackDetailActivity extends FragmentActivity implements ActionBar.T
 				Intent intent = new Intent(this, LiveTrainingActivity.class);
 				intent.putExtra("sport", mSport);
 				intent.putExtra("trackId", mTrackId);
+				intent.putExtra("ghostTrackInstanceId", mTrackInstanceId);
+				intent.putExtra("hasGhost", true);
+
 				startActivity(intent);
 				break;
 		}

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Random;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
@@ -27,6 +28,7 @@ GooglePlayServicesClient.ConnectionCallbacks,
 GooglePlayServicesClient.OnConnectionFailedListener
 {
 
+	LiveTrainingActivity parentActivity;
 	
 	List<Location> waypoints = new LinkedList<Location>();
 
@@ -36,6 +38,13 @@ GooglePlayServicesClient.OnConnectionFailedListener
 	private LocationRequest mLocationRequest;
 
 	private FakeLocationListener fakeLocationListener;
+	
+	@Override
+	public void onAttach(Activity activity) {
+		// TODO Auto-generated method stub
+		super.onAttach(activity);
+		parentActivity = (LiveTrainingActivity)activity;
+	}
 	
 	@Override
 	public void onDestroyView() {
@@ -79,7 +88,7 @@ GooglePlayServicesClient.OnConnectionFailedListener
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         // Set the interval ceiling to one minute
-        mLocationRequest.setFastestInterval(5000);
+        //mLocationRequest.setFastestInterval(5000);
 
         // Get an editor
 
@@ -97,8 +106,21 @@ GooglePlayServicesClient.OnConnectionFailedListener
 		Log.i("LiveMapFragment", "onRes before");
 
 		super.onResume();
+		
+		if (parentActivity != null) {
+			if (parentActivity.getHasGhost())
+			{
+				Log.i("LMF", "has ghost");
+				Log.i("LMF", "gtid" + parentActivity.getGhostTrackInstanceId());
+			}
+			else 
+			{
+				System.out.println("no ghost");
+			}
+		}
+		else Log.i("LMF", "no Act");
+		
 		setupFakeGPS();
-		//setupGPS();
 	}
 
 	@Override
@@ -143,7 +165,8 @@ GooglePlayServicesClient.OnConnectionFailedListener
 				Location loc = new Location("Test");
 				loc.setLatitude(l.latitude);
 				loc.setLongitude(l.longitude);
-				loc.setAltitude(0);
+				loc.setAltitude(getRndDb());
+				loc.setSpeed((float)getRndDb());
 				loc.setAccuracy(1);
 				loc.setTime(System.currentTimeMillis());
 				loc.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
@@ -175,9 +198,9 @@ GooglePlayServicesClient.OnConnectionFailedListener
 			if (!((LiveTrainingActivity) parentActivity).isPaused)
 				mapElements.addPointAndRefreshPolyline(new LatLng(location.getLatitude(), location.getLongitude()));
 				trackInstance.addWaypoint(location);
-				Log.i("Stats", trackInstance.getStatistics().toString());
+
 				((LiveTrainingActivity) parentActivity).refreshStatsPanel();
-				((LiveTrainingActivity) parentActivity).addDataToGraph();
+				((LiveTrainingActivity) parentActivity).refreshGraphPanel();
 		}
 
 		@Override
@@ -202,7 +225,11 @@ GooglePlayServicesClient.OnConnectionFailedListener
 		}
 	}
 
-
+	public double getRndDb()
+	{
+		return Math.ceil(new Random().nextDouble()*100 + 100);
+	}
+	
 
 	@SuppressLint("NewApi")
 	public void fakeMapClick(LatLng l, LocationManager lm)
@@ -212,7 +239,9 @@ GooglePlayServicesClient.OnConnectionFailedListener
 		Location loc = new Location("Test");
 		loc.setLatitude(l.latitude);
 		loc.setLongitude(l.longitude);
-		loc.setAltitude(0);
+		loc.setAltitude(getRndDb());
+		loc.setSpeed((float)getRndDb());
+		System.out.println(loc.getAltitude() + " : " + loc.getSpeed());
 		loc.setAccuracy(1);
 		loc.setTime(System.currentTimeMillis());
 		loc.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
@@ -254,8 +283,9 @@ GooglePlayServicesClient.OnConnectionFailedListener
 		if (!((LiveTrainingActivity) parentActivity).isPaused && trackInstance != null) {
 			mapElements.addPointAndRefreshPolyline(new LatLng(location.getLatitude(), location.getLongitude()));
 			trackInstance.addWaypoint(location);
+			System.out.println(location.getAltitude());
 			((LiveTrainingActivity) parentActivity).refreshStatsPanel();
-			((LiveTrainingActivity) parentActivity).addDataToGraph();
+			((LiveTrainingActivity) parentActivity).refreshGraphPanel();
 		}
 		mapElements.start(new LatLng(location.getLatitude(), location.getLongitude()));
 

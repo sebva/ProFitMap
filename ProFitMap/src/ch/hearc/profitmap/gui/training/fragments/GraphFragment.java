@@ -1,5 +1,6 @@
 package ch.hearc.profitmap.gui.training.fragments;
 
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -39,29 +40,29 @@ public class GraphFragment extends Fragment {
 			Bundle savedInstanceState) {
 		View rootView = inflater.inflate(R.layout.fragment_graph,
 				container, false);
-		
+
 		System.out.println("oCV Graph");
 
 		mTrackInstance = ((TrackInstanceProvider) getActivity())
 				.getTrackInstance();
 
 		createAndAddGraphsToFragment(rootView);
-		
+
 		return rootView;
 	}
 
 	protected void createAndAddGraphsToFragment(View rootView) {
-		altitudeSeries = new GraphViewSeries(
-				new GraphViewData[] { });
+		altitudeSeries = new GraphViewSeries(new GraphViewData[] {});
 
-		speedSeries = new GraphViewSeries(
-				new GraphViewData[] { });
-		
-		for (int i=0; i < mTrackInstance.getWaypoints().size() ; i++)
-		{
+		speedSeries = new GraphViewSeries(new GraphViewData[] {});
+
+		for (int i = 0; i < mTrackInstance.getWaypoints().size(); i++) {
 			Location location = mTrackInstance.getWaypoints().get(i);
-			altitudeSeries.appendData(new GraphViewData(i+1,location.getAltitude()), true, 1000);
-			speedSeries.appendData(new GraphViewData(i+1,location.getSpeed()), true, 1000);
+			altitudeSeries.appendData(
+					new GraphViewData(i + 1, location.getAltitude()), true,
+					1000);
+			speedSeries.appendData(
+					new GraphViewData(i + 1, location.getSpeed()), true, 1000);
 		}
 
 		altitudeGraphView = new LineGraphView(rootView.getContext() // context
@@ -70,9 +71,22 @@ public class GraphFragment extends Fragment {
 		speedGraphView = new LineGraphView(rootView.getContext() // context
 				, "Speed" // heading
 		);
-		
+
 		speedGraphView.addSeries(speedSeries); // data
 		altitudeGraphView.addSeries(altitudeSeries); // data
+
+		speedGraphView.getGraphViewStyle().setNumVerticalLabels(5);
+		speedGraphView.getGraphViewStyle().setNumHorizontalLabels(5);
+		
+		altitudeGraphView.getGraphViewStyle().setNumVerticalLabels(5);
+		altitudeGraphView.getGraphViewStyle().setNumHorizontalLabels(5);
+		((LineGraphView)altitudeGraphView).setDrawBackground(true);
+		
+		/* Useful funcs
+		 * // set view port, start=2, size=10 graphView.setViewPort(2, 10);
+		 * graphView.setScalable(true); // set manual Y axis bounds
+		 * graphView.setManualYAxisBounds(2, -1);
+		 */
 
 		LinearLayout layout1 = (LinearLayout) rootView
 				.findViewById(R.id.graph1);
