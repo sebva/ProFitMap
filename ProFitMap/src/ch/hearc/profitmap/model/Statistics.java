@@ -18,8 +18,7 @@ import android.widget.ListAdapter;
 import android.widget.TextView;
 import ch.hearc.profitmap.R;
 
-public class Statistics
-{
+public class Statistics {
 	/**
 	 * Length in meters
 	 */
@@ -36,139 +35,148 @@ public class Statistics
 	private TrackInstance trackInstance;
 	private transient Location lastLocation;
 
-	public enum TypeStatistics
-	{
-		LIVE, END, SUMMARY;
-		
-		public int[] getShownStats()
-		{
-			switch(this)
-			{
-				case END:
-					return new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11 };
-				case LIVE:
-					return new int[] { 0, 1, 2, 3, 4, 6, 7, 8, 9, 11 };
-				default:
-				case SUMMARY:
-					return new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
+	public enum TypeStatistics {
+		LIVE, END, SUMMARY, LIVE_GHOST;
+
+		public int[] getShownStats() {
+			switch (this) {
+			/*
+			 * case LIVE_GHOST: break;
+			 */
+			case END:
+				return new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11 };
+			case LIVE:
+				return new int[] { 0, 1, 2, 3, 4, 6, 7, 8, 9, 11 };
+			default:
+			case SUMMARY:
+				return new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
 			}
 		}
 	}
-	
-	public Statistics(TrackInstance track)
-	{
+
+	public Statistics(TrackInstance track) {
 		this.trackInstance = track;
 	}
 
 	@SuppressLint("NewApi")
-	public void computeStatistics()
-	{
+	public void computeStatistics() {
 		length = ascent = descent = averageSpeed = maxSpeed = duration = 0;
-		if(trackInstance.getWaypoints().size() == 0)
+		if (trackInstance.getWaypoints().size() == 0)
 			return;
-		
+
 		Location previous = trackInstance.getWaypoints().get(0);
-		for(Location l : trackInstance.getWaypoints())
-		{
+		for (Location l : trackInstance.getWaypoints()) {
 			length += previous.distanceTo(l);
 			double deniv = l.getAltitude() - previous.getAltitude();
-			if(deniv >= 0)
+			if (deniv >= 0)
 				ascent += deniv;
 			else
 				descent -= deniv;
-			
+
 			float speed = l.getSpeed();
-			if(speed > maxSpeed)
+			if (speed > maxSpeed)
 				maxSpeed = speed;
-			
+
 			previous = l;
 		}
-		
+
 		// Better precision, but only since Jelly Bean
-		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)
-			duration = (previous.getElapsedRealtimeNanos() - trackInstance.getWaypoints().get(0).getElapsedRealtimeNanos()) / 1000000000l;
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)
+			duration = (previous.getElapsedRealtimeNanos() - trackInstance
+					.getWaypoints().get(0).getElapsedRealtimeNanos()) / 1000000000l;
 		else
-			duration = (previous.getTime() - trackInstance.getWaypoints().get(0).getTime()) / 1000l;
-		
-		averageSpeed = length / (double)duration;
+			duration = (previous.getTime() - trackInstance.getWaypoints()
+					.get(0).getTime()) / 1000l;
+
+		averageSpeed = length / (double) duration;
 		effortKm = (length + ascent * 10.0 + descent * 2.0) / 1000.0;
 	}
-	
+
 	@SuppressLint("NewApi")
-	void addLocation(Location l)
-	{
-		if(lastLocation != null)
-		{
+	void addLocation(Location l) {
+		if (lastLocation != null) {
 			length += lastLocation.distanceTo(l);
 			double deniv = l.getAltitude() - lastLocation.getAltitude();
-			if(deniv >= 0)
+			if (deniv >= 0)
 				ascent += deniv;
 			else
 				descent -= deniv;
-			
-			if(l.getSpeed() > maxSpeed)
+
+			if (l.getSpeed() > maxSpeed)
 				maxSpeed = l.getSpeed();
-			
-			if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)
-				duration += (l.getElapsedRealtimeNanos() - lastLocation.getElapsedRealtimeNanos()) / 1000000000l;
+
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)
+				duration += (l.getElapsedRealtimeNanos() - lastLocation
+						.getElapsedRealtimeNanos()) / 1000000000l;
 			else
 				duration += (l.getTime() - lastLocation.getTime()) / 1000l;
-		}
-		else
+		} else
 			maxSpeed = l.getSpeed();
-		
-		averageSpeed = length / (double)duration;
+
+		averageSpeed = length / (double) duration;
 		effortKm = (length + ascent * 10.0 + descent * 2.0) / 1000.0;
 		lastLocation = l;
 	}
-	
-	private Pair<Integer, String> getStatisticForPosition(int position)
-	{
+
+	private Pair<Integer, String> getStatisticForPosition(int position) {
 		NumberFormat format = DecimalFormat.getNumberInstance();
-		switch(position)
-		{
-			default:
-			case 0:
-				format.setMaximumIntegerDigits(3);
-				return new Pair<Integer, String>(R.string.track_length, format.format(length / 1000.0) + " km");
-			case 1:
-				return new Pair<Integer, String>(R.string.track_duration, DateUtils.formatElapsedTime(duration));
-			case 2:
-				return new Pair<Integer, String>(R.string.track_ascent, Math.round(ascent) + " m");
-			case 3:
-				return new Pair<Integer, String>(R.string.track_descent, Math.round(descent) + " m");
-			case 4:
-				format.setMaximumIntegerDigits(1);
-				return new Pair<Integer, String>(R.string.track_average_speed, format.format(averageSpeed * 3.6) + " km/h");
-			case 5:
-				return new Pair<Integer, String>(R.string.track_end_time, DateFormat.getDateTimeInstance().format(trackInstance.getTimestampEnd()));
-			case 6:
-				return new Pair<Integer, String>(R.string.track_start_time, DateFormat.getDateTimeInstance().format(trackInstance.getTimestampStart()));
-			case 7:
-				format.setMaximumIntegerDigits(1);
-				return new Pair<Integer, String>(R.string.track_max_speed, format.format(maxSpeed * 3.6) + " km/h");
-			case 8:
-				return new Pair<Integer, String>(R.string.track_number_of_pauses, String.valueOf(trackInstance.getNumberOfPauses()));
-			case 9:
-				return new Pair<Integer, String>(R.string.track_total_pause_time, DateUtils.formatElapsedTime(trackInstance.getTotalPauseTime()));
-			case 10:
-				return new Pair<Integer, String>(R.string.rating, trackInstance.getRating() + " / 5");
-			case 11:
-				format.setMaximumIntegerDigits(3);
-				return new Pair<Integer, String>(R.string.track_km_effort, format.format(effortKm) + " km");
+		switch (position) {
+		default:
+		case 0:
+			format.setMaximumIntegerDigits(3);
+			return new Pair<Integer, String>(R.string.track_length,
+					format.format(length / 1000.0) + " km");
+		case 1:
+			return new Pair<Integer, String>(R.string.track_duration,
+					DateUtils.formatElapsedTime(duration));
+		case 2:
+			return new Pair<Integer, String>(R.string.track_ascent,
+					Math.round(ascent) + " m");
+		case 3:
+			return new Pair<Integer, String>(R.string.track_descent,
+					Math.round(descent) + " m");
+		case 4:
+			format.setMaximumIntegerDigits(1);
+			return new Pair<Integer, String>(R.string.track_average_speed,
+					format.format(averageSpeed * 3.6) + " km/h");
+		case 5:
+			return new Pair<Integer, String>(R.string.track_end_time,
+					DateFormat.getDateTimeInstance().format(
+							trackInstance.getTimestampEnd()));
+		case 6:
+			return new Pair<Integer, String>(R.string.track_start_time,
+					DateFormat.getDateTimeInstance().format(
+							trackInstance.getTimestampStart()));
+		case 7:
+			format.setMaximumIntegerDigits(1);
+			return new Pair<Integer, String>(R.string.track_max_speed,
+					format.format(maxSpeed * 3.6) + " km/h");
+		case 8:
+			return new Pair<Integer, String>(R.string.track_number_of_pauses,
+					String.valueOf(trackInstance.getNumberOfPauses()));
+		case 9:
+			return new Pair<Integer, String>(R.string.track_total_pause_time,
+					DateUtils.formatElapsedTime(trackInstance
+							.getTotalPauseTime()));
+		case 10:
+			return new Pair<Integer, String>(R.string.rating,
+					trackInstance.getRating() + " / 5");
+		case 11:
+			format.setMaximumIntegerDigits(3);
+			return new Pair<Integer, String>(R.string.track_km_effort,
+					format.format(effortKm) + " km");
 		}
 	}
-	
-	public ListAdapter getAdapter(final Context c, final TypeStatistics typeStatistics)
-	{
+
+	public ListAdapter getAdapter(final Context c,
+			final TypeStatistics typeStatistics) {
 		final int[] shownStats = typeStatistics.getShownStats();
-		return new BaseAdapter()
-		{
+		return new BaseAdapter() {
 
 			@Override
-			public View getView(int position, View convertView, ViewGroup parent)
-			{
-				LayoutInflater inflater = (LayoutInflater) c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			public View getView(int position, View convertView, ViewGroup parent) {
+				LayoutInflater inflater = (LayoutInflater) c
+						.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 				View v;
 				if (convertView == null)
@@ -178,28 +186,27 @@ public class Statistics
 					v = convertView;
 
 				Pair<Integer, String> pair = getStatisticForPosition(shownStats[position]);
-				TextView value = (TextView) v.findViewById(R.id.stat_tile_value_text);
+				TextView value = (TextView) v
+						.findViewById(R.id.stat_tile_value_text);
 				value.setText(pair.second);
-				TextView detail = (TextView) v.findViewById(R.id.stat_tile_detail_text);
+				TextView detail = (TextView) v
+						.findViewById(R.id.stat_tile_detail_text);
 				detail.setText(pair.first);
 				return v;
 			}
 
 			@Override
-			public long getItemId(int position)
-			{
+			public long getItemId(int position) {
 				return position;
 			}
 
 			@Override
-			public Object getItem(int position)
-			{
+			public Object getItem(int position) {
 				return null;
 			}
 
 			@Override
-			public int getCount()
-			{
+			public int getCount() {
 				return shownStats.length;
 			}
 		};

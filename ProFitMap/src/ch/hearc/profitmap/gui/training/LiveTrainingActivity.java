@@ -401,4 +401,8 @@ public class LiveTrainingActivity extends FragmentActivity implements
 			Log.i("LTA", "lgf null");
 	}
 
+	public int getSportId() {
+		return mSport;
+	}
+
 }
