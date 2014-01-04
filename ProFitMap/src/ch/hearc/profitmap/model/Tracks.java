@@ -213,6 +213,7 @@ public class Tracks implements DropboxListener, DropboxLinkedListener
 							Track track = new Track();
 							track.setTracks(Tracks.this);
 							track.setName(record.getString("name"));
+							track.setDropboxId(record.getId());
 	
 							DbxList list = record.getList("instances");
 							for (int i = 0; i < list.size(); i++)
