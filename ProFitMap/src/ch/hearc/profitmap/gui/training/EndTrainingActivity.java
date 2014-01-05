@@ -88,7 +88,7 @@ public class EndTrainingActivity extends FragmentActivity implements StatisticsP
 		}
 		
 		SummaryFragment mStatsFragment = (SummaryFragment) getSupportFragmentManager().findFragmentById(R.id.summary_fragment);
-		mStatsFragment.setStatistics(mTrackInstance.getStatistics(), TypeStatistics.END);
+		mStatsFragment.setStatistics(mTrackInstance.getStatistics(), TypeStatistics.END, mSport);
 	}
 
 	/**
@@ -203,5 +203,11 @@ public class EndTrainingActivity extends FragmentActivity implements StatisticsP
 	public TypeStatistics getTypeStatistics()
 	{
 		return TypeStatistics.END;
+	}
+	
+	@Override
+	public int getSportId()
+	{
+		return mSport;
 	}
 }

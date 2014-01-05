@@ -248,6 +248,12 @@ public class TrackDetailActivity extends FragmentActivity implements ActionBar.T
 	{
 		return TypeStatistics.SUMMARY;
 	}
+	
+	@Override
+	public int getSportId()
+	{
+		return mSport;
+	}
 
 	public TrackInstance getTrackInstance()
 	{

@@ -1,20 +1,34 @@
 package ch.hearc.profitmap.gui.settings;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
 import ch.hearc.profitmap.R;
+import ch.hearc.profitmap.model.DropboxManager;
 
+import com.dropbox.sync.android.DbxException;
+import com.dropbox.sync.android.DbxFields;
+import com.dropbox.sync.android.DbxList;
+import com.dropbox.sync.android.DbxRecord;
+import com.dropbox.sync.android.DbxTable;
+import com.dropbox.sync.android.DbxTable.QueryResult;
+import com.mobeta.android.dslv.DragSortController;
 import com.mobeta.android.dslv.DragSortListView;
 
 public class StatsOrderActivity extends Activity
 {
-	private DragSortListView dslv;
+	private DragSortListView listView;
+	private ArrayAdapter<String> adapter;
+	private DropboxManager dropbox;
+	private String[] tiles_array;
+	private int sportId;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -24,8 +38,72 @@ public class StatsOrderActivity extends Activity
 		// Show the Up button in the action bar.
 		setupActionBar();
 		
-		dslv = (DragSortListView) findViewById(R.id.dslv);
-		dslv.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, new String[]{"Item 1", "Item 2", "Item 3"}));
+		tiles_array = getResources().getStringArray(R.array.tiles_array);
+		
+		sportId = getIntent().getIntExtra("sportId", 0);
+		
+		getActionBar().setIcon(getResources().getIdentifier(getResources().getStringArray(R.array.sports_images)[sportId], "drawable", "ch.hearc.profitmap"));
+		
+		dropbox = DropboxManager.getInstance();
+		DbxTable table = dropbox.getStatsOrderTable();
+		
+		ArrayList<String> list;
+		
+		try
+		{
+			QueryResult result = table.query(new DbxFields().set("sport", sportId));
+			if(result.count() > 0)
+			{
+				DbxRecord record = result.asList().get(0);
+				list = new ArrayList<String>(tiles_array.length);
+				DbxList dbxList = record.getList("order");
+				for(int i = 0; i < dbxList.size(); i++)
+					list.add(tiles_array[(int) dbxList.getLong(i)]);
+			}
+			else
+				list = new ArrayList<String>(Arrays.asList(tiles_array));
+		}
+		catch (DbxException e)
+		{
+			e.printStackTrace();
+			list = new ArrayList<String>(Arrays.asList(tiles_array));
+		}
+		
+		listView = (DragSortListView) findViewById(R.id.dslv);
+	    
+	    adapter = new ArrayAdapter<String>(this, R.layout.stats_order_list_item, R.id.textView, list);
+	    listView.setAdapter(adapter);
+	    listView.setDropListener(new DragSortListView.DropListener()
+	    {
+	        @Override
+	        public void drop(int from, int to)
+	        {
+	            if (from != to)
+	            {
+	                String item = adapter.getItem(from);
+	                adapter.remove(item);
+	                adapter.insert(item, to);
+	            }
+	        }
+	    });
+		listView.setRemoveListener(new DragSortListView.RemoveListener()
+		{
+			@Override
+			public void remove(int which)
+			{
+				adapter.remove(adapter.getItem(which));
+			}
+		});
+
+	    DragSortController controller = new DragSortController(listView);
+	    controller.setDragHandleId(R.id.imageView);
+	    controller.setRemoveEnabled(false);
+	    controller.setSortEnabled(true);
+	    controller.setDragInitMode(DragSortController.ON_DRAG);
+
+	    listView.setFloatViewManager(controller);
+	    listView.setOnTouchListener(controller);
+	    listView.setDragEnabled(true);
 	}
 
 	/**
@@ -70,8 +148,30 @@ public class StatsOrderActivity extends Activity
 	{
 		super.onPause();
 		
-		ListAdapter adapter = dslv.getAdapter();
+		DbxTable dbxTable = dropbox.getStatsOrderTable();
+		try
+		{
+			QueryResult result = dbxTable.query(new DbxFields().set("sport", sportId));
+			if(result.hasResults())
+			{
+				Iterator<DbxRecord> iterator = result.iterator();
+				while(iterator.hasNext())
+					iterator.next().deleteRecord();
+			}
+		}
+		catch (DbxException e)
+		{
+			e.printStackTrace();
+		}
+		
+		DbxList list = new DbxList();
 		for(int i = 0; i < adapter.getCount(); i++)
-			Log.d("DSLV", (String) adapter.getItem(i));
+		{
+			int id = -1;
+			String item = adapter.getItem(i);
+			while(tiles_array[++id] != item);
+			list.add(id);
+		}
+		dbxTable.insert().set("sport", sportId).set("order", list);
 	}
 }

@@ -15,6 +15,7 @@ public class SummaryFragment extends Fragment
 	{
 		public Statistics getStatistics();
 		public TypeStatistics getTypeStatistics();
+		public int getSportId();
 	}
 
 	private Statistics mStatistics;
@@ -25,10 +26,10 @@ public class SummaryFragment extends Fragment
 		// Empty constructor required for fragment subclasses
 	}
 	
-	public void setStatistics(Statistics statistics, TypeStatistics typeStatistics)
+	public void setStatistics(Statistics statistics, TypeStatistics typeStatistics, int sportId)
 	{
 		mStatistics = statistics;
-		mGridView.setAdapter(mStatistics.getAdapter(getActivity(), typeStatistics));
+		mGridView.setAdapter(mStatistics.getAdapter(getActivity(), typeStatistics, sportId));
 		mStatistics.computeStatistics();
 	}
 
@@ -40,8 +41,9 @@ public class SummaryFragment extends Fragment
 		mGridView = (GridView) rootView.findViewById(R.id.trackinstance_grid);
 		Statistics statistics = ((StatisticsProvider)getActivity()).getStatistics();
 		TypeStatistics typeStatistics = ((StatisticsProvider)getActivity()).getTypeStatistics();
+		int sportId = ((StatisticsProvider)getActivity()).getSportId();
 		if(statistics != null)
-			setStatistics(statistics, typeStatistics);
+			setStatistics(statistics, typeStatistics, sportId);
 		
 		return rootView;
 	}

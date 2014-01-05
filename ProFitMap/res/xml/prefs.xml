@@ -1,22 +1,16 @@
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 	<PreferenceCategory
 	    android:title="@string/pref_header_stats_order">
+	    
+	    <!-- Using the key attribute to pass the sport id -->
 	    <ch.hearc.profitmap.gui.settings.StatsOrderPreference
-	        android:key="stats_order_running"
-	        android:title="@string/running"
-	        android:icon="@drawable/running" />
+	        android:key="0" />
 	    <ch.hearc.profitmap.gui.settings.StatsOrderPreference
-	        android:key="stats_order_biking"
-	        android:title="@string/biking"
-	        android:icon="@drawable/biking" />
+	        android:key="1" />
 	    <ch.hearc.profitmap.gui.settings.StatsOrderPreference
-	        android:key="stats_order_skiing"
-	        android:title="@string/skiing"
-			android:icon="@drawable/ski" />
+	        android:key="2" />
 	    <ch.hearc.profitmap.gui.settings.StatsOrderPreference
-	        android:key="stats_order_kayaking"
-	        android:title="@string/kayaking"
-	        android:icon="@drawable/kayak" />
+	        android:key="3" />
 	        
 	</PreferenceCategory>
 </PreferenceScreen>

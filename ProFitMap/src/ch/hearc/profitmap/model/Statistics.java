@@ -3,6 +3,8 @@ package ch.hearc.profitmap.model;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -17,6 +19,12 @@ import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 import ch.hearc.profitmap.R;
+
+import com.dropbox.sync.android.DbxException;
+import com.dropbox.sync.android.DbxFields;
+import com.dropbox.sync.android.DbxList;
+import com.dropbox.sync.android.DbxTable;
+import com.dropbox.sync.android.DbxTable.QueryResult;
 
 public class Statistics {
 	/**
@@ -168,48 +176,72 @@ public class Statistics {
 		}
 	}
 
-	public ListAdapter getAdapter(final Context c,
-			final TypeStatistics typeStatistics) {
-		final int[] shownStats = typeStatistics.getShownStats();
-		return new BaseAdapter() {
-
-			@Override
-			public View getView(int position, View convertView, ViewGroup parent) {
-				LayoutInflater inflater = (LayoutInflater) c
-						.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-				View v;
-				if (convertView == null)
-					// if it's not recycled, initialize some attributes
-					v = inflater.inflate(R.layout.stat_tile, null);
-				else
-					v = convertView;
-
-				Pair<Integer, String> pair = getStatisticForPosition(shownStats[position]);
-				TextView value = (TextView) v
-						.findViewById(R.id.stat_tile_value_text);
-				value.setText(pair.second);
-				TextView detail = (TextView) v
-						.findViewById(R.id.stat_tile_detail_text);
-				detail.setText(pair.first);
-				return v;
+	public ListAdapter getAdapter(final Context c, final TypeStatistics typeStatistics, final int sportId)
+	{
+		DbxTable statsOrderTable = DropboxManager.getInstance().getStatsOrderTable();
+		final List<Integer> userOrder;
+		try
+		{
+			QueryResult result = statsOrderTable.query(new DbxFields().set("sport", sportId));
+			if (result.hasResults())
+			{
+				DbxList list = result.iterator().next().getList("order");
+				userOrder = new ArrayList<Integer>(list.size());
+				for (int i = 0; i < list.size(); i++)
+					userOrder.add((int) list.getLong(i));
 			}
+			else
+				userOrder = null;
 
-			@Override
-			public long getItemId(int position) {
-				return position;
-			}
+			final int[] shownStats = typeStatistics.getShownStats();
+			return new BaseAdapter()
+			{
 
-			@Override
-			public Object getItem(int position) {
-				return null;
-			}
+				@Override
+				public View getView(int position, View convertView, ViewGroup parent)
+				{
+					LayoutInflater inflater = (LayoutInflater) c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-			@Override
-			public int getCount() {
-				return shownStats.length;
-			}
-		};
+					View v;
+					if (convertView == null)
+						// if it's not recycled, initialize some attributes
+						v = inflater.inflate(R.layout.stat_tile, null);
+					else
+						v = convertView;
+
+					int stat = (userOrder == null) ? shownStats[position] : userOrder.get(shownStats[position]);
+					Pair<Integer, String> pair = getStatisticForPosition(stat);
+					TextView value = (TextView) v.findViewById(R.id.stat_tile_value_text);
+					value.setText(pair.second);
+					TextView detail = (TextView) v.findViewById(R.id.stat_tile_detail_text);
+					detail.setText(pair.first);
+					return v;
+				}
+
+				@Override
+				public long getItemId(int position)
+				{
+					return position;
+				}
+
+				@Override
+				public Object getItem(int position)
+				{
+					return null;
+				}
+
+				@Override
+				public int getCount()
+				{
+					return shownStats.length;
+				}
+			};
+		}
+		catch (DbxException e)
+		{
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	@Override

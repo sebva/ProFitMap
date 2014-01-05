@@ -19,11 +19,26 @@
 
     <string name="app_name" translatable="false">ProFitMap</string>
 
-    <string-array name="sports_array">
+    <string-array name="sports_array" translatable="false">
         <item>@string/running</item>
         <item>@string/biking</item>
         <item>@string/skiing</item>
         <item>@string/kayaking</item>
+    </string-array>
+    
+    <string-array name="tiles_array" translatable="false">
+        <item>@string/track_length</item>
+        <item>@string/track_duration</item>
+        <item>@string/track_ascent</item>
+        <item>@string/track_descent</item>
+        <item>@string/track_average_speed</item>
+        <item>@string/track_end_time</item>
+        <item>@string/track_start_time</item>
+        <item>@string/track_max_speed</item>
+        <item>@string/track_number_of_pauses</item>
+        <item>@string/track_total_pause_time</item>
+        <item>@string/rating</item>
+        <item>@string/track_km_effort</item>
     </string-array>
 
     <string name="running">Running</string>

@@ -66,6 +66,11 @@ public class DropboxManager implements AccountListener, SyncStatusListener, Path
 		return mStore.getTable(TRACKS_TABLE + tracksId);
 	}
 	
+	public DbxTable getStatsOrderTable()
+	{
+		return mStore.getTable("statsOrder");
+	}
+	
 	public DbxFileSystem getFilesystem()
 	{
 		return mFs;
@@ -256,4 +261,5 @@ public class DropboxManager implements AccountListener, SyncStatusListener, Path
 		
 		mStore.sync();
 	}
+
 }
