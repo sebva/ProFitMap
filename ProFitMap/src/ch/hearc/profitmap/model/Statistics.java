@@ -118,6 +118,7 @@ public class Statistics {
 						.getElapsedRealtimeNanos()) / 1000000000l;
 			else
 				duration += (l.getTime() - lastLocation.getTime()) / 1000l;
+
 		} else
 			maxSpeed = l.getSpeed();
 
@@ -136,7 +137,7 @@ public class Statistics {
 					format.format(length / 1000.0) + " km");
 		case 1:
 			return new Pair<Integer, String>(R.string.track_duration,
-					DateUtils.formatElapsedTime(duration));
+					DateUtils.formatElapsedTime(duration - trackInstance.getTotalPauseTime()));
 		case 2:
 			return new Pair<Integer, String>(R.string.track_ascent,
 					Math.round(ascent) + " m");

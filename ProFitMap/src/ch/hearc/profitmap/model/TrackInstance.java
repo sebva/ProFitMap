@@ -13,8 +13,8 @@ public class TrackInstance
 	private Date timestampStart;
 	private Date timestampEnd;
 	private int rating;
-	private long totalPauseTime;
-	private int numberOfPauses;
+	private long totalPauseTime = 0l;
+	private int numberOfPauses = 0;
 	private List<GeoImage> images;
 	private String thumbnail;
 	private List<Location> waypoints;
@@ -38,6 +38,12 @@ public class TrackInstance
 	{
 		waypoints.add(location);
 		statistics.addLocation(location);
+	}
+	
+	public void addPause(long pauseTimeSeconds)
+	{
+		numberOfPauses ++;
+		totalPauseTime += pauseTimeSeconds;
 	}
 	
 	public void endInstance()

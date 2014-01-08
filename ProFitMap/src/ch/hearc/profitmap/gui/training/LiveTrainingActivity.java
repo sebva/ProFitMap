@@ -61,6 +61,8 @@ public class LiveTrainingActivity extends FragmentActivity implements
 
 	public boolean isCreated = false;
 	public boolean isPaused = false;
+	
+	private long pauseStartTime;
 
 	private MapFragment liveMapFragment;
 	private SummaryFragment liveStatsFragment;
@@ -105,6 +107,7 @@ public class LiveTrainingActivity extends FragmentActivity implements
 		case R.id.action_startrec:
 			isPaused = false;
 			switchStartPauseVisibility();
+			trackInstance.addPause((System.nanoTime() - pauseStartTime) / 1000000000l);
 			break;
 		case R.id.action_stoprec:
 			liveMapFragment.endTraining();
@@ -118,6 +121,7 @@ public class LiveTrainingActivity extends FragmentActivity implements
 		case R.id.action_pause:
 			isPaused = true;
 			switchStartPauseVisibility();
+			pauseStartTime = System.nanoTime();
 			break;
 		case R.id.action_takepic:
 			takePic();
