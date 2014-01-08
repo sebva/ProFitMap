@@ -23,6 +23,7 @@ import ch.hearc.profitmap.R;
 import com.dropbox.sync.android.DbxException;
 import com.dropbox.sync.android.DbxFields;
 import com.dropbox.sync.android.DbxList;
+import com.dropbox.sync.android.DbxRecord;
 import com.dropbox.sync.android.DbxTable;
 import com.dropbox.sync.android.DbxTable.QueryResult;
 
@@ -41,7 +42,7 @@ public class Statistics {
 	 */
 	private long duration;
 	private TrackInstance trackInstance;
-	private transient Location lastLocation;
+	private transient Location lastLocation = null;
 
 	public enum TypeStatistics {
 		LIVE, END, SUMMARY, LIVE_GHOST;
@@ -54,7 +55,7 @@ public class Statistics {
 			case END:
 				return new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11 };
 			case LIVE:
-				return new int[] { 0, 1, 2, 3, 4, 6, 7, 8, 9, 11 };
+				return new int[] { 0, 1, 2, 3, 4, 6, 7, 8, 9, 11, 12 };
 			default:
 			case SUMMARY:
 				return new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
@@ -75,12 +76,15 @@ public class Statistics {
 		Location previous = trackInstance.getWaypoints().get(0);
 		for (Location l : trackInstance.getWaypoints()) {
 			length += previous.distanceTo(l);
-			double deniv = l.getAltitude() - previous.getAltitude();
-			if (deniv >= 0)
-				ascent += deniv;
-			else
-				descent -= deniv;
-
+			if(l.hasAltitude() && previous.hasAltitude())
+			{
+				double deniv = l.getAltitude() - previous.getAltitude();
+				if (deniv >= 0)
+					ascent += deniv;
+				else
+					descent -= deniv;
+			}
+			
 			float speed = l.getSpeed();
 			if (speed > maxSpeed)
 				maxSpeed = speed;
@@ -104,11 +108,14 @@ public class Statistics {
 	void addLocation(Location l) {
 		if (lastLocation != null) {
 			length += lastLocation.distanceTo(l);
-			double deniv = l.getAltitude() - lastLocation.getAltitude();
-			if (deniv >= 0)
-				ascent += deniv;
-			else
-				descent -= deniv;
+			if(l.hasAltitude() && lastLocation.hasAltitude())
+			{
+				double deniv = l.getAltitude() - lastLocation.getAltitude();
+				if (deniv >= 0)
+					ascent += deniv;
+				else
+					descent -= deniv;
+			}
 
 			if (l.getSpeed() > maxSpeed)
 				maxSpeed = l.getSpeed();
@@ -174,6 +181,10 @@ public class Statistics {
 			format.setMaximumFractionDigits(3);
 			return new Pair<Integer, String>(R.string.track_km_effort,
 					format.format(effortKm) + " km");
+		case 12:
+			format.setMaximumFractionDigits(1);
+			return new Pair<Integer, String>(R.string.track_current_speed,
+					format.format((lastLocation != null) ? lastLocation.getSpeed() * 3.6 : 0.0) + " km/h");
 		}
 	}
 
@@ -186,10 +197,19 @@ public class Statistics {
 			QueryResult result = statsOrderTable.query(new DbxFields().set("sport", sportId));
 			if (result.hasResults())
 			{
-				DbxList list = result.iterator().next().getList("order");
-				userOrder = new ArrayList<Integer>(list.size());
-				for (int i = 0; i < list.size(); i++)
-					userOrder.add((int) list.getLong(i));
+				DbxRecord record = result.iterator().next();
+				DbxList list = record.getList("order");
+				if(list.size() != 13) // Upgrade number when new tiles are added
+				{
+					userOrder = null;
+					record.deleteRecord();
+				}
+				else
+				{
+					userOrder = new ArrayList<Integer>(list.size());
+					for (int i = 0; i < list.size(); i++)
+						userOrder.add((int) list.getLong(i));
+				}
 			}
 			else
 				userOrder = null;
