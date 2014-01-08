@@ -1,6 +1,5 @@
 package ch.hearc.profitmap.gui.training.fragments;
 
-import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -62,7 +61,7 @@ public class GraphFragment extends Fragment {
 					new GraphViewData(i + 1, location.getAltitude()), true,
 					1000);
 			speedSeries.appendData(
-					new GraphViewData(i + 1, location.getSpeed()), true, 1000);
+					new GraphViewData(i + 1, location.getSpeed() * 3.6), true, 1000);
 		}
 
 		altitudeGraphView = new LineGraphView(rootView.getContext() // context

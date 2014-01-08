@@ -87,15 +87,15 @@ public class Statistics {
 
 			previous = l;
 		}
-
+		
 		// Better precision, but only since Jelly Bean
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 && previous.getElapsedRealtimeNanos() != 0l)
 			duration = (previous.getElapsedRealtimeNanos() - trackInstance
 					.getWaypoints().get(0).getElapsedRealtimeNanos()) / 1000000000l;
 		else
 			duration = (previous.getTime() - trackInstance.getWaypoints()
 					.get(0).getTime()) / 1000l;
-
+		
 		averageSpeed = length / (double) duration;
 		effortKm = (length + ascent * 10.0 + descent * 2.0) / 1000.0;
 	}
@@ -113,7 +113,7 @@ public class Statistics {
 			if (l.getSpeed() > maxSpeed)
 				maxSpeed = l.getSpeed();
 
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 && l.getElapsedRealtimeNanos() != 0l)
 				duration += (l.getElapsedRealtimeNanos() - lastLocation
 						.getElapsedRealtimeNanos()) / 1000000000l;
 			else
@@ -131,7 +131,7 @@ public class Statistics {
 		switch (position) {
 		default:
 		case 0:
-			format.setMaximumIntegerDigits(3);
+			format.setMaximumFractionDigits(3);
 			return new Pair<Integer, String>(R.string.track_length,
 					format.format(length / 1000.0) + " km");
 		case 1:
@@ -144,7 +144,7 @@ public class Statistics {
 			return new Pair<Integer, String>(R.string.track_descent,
 					Math.round(descent) + " m");
 		case 4:
-			format.setMaximumIntegerDigits(1);
+			format.setMaximumFractionDigits(1);
 			return new Pair<Integer, String>(R.string.track_average_speed,
 					format.format(averageSpeed * 3.6) + " km/h");
 		case 5:
@@ -156,7 +156,7 @@ public class Statistics {
 					DateFormat.getDateTimeInstance().format(
 							trackInstance.getTimestampStart()));
 		case 7:
-			format.setMaximumIntegerDigits(1);
+			format.setMaximumFractionDigits(1);
 			return new Pair<Integer, String>(R.string.track_max_speed,
 					format.format(maxSpeed * 3.6) + " km/h");
 		case 8:
@@ -170,7 +170,7 @@ public class Statistics {
 			return new Pair<Integer, String>(R.string.rating,
 					trackInstance.getRating() + " / 5");
 		case 11:
-			format.setMaximumIntegerDigits(3);
+			format.setMaximumFractionDigits(3);
 			return new Pair<Integer, String>(R.string.track_km_effort,
 					format.format(effortKm) + " km");
 		}
