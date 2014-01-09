@@ -58,6 +58,7 @@ public class Tracks implements DropboxListener, DropboxLinkedListener
 	
 	private static final DbxPath kDbxRoot = new DbxPath("/tracks");
 	public static TrackInstance currentTrackInstance;
+	private AsyncTask<Void, Void, Void> asyncTask;
 	
 	static
 	{
@@ -190,9 +191,11 @@ public class Tracks implements DropboxListener, DropboxLinkedListener
 	}
 
 	@Override
-	public void onDropboxChange()
+	public synchronized void onDropboxChange()
 	{
-		new AsyncTask<Void, Void, Void>()
+		if(asyncTask != null && !asyncTask.isCancelled())
+			asyncTask.cancel(false);
+		asyncTask = new AsyncTask<Void, Void, Void>()
 		{
 			
 			@Override
@@ -210,6 +213,8 @@ public class Tracks implements DropboxListener, DropboxLinkedListener
 						tracks.clear();
 						for (DbxRecord record : queryResult)
 						{
+							if(isCancelled())
+								return null;
 							Track track = new Track();
 							track.setTracks(Tracks.this);
 							track.setName(record.getString("name"));
@@ -218,6 +223,8 @@ public class Tracks implements DropboxListener, DropboxLinkedListener
 							DbxList list = record.getList("instances");
 							for (int i = 0; i < list.size(); i++)
 							{
+								if(isCancelled())
+									return null;
 								try
 								{
 									DbxPath path = new DbxPath(kDbxRoot, list.getString(i));
@@ -263,6 +270,11 @@ public class Tracks implements DropboxListener, DropboxLinkedListener
 				}
 				return null;
 			}
+			
+			protected void onCancelled()
+			{
+				tracks.clear();
+			};
 			
 			@Override
 			protected void onPostExecute(Void result)
