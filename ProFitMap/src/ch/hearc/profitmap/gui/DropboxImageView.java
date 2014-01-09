@@ -17,14 +17,25 @@ import com.dropbox.sync.android.DbxPath;
 
 public class DropboxImageView extends ImageView
 {
+	private AsyncTask<Void, Void, Drawable> asyncTask;
+
 	public DropboxImageView(Context context, AttributeSet attributeSet)
 	{
 		super(context, attributeSet);
 	}
 	
+	public void reset()
+	{
+		if(asyncTask != null && !asyncTask.isCancelled())
+			asyncTask.cancel(false);
+		
+		setBackgroundResource(android.R.color.holo_green_dark);
+		setImageResource(android.R.color.transparent);
+	}
+	
 	public void loadImageFromDropbox(final DbxPath path, final DbxFileSystem dbxFs)
 	{
-		new AsyncTask<Void, Void, Drawable>()
+		asyncTask = new AsyncTask<Void, Void, Drawable>()
 		{
 			protected void onPreExecute()
 			{

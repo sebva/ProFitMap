@@ -148,6 +148,9 @@ public class Tracks implements DropboxListener, DropboxLinkedListener
 		        	tv.setText(DateFormat.getDateTimeInstance().format(track.getTrackInstance(0).getTimestampStart()));
 		        
 		        DropboxImageView iv = (DropboxImageView) v.findViewById(R.id.imageView);
+		        if(convertView != null)
+		        	iv.reset();
+		        
 		        List<TrackInstance> ti = track.getTrackInstances();
 		        if(ti != null)
 				{

@@ -116,6 +116,8 @@ public class Track implements Comparable<Track>
 		        TextView tv = (TextView)v.findViewById(R.id.textView);
 		        tv.setText(DateFormat.getDateTimeInstance().format(trackInstance.getTimestampStart()));
 		        DropboxImageView iv = (DropboxImageView) v.findViewById(R.id.imageView);
+		        if(convertView != null)
+		        	iv.reset();
 		        if(trackInstance.getThumbnail() != null)
 		        	iv.loadImageFromDropbox(new DbxPath(trackInstance.getThumbnail()), DropboxManager.getInstance().getFilesystem());
 		        
