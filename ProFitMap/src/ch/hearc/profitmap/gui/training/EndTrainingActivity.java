@@ -3,7 +3,9 @@ package ch.hearc.profitmap.gui.training;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
@@ -19,11 +21,13 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RatingBar;
+import android.widget.Toast;
 import ch.hearc.profitmap.R;
 import ch.hearc.profitmap.TrackListActivity;
 import ch.hearc.profitmap.gui.training.fragments.SummaryFragment;
 import ch.hearc.profitmap.gui.training.fragments.SummaryFragment.StatisticsProvider;
 import ch.hearc.profitmap.model.DropboxManager;
+import ch.hearc.profitmap.model.DropboxManager.DropboxLinkedListener;
 import ch.hearc.profitmap.model.Statistics;
 import ch.hearc.profitmap.model.Statistics.TypeStatistics;
 import ch.hearc.profitmap.model.Track;
@@ -33,10 +37,11 @@ import ch.hearc.profitmap.model.Tracks;
 import com.dropbox.chooser.android.DbxChooser;
 import com.dropbox.chooser.android.DbxChooser.ResultType;
 
-public class EndTrainingActivity extends FragmentActivity implements StatisticsProvider
+public class EndTrainingActivity extends FragmentActivity implements StatisticsProvider, DropboxLinkedListener
 {
 	
 	protected static final int kChooserCode = 109;
+	private static final int kDropboxCallback = 110;
 	private TrackInstance mTrackInstance;
 	private int mSport;
 	private int mTrackId;
@@ -45,6 +50,8 @@ public class EndTrainingActivity extends FragmentActivity implements StatisticsP
 	private RatingBar mRating;
 	private DbxChooser mChooser;
 	private ImageButton mBtnChoosePic;
+	private ProgressDialog mProgressDialog;
+	private DropboxManager mDropbox;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -53,6 +60,11 @@ public class EndTrainingActivity extends FragmentActivity implements StatisticsP
 		setContentView(R.layout.activity_end_training);
 		// Show the Up button in the action bar.
 		setupActionBar();
+		
+		mProgressDialog = new ProgressDialog(this);
+		mProgressDialog.setTitle(R.string.waiting_dropbox);
+		mProgressDialog.setCancelable(false);
+		mProgressDialog.show();
 		
 		mChooser = new DbxChooser("q2sr7uxe7l3b38n");
 		
@@ -87,8 +99,10 @@ public class EndTrainingActivity extends FragmentActivity implements StatisticsP
 			mTrackTitle.setFocusable(false);
 		}
 		
-		SummaryFragment mStatsFragment = (SummaryFragment) getSupportFragmentManager().findFragmentById(R.id.summary_fragment);
-		mStatsFragment.setStatistics(mTrackInstance.getStatistics(), TypeStatistics.END, mSport);
+		mDropbox = DropboxManager.getInstance();
+		mDropbox.addLinkedListener(this);
+		if(!mDropbox.isDropboxLinked())
+			mDropbox.linkToDropbox(this, kDropboxCallback);
 	}
 
 	/**
@@ -126,6 +140,18 @@ public class EndTrainingActivity extends FragmentActivity implements StatisticsP
 			
 			mTrackInstance.setThumbnail(dropbox.copyPictureToDropbox(this, result.getLink()));
 		}
+		else if(requestCode == kDropboxCallback)
+		{
+			if(resultCode == Activity.RESULT_OK)
+				Toast.makeText(this, R.string.dropbox_connected, Toast.LENGTH_SHORT).show();
+			else
+			{
+				Toast.makeText(this, R.string.dropbox_error, Toast.LENGTH_SHORT).show();
+				mDropbox.linkToDropbox(this, kDropboxCallback);
+			}
+		}
+		else
+			super.onActivityResult(requestCode, resultCode, data);
 	}
 
 	@Override
@@ -209,5 +235,13 @@ public class EndTrainingActivity extends FragmentActivity implements StatisticsP
 	public int getSportId()
 	{
 		return mSport;
+	}
+
+	@Override
+	public void onAccountLinked()
+	{
+		mProgressDialog.dismiss();
+		SummaryFragment statsFragment = (SummaryFragment) getSupportFragmentManager().findFragmentById(R.id.summary_fragment);
+		statsFragment.setStatistics(mTrackInstance.getStatistics(), TypeStatistics.END, mSport);
 	}
 }

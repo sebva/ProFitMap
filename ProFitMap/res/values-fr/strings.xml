@@ -69,5 +69,6 @@
     <string name="track_not_ready">Cet entraînement n\'a pas encore été rapatrié depuis le Cloud. Veuillez réessayer plus tard</string>
     <string name="title_activity_nfcimport">Importer un entraînement</string>
     <string name="track_current_speed">Vitesse actuelle</string>
+    <string name="waiting_dropbox">En attente de Dropbox…</string>
 
 </resources>

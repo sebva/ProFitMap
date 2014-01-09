@@ -98,5 +98,6 @@
     <string name="track_not_ready">This track has not yet been downloaded from the cloud. Please try later</string>
     <string name="title_activity_nfcimport">Import track</string>
     <string name="track_current_speed">Current speed</string>
+    <string name="waiting_dropbox">Waiting for Dropbox…</string>
 
 </resources>
