@@ -199,6 +199,12 @@ public class EndTrainingActivity extends FragmentActivity implements StatisticsP
 				}).show();
 				return true;
 			case R.id.action_save_training:
+				if(mTrackInstance.getWaypoints().size() < 2)
+				{
+					Toast.makeText(this, R.string.not_enough_points, Toast.LENGTH_SHORT).show();
+					return true;
+				}
+				
 				Tracks tracks = Tracks.getInstance(mSport);
 				Track track;
 				if(mTrackId == -1)
