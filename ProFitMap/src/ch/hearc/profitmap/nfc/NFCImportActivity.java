@@ -53,6 +53,7 @@ public class NFCImportActivity extends Activity
 		{
 			String json = decompress(records[0].getPayload());
 			TrackInstance trackInstance = new Gson().fromJson(json, TrackInstance.class);
+			trackInstance.removeImages();
 
 			int sportId = byteArrayToInt(records[1].getPayload());
 

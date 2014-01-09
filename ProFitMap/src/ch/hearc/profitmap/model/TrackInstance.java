@@ -111,6 +111,12 @@ public class TrackInstance
 	{
 		this.timestampEnd = timestampEnd;
 	}
+
+	public void removeImages()
+	{
+		images.clear();
+		thumbnail = null;
+	}
 	
 	
 }
