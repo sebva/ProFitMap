@@ -45,6 +45,8 @@ public class TrackListActivity extends FragmentActivity
 	private String[] mSports;
 	private String[] mSportsImages;
 
+	private boolean isLandTablet = false;
+	
 	private int mCurrentIndex = 0;
 	private TrackListTilesFragment mTrackListFragment;
 	
@@ -71,21 +73,8 @@ public class TrackListActivity extends FragmentActivity
 			mSportsCursor.addRow(row);
 		}
 
-		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-		mDrawerList = (ListView) findViewById(R.id.left_drawer);
-
-		// set a custom shadow that overlays the main content when the drawer opens
-		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
-		// set up the drawer's list view with items and click listener
-		mDrawerList.setAdapter(new SimpleCursorAdapter(this, R.layout.drawer_list_item, mSportsCursor, new String[] { "image", "text" }, new int[] {
-				R.id.imageView, R.id.textView }, 0));
-
-		mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
-
 		// enable ActionBar app icon to behave as action to toggle nav drawer
 		final ActionBar actionBar = getActionBar();
-		actionBar.setDisplayHomeAsUpEnabled(true);
-		actionBar.setHomeButtonEnabled(true);
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
 
 		String[] sortModes = getResources().getStringArray(R.array.sort_modes);
@@ -101,32 +90,64 @@ public class TrackListActivity extends FragmentActivity
 			}
 		});
 
-		// ActionBarDrawerToggle ties together the the proper interactions
-		// between the sliding drawer and the action bar app icon
-		mDrawerToggle = new ActionBarDrawerToggle(this, /* host Activity */
-		mDrawerLayout, /* DrawerLayout object */
-		R.drawable.ic_drawer, /* nav drawer image to replace 'Up' caret */
-		R.string.drawer_open, /* "open drawer" description for accessibility */
-		R.string.drawer_close /* "close drawer" description for accessibility */
-		)
-		{
-			public void onDrawerClosed(View view)
-			{
-				onDrawerOpenClose(false);
-				ActivityCompat.invalidateOptionsMenu(TrackListActivity.this); // creates call to onPrepareOptionsMenu()
-			}
-
-			public void onDrawerOpened(View drawerView)
-			{
-				onDrawerOpenClose(true);
-				ActivityCompat.invalidateOptionsMenu(TrackListActivity.this); // creates call to onPrepareOptionsMenu()
-			}
-		};
-		mDrawerLayout.setDrawerListener(mDrawerToggle);
+		
+		setupDrawer();
 
 		if (savedInstanceState == null)
 		{
 			selectItem(0);
+		}
+	}
+
+	private void setupDrawer()
+	{
+		mDrawerList = (ListView) findViewById(R.id.left_drawer);
+		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+		// set up the drawer's list view with items and click listener
+		mDrawerList.setAdapter(new SimpleCursorAdapter(this, R.layout.drawer_list_item, mSportsCursor, new String[] { "image", "text" }, new int[] {
+				R.id.imageView, R.id.textView }, 0));
+
+		mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+		
+		final ActionBar actionBar = getActionBar();
+		if(mDrawerLayout != null)
+		{
+			actionBar.setDisplayHomeAsUpEnabled(true);
+			actionBar.setHomeButtonEnabled(true);
+			
+			// set a custom shadow that overlays the main content when the drawer opens
+			mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+			
+			// ActionBarDrawerToggle ties together the the proper interactions
+			// between the sliding drawer and the action bar app icon
+			mDrawerToggle = new ActionBarDrawerToggle(this, /* host Activity */
+			mDrawerLayout, /* DrawerLayout object */
+			R.drawable.ic_drawer, /* nav drawer image to replace 'Up' caret */
+			R.string.drawer_open, /* "open drawer" description for accessibility */
+			R.string.drawer_close /* "close drawer" description for accessibility */
+			)
+			{
+				public void onDrawerClosed(View view)
+				{
+					onDrawerOpenClose(false);
+					ActivityCompat.invalidateOptionsMenu(TrackListActivity.this); // creates call to onPrepareOptionsMenu()
+				}
+	
+				public void onDrawerOpened(View drawerView)
+				{
+					onDrawerOpenClose(true);
+					ActivityCompat.invalidateOptionsMenu(TrackListActivity.this); // creates call to onPrepareOptionsMenu()
+				}
+			};
+			mDrawerLayout.setDrawerListener(mDrawerToggle);
+			isLandTablet = false;
+		}
+		else
+		{
+			actionBar.setDisplayHomeAsUpEnabled(false);
+			actionBar.setHomeButtonEnabled(false);
+			isLandTablet = true;
 		}
 	}
 	
@@ -251,7 +272,8 @@ public class TrackListActivity extends FragmentActivity
 		// update selected item and title, then close the drawer
 		mDrawerList.setItemChecked(position, true);
 		getActionBar().setIcon(getSportImageIdentifier(mCurrentIndex));
-		mDrawerLayout.closeDrawer(mDrawerList);
+		if(mDrawerLayout != null)
+			mDrawerLayout.closeDrawer(mDrawerList);
 	}
 
 	private int getSportImageIdentifier(int position)
@@ -274,16 +296,29 @@ public class TrackListActivity extends FragmentActivity
 	{
 		super.onPostCreate(savedInstanceState);
 		// Sync the toggle state after onRestoreInstanceState has occurred.
-		mDrawerToggle.syncState();
+		if(mDrawerLayout != null)
+			mDrawerToggle.syncState();
 	}
 
 	@Override
 	public void onConfigurationChanged(Configuration newConfig)
 	{
 		super.onConfigurationChanged(newConfig);
+		if((!isLandTablet && newConfig.screenWidthDp >= 600 && newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) ||
+			(isLandTablet && (newConfig.screenWidthDp < 600 || newConfig.orientation != Configuration.ORIENTATION_LANDSCAPE)))
+		{
+			setContentView(R.layout.activity_track_list);
+			selectItem(mCurrentIndex);
+		}
+		
+		setupDrawer();
+		
 		// Pass any configuration change to the drawer toggls
-		mDrawerToggle.onConfigurationChanged(newConfig);
-		onDrawerOpenClose(mDrawerLayout.isDrawerOpen(GravityCompat.START));
+		if(mDrawerLayout != null)
+		{
+			mDrawerToggle.onConfigurationChanged(newConfig);
+			onDrawerOpenClose(mDrawerLayout.isDrawerOpen(GravityCompat.START));
+		}
 		Log.d(getClass().getSimpleName(), "Rotate");
 	}
 }
