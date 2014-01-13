@@ -9,8 +9,10 @@ import android.util.Log;
 import ch.hearc.profitmap.R;
 
 import com.google.android.gms.internal.cu;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnMapLoadedCallback;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -47,6 +49,7 @@ public class MapElements {
 	private Polyline ghostDifferencePl;
 	private PolylineOptions ghostDifferencePlo = new PolylineOptions()
 			.geodesic(true).color(Color.parseColor("#FFBB33"));
+	private CameraUpdate initialCu;
 
 	public MapElements() {
 
@@ -79,12 +82,25 @@ public class MapElements {
 		ghostDifferencePl = map.addPolyline(ghostDifferencePlo);
 	}
 
+	public void setMapLoadedListener() {
+
+		map.setOnMapLoadedCallback(new OnMapLoadedCallback() {
+
+			@Override
+			public void onMapLoaded() {
+				if (initialCu != null)
+					map.moveCamera(initialCu);
+			}
+		});
+	}
+
 	public void addPointAndRefreshPolyline(LatLng loc) {
 		plo.add(loc);
 		if (pl != null) {
 			pl.remove();
 		}
 		pl = map.addPolyline(plo);
+
 		/*
 		 * Log.i("MapElements", "Added point " + loc.latitude + ", " +
 		 * loc.longitude);
@@ -208,5 +224,26 @@ public class MapElements {
 		cLocMarker = map.addMarker(cmos);
 		persistentMarkerList.add(cLocMarker);
 		Log.i("mapE", "adding CurrentPosMarker : " + moList.size());
+		Log.i("hashcode", "" + map.hashCode());
+
+	}
+
+	public void addPictureMarker(Location loc, String dropBoxPath) {
+
+		Log.i("addPic", loc.getLatitude() + loc.getLongitude() + "");
+		MarkerOptions mo = new MarkerOptions()
+				.position(new LatLng(loc.getLatitude(), loc.getLongitude()))
+
+				.title(dropBoxPath)
+				.icon(BitmapDescriptorFactory
+						.fromResource(R.drawable.ic_action_photo));
+
+		Log.i("hashcode", "" + map.hashCode());
+		map.addMarker(mo);
+		moList.add(mo);
+	}
+
+	public void setInitialCameraUpdate(CameraUpdate cu) {
+		this.initialCu = cu;
 	}
 }

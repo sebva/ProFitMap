@@ -20,37 +20,46 @@ public class LiveGraphFragment extends GraphFragment
 	}
 
 	public void refreshGraphs() {
-		System.out.println("ref graph");
 
-		GraphViewData last5Altitude[] = new GraphViewData[] {
+		GraphViewData last10Altitude[] = new GraphViewData[] {
 			new GraphViewData(1,0d),
 			new GraphViewData(1,0d),
 			new GraphViewData(1,0d),
 			new GraphViewData(1,0d),
 			new GraphViewData(1,0d),
+			new GraphViewData(1,0d),
+			new GraphViewData(1,0d),
+			new GraphViewData(1,0d),
+			new GraphViewData(1,0d),
+			new GraphViewData(1,0d)
 		};
-		GraphViewData last5Speed[] = new GraphViewData[] {
+		GraphViewData last10Speed[] = new GraphViewData[] {
 			new GraphViewData(1,0d),
 			new GraphViewData(1,0d),
 			new GraphViewData(1,0d),
 			new GraphViewData(1,0d),
 			new GraphViewData(1,0d),
+			new GraphViewData(1,0d),
+			new GraphViewData(1,0d),
+			new GraphViewData(1,0d),
+			new GraphViewData(1,0d),
+			new GraphViewData(1,0d)
 		};
 		
-		insertLastSpeedsAndAltitudes(last5Altitude, last5Speed);
+		insertLastSpeedsAndAltitudes(last10Altitude, last10Speed);
 
-		speedSeries.resetData(last5Speed);
-		altitudeSeries.resetData(last5Altitude);
+		speedSeries.resetData(last10Speed);
+		altitudeSeries.resetData(last10Altitude);
 	}
 
-	private void insertLastSpeedsAndAltitudes(GraphViewData[] last5Altitude,
-			GraphViewData[] last5Speed) {
+	private void insertLastSpeedsAndAltitudes(GraphViewData[] last10Altitude,
+			GraphViewData[] last10Speed) {
 		int totalPoints = mTrackInstance.getWaypoints().size();
-		int firstPoint = ((totalPoints-5 < 0) ? 0 : totalPoints-5);
+		int firstPoint = ((totalPoints-10 < 0) ? 0 : totalPoints-10);
 
 		for (int i = firstPoint,j=0; i < totalPoints; i++,j++) {
-			last5Altitude[j] = new GraphViewData(i,mTrackInstance.getWaypoints().get(i).getAltitude());
-			last5Speed[j] = new GraphViewData(i,mTrackInstance.getWaypoints().get(i).getSpeed());
+			last10Altitude[j] = new GraphViewData(mTrackInstance.getWaypoints().get(i).getTime(),mTrackInstance.getWaypoints().get(i).getAltitude());
+			last10Speed[j] = new GraphViewData(mTrackInstance.getWaypoints().get(i).getTime(),mTrackInstance.getWaypoints().get(i).getSpeed());
 		}
 	}
 

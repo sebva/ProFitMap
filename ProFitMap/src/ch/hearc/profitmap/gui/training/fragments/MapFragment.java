@@ -26,10 +26,13 @@ import ch.hearc.profitmap.gui.TrackDetailActivity;
 import ch.hearc.profitmap.gui.training.LiveTrainingActivity;
 import ch.hearc.profitmap.model.TrackInstance;
 
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -57,7 +60,6 @@ public class MapFragment extends Fragment {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-
 		mapElements = ActiveMapElements.getInstance().getMapElements();
 
 	}
@@ -73,12 +75,10 @@ public class MapFragment extends Fragment {
 	public void onResume() {
 		Log.i("MSF", "onRes before");
 		if (parentActivity instanceof LiveTrainingActivity) {
-		LiveTrainingActivity lta = (LiveTrainingActivity)parentActivity;
-		trackInstance = lta.getTrackInstance();
-		}
-		else if (parentActivity instanceof TrackDetailActivity)
-		{
-			TrackDetailActivity tda = (TrackDetailActivity)parentActivity;
+			LiveTrainingActivity lta = (LiveTrainingActivity) parentActivity;
+			trackInstance = lta.getTrackInstance();
+		} else if (parentActivity instanceof TrackDetailActivity) {
+			TrackDetailActivity tda = (TrackDetailActivity) parentActivity;
 			trackInstance = tda.getTrackInstance();
 		}
 		if (mapElements != null) {
@@ -87,6 +87,7 @@ public class MapFragment extends Fragment {
 				mapElements.map = fragment.getMap();
 				setupMap();
 				addWaypoints();
+				mapElements.setMapLoadedListener();
 			}
 
 			else {
@@ -96,6 +97,7 @@ public class MapFragment extends Fragment {
 				addWaypoints();
 				mapElements.showMarkers();
 				mapElements.showPolyline();
+				mapElements.setMapLoadedListener();
 			}
 		}
 		super.onResume();
@@ -141,68 +143,22 @@ public class MapFragment extends Fragment {
 		mapElements.end(endPosition);
 	}
 
-	public boolean addPicMarkerToLocation(Location loc, String filePath,
-			int orientation) {
+	public boolean addPicMarkerToLocation(Location loc, String dropBoxPath) {
 		if (mapElements != null) {
-			MarkerOptions mo = new MarkerOptions().position(MapElements.NEUCH_LOC);
-			mo.title(filePath);
+			Log.i("picMarker", "add");
+			MarkerOptions mo = new MarkerOptions().position(new LatLng(loc
+					.getLatitude(), loc.getLongitude()));
+			mo.title(dropBoxPath);
 
-			Log.i("fp", filePath);
+			mo.icon(BitmapDescriptorFactory
+					.fromResource(R.drawable.ic_action_photo));
 
-			/*
-			 * Bitmap micon = BitmapFactory.decodeFile(filePath); Matrix matrix
-			 * = new Matrix(); matrix.postRotate(270); Bitmap rotated =
-			 * Bitmap.createBitmap(micon, 0, 0, micon.getWidth(),
-			 * micon.getHeight(), matrix, true); micon.recycle(); int coeff =
-			 * rotated.getWidth()/150;
-			 * 
-			 * Bitmap scaled = Bitmap.createScaledBitmap(rotated,
-			 * rotated.getWidth()/coeff, rotated.getHeight()/coeff,false);
-			 */
-
-			Log.i("orientation", orientation + " ");
-			Bitmap scaled = decodeFile(new File(filePath));
-
-			mo.icon(BitmapDescriptorFactory.fromBitmap(scaled));
-
-			mapElements.map.addMarker(mo);
-			mapElements.moList.add(mo);
+			// mapElements.map.addMarker(mo);
+			// mapElements.moList.add(mo);
+			mapElements.addPictureMarker(loc, dropBoxPath);
 			return true;
 		} else
 			return false;
-	}
-
-	// decodes image and scales it to reduce memory consumption
-	private Bitmap decodeFile(File f) {
-		try {
-			// Decode image size
-			BitmapFactory.Options o = new BitmapFactory.Options();
-			o.inJustDecodeBounds = true;
-			BitmapFactory.decodeStream(new FileInputStream(f), null, o);
-
-			// The new size we want to scale to
-			final int REQUIRED_SIZE = 70;
-
-			// Find the correct scale value. It should be the power of 2.
-			int scale = 1;
-			while (o.outWidth / scale / 2 >= REQUIRED_SIZE
-					&& o.outHeight / scale / 2 >= REQUIRED_SIZE)
-				scale *= 2;
-
-			// Decode with inSampleSize
-			BitmapFactory.Options o2 = new BitmapFactory.Options();
-			o2.inSampleSize = scale;
-			Matrix matrix = new Matrix();
-			matrix.postRotate(270);
-			Bitmap scaled = BitmapFactory.decodeStream(new FileInputStream(f),
-					null, o2);
-			Bitmap rotated = Bitmap.createBitmap(scaled, 0, 0,
-					scaled.getWidth(), scaled.getHeight(), matrix, true);
-
-			return rotated;
-		} catch (Exception e) {
-		}
-		return null;
 	}
 
 	public void setTrackInstance(TrackInstance trackInstance) {
@@ -210,21 +166,30 @@ public class MapFragment extends Fragment {
 	}
 
 	protected void addWaypoints() {
+		LatLngBounds.Builder builder = new LatLngBounds.Builder();
 		if (trackInstance != null) {
 			if (trackInstance.getWaypoints().size() != 0) {
 				for (Location l : trackInstance.getWaypoints()) {
-					//Log.i("mapF", "Adding waypoint");
+					// Log.i("mapF", "Adding waypoint");
 					mapElements.start(new LatLng(l.getLatitude(), l
 							.getLongitude()));
 					mapElements.addPointAndRefreshPolyline(new LatLng(l
 							.getLatitude(), l.getLongitude()));
+					builder.include(new LatLng(l.getLatitude(), l
+							.getLongitude()));
 				}
 				Location l = trackInstance.getWaypoints().get(
 						trackInstance.getWaypoints().size() - 1);
 				mapElements.end(new LatLng(l.getLatitude(), l.getLongitude()));
+				builder.include(new LatLng(l.getLatitude(), l.getLongitude()));
 			}
+
+			LatLngBounds bounds = builder.build();
+			int padding = 25; // offset from edges of the map in pixels
+			CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
+			mapElements.setInitialCameraUpdate(cu);
 		}
-		//Log.i(this.getClass().getSimpleName(),
-		//		"addWaypoints:trackInstance null");
+		// Log.i(this.getClass().getSimpleName(),
+		// "addWaypoints:trackInstance null");
 	}
 }

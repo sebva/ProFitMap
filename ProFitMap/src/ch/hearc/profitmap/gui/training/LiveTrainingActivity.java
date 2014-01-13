@@ -158,9 +158,8 @@ public class LiveTrainingActivity extends FragmentActivity implements
 	@Override
 	protected void onActivityResult(int arg0, int arg1, Intent intent) {
 		LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		Location l = lm.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER); // Fake
-																				// GPS
-																				// provider
+		Location lastLocation = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER); 
+		
 		String[] projection = { MediaStore.Images.Media.DATA };
 		Cursor cursor = getApplicationContext().getContentResolver().query(
 				mCapturedImageURI, projection, null, null, null);
@@ -170,16 +169,15 @@ public class LiveTrainingActivity extends FragmentActivity implements
 		String capturedImageFilePath = cursor.getString(column_index_data);
 
 		GeoImage geoImage = new GeoImage(DropboxManager.getInstance()
-				.copyPictureToDropbox(this, mCapturedImageURI), l);
+				.copyPictureToDropbox(this, mCapturedImageURI), lastLocation);
 
 		trackInstance.addImage(geoImage);
 
 		int orientation = 0; // TODO : change to correct orientation
-		liveMapFragment.addPicMarkerToLocation(l, capturedImageFilePath,
-				orientation);
+		liveMapFragment.addPicMarkerToLocation(lastLocation, geoImage.getImagePath());
 
-		Log.i("Result i :", "" + l.toString() + capturedImageFilePath + " "
-				+ mCapturedImageURI);
+		Log.i("Result i :", "" + lastLocation.toString() + capturedImageFilePath + " "
+				+ mCapturedImageURI + " " + geoImage.getImagePath());
 		super.onActivityResult(arg0, arg1, intent);
 	}
 
