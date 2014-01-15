@@ -24,6 +24,7 @@
         <item>@string/biking</item>
         <item>@string/skiing</item>
         <item>@string/kayaking</item>
+        <item>@string/hiking</item>
     </string-array>
     <string-array name="tiles_array" translatable="false">
         <item>@string/track_length</item>
@@ -45,6 +46,7 @@
     <string name="biking">Biking</string>
     <string name="skiing">Skiing</string>
     <string name="kayaking">Kayaking</string>
+    <string name="hiking">Hiking</string>
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
 
@@ -53,6 +55,7 @@
         <item>biking</item>
         <item>ski</item>
         <item>kayak</item>
+        <item>hiking</item>
     </string-array>
 
     <string name="action_settings">Settings</string>

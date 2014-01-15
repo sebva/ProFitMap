@@ -25,6 +25,7 @@
     <string name="biking">Vélo</string>
     <string name="skiing">Ski</string>
     <string name="kayaking">Kayak</string>
+    <string name="hiking">Randonnée</string>
     <string name="drawer_open">Ouvrir le menu de navigation</string>
     <string name="drawer_close">Fermer le menu de navigation</string>
     <string name="action_settings">Paramètres</string>

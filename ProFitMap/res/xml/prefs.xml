@@ -11,6 +11,8 @@
 	        android:key="2" />
 	    <ch.hearc.profitmap.gui.settings.StatsOrderPreference
 	        android:key="3" />
+	    <ch.hearc.profitmap.gui.settings.StatsOrderPreference
+	        android:key="4" />
 	        
 	</PreferenceCategory>
 </PreferenceScreen>
