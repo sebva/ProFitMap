@@ -1,7 +1,9 @@
 package ch.hearc.profitmap.gui.training.fragments;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 import android.location.Location;
 import android.os.Bundle;
@@ -104,17 +106,16 @@ public class GraphFragment extends Fragment {
 	}
 
 	private CustomLabelFormatter speedGraphLabelsFormatter() {
-		final SimpleDateFormat dateFormat = new SimpleDateFormat("kk:mm:ss");
+		final SimpleDateFormat dateFormat = new SimpleDateFormat("kk:mm:ss", Locale.FRANCE);
 
 		return new CustomLabelFormatter() {
 			@Override
 			public String formatLabel(double value, boolean isValueX) {
 				if (!isValueX) {
-					return value + "km/h";
+					return (double)Math.round(value * 100) / 100 + "km/h";
 				} else {
 
 					Date d = new Date((long) value);
-					Log.i("format", "" + value);
 					return dateFormat.format(d);
 				} 
 			}
@@ -122,17 +123,16 @@ public class GraphFragment extends Fragment {
 	}
 
 	private CustomLabelFormatter altitudeGraphLabelFormatter() {
-		final SimpleDateFormat dateFormat = new SimpleDateFormat("kk:mm:ss");
+		final SimpleDateFormat dateFormat = new SimpleDateFormat("kk:mm:ss", Locale.FRANCE);
 
 		return new CustomLabelFormatter() {
 			@Override
 			public String formatLabel(double value, boolean isValueX) {
 				if (!isValueX) {
-					return value + "m";
+					return (double)Math.round(value * 100) / 100 + "m";
 				} else {
 
 					Date d = new Date((long) value);
-					Log.i("format", "" + value);
 					return dateFormat.format(d);
 				} 
 			}

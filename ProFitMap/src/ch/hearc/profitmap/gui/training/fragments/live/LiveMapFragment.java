@@ -13,6 +13,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
+import ch.hearc.profitmap.R;
 import ch.hearc.profitmap.gui.training.LiveTrainingActivity;
 import ch.hearc.profitmap.gui.training.fragments.MapFragment;
 import ch.hearc.profitmap.model.TrackInstance;
@@ -24,7 +25,9 @@ import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 public class LiveMapFragment extends MapFragment implements
 		com.google.android.gms.location.LocationListener,
@@ -238,8 +241,11 @@ public class LiveMapFragment extends MapFragment implements
 				computeGhost(location);
 
 			mapElements.map
-			.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(
-					location.getLatitude(), location.getLongitude()), mapElements.map.getCameraPosition().zoom >= 18 ? mapElements.map.getCameraPosition().zoom : 18));
+					.animateCamera(CameraUpdateFactory.newLatLngZoom(
+							new LatLng(location.getLatitude(), location
+									.getLongitude()),
+							mapElements.map.getCameraPosition().zoom >= 18 ? mapElements.map
+									.getCameraPosition().zoom : 18));
 
 		}
 
@@ -267,72 +273,121 @@ public class LiveMapFragment extends MapFragment implements
 	}
 
 	public void computeGhost(Location currentLocation) {
-		// Location ghostLocation = findClosestGhostLocationByTime();
+
+		// How long has it been since the very first location ?
 		long timeSinceStart = currentLocation.getTime() - startTime;
 
-		// move to init of ghost (once)
+		// CLOSEST GHOST; BY TIME
+		// Where was the ghost, at this point in time, relative to our time
+		// since start
+
+		// When did the ghost start ? (UNIX timestamp)
 		long ghostStartTime = ghostTrackInstance.getWaypoints().get(0)
 				.getTime();
 
-		// List<Location> waypointTimeList = new ArrayList<Location>();
-
-		Location closestGhostLocation = null;
-		int closestGhostLocationIndex = 0;
 		long closestTime = (long) Double.POSITIVE_INFINITY;
+		Location closestGhostLocationByTime = null;
+		int closestGhostLocationByTimeIndex = 0;
+
 		for (Location l : ghostTrackInstance.getWaypoints()) {
 			long relTime = l.getTime() - ghostStartTime;
 			long diff = Math.abs(relTime - timeSinceStart);
 			if (diff < closestTime) {
 				closestTime = diff;
-				closestGhostLocation = l;
-				closestGhostLocationIndex = ghostTrackInstance.getWaypoints()
-						.indexOf(closestGhostLocation);
+				closestGhostLocationByTime = l;
+				closestGhostLocationByTimeIndex = ghostTrackInstance
+						.getWaypoints().indexOf(closestGhostLocationByTime);
 			}
 		}
 
-		boolean isAhead = false;
-		Location nextLocationFromClosest = closestGhostLocation;
+		// CLOSEST GHOST; BY DISTANCE
+		// Which is the location that is closer to the ghost, in terms of
+		// distance.
+		double closestDistance = Double.POSITIVE_INFINITY;
+		Location closestGhostLocationByDistance = null;
+		int closestGhostLocationByDistanceIndex = 0;
 
-		if (closestGhostLocationIndex + 1 >= ghostTrackInstance.getWaypoints()
-				.size() - 1) {
-		} else {
-			nextLocationFromClosest = ghostTrackInstance.getWaypoints().get(
-					closestGhostLocationIndex + 1);
+		for (Location l : ghostTrackInstance.getWaypoints()) {
+			float distance = distanceBetween(currentLocation, l);
+
+			if (distance < closestDistance) {
+				closestDistance = distance;
+				closestGhostLocationByDistance = l;
+				closestGhostLocationByDistanceIndex = ghostTrackInstance
+						.getWaypoints().indexOf(closestGhostLocationByDistance);
+			}
 		}
 
-		float results[] = new float[3];
-		Location.distanceBetween(currentLocation.getLatitude(),
-				currentLocation.getLongitude(),
-				nextLocationFromClosest.getLatitude(),
-				nextLocationFromClosest.getLongitude(), results);
+		// What is the total distance to the ghost, from our location to the
+		// ghost's current location,
+		// following the ghost's track
 
-		float distanceBetweenCurrentAndNextAfterClosest = results[0];
+		float totalDistanceToGhost = 0;
+		for (int i = closestGhostLocationByDistanceIndex; i < closestGhostLocationByTimeIndex; i++) {
+			float distanceToGhostArray = distanceBetween(currentLocation,
+					ghostTrackInstance.getWaypoints().get(i));
+			float distance = distanceToGhostArray;
+			totalDistanceToGhost += distance;
+		}
+		
+		boolean isAhead = false;
 
-		Log.i("Ghosts",
-				"distance between curent and next after closest ghost loc : "
-						+ distanceBetweenCurrentAndNextAfterClosest);
+		// Initializing the next location from closest ghost(by time) to the
+		// location of the ghost(by time)
+		Location nextLocationFromClosest = closestGhostLocationByTime;
 
-		results = new float[3];
-		Location.distanceBetween(closestGhostLocation.getLatitude(),
-				closestGhostLocation.getLongitude(),
-				nextLocationFromClosest.getLatitude(),
-				nextLocationFromClosest.getLongitude(), results);
-		float distanceBetweenClosestAndNextAfterClosest = results[0];
+		// Which is the location after the one closest to the ghost(by time) ?
+		if (!(closestGhostLocationByTimeIndex + 1 >= ghostTrackInstance
+				.getWaypoints().size() - 1)) {
+			nextLocationFromClosest = ghostTrackInstance.getWaypoints().get(
+					closestGhostLocationByTimeIndex + 1);
+		}
 
+		// Computing the distance between :
+		// 1. Our current location and the location after the ghost(by time)
+		float distanceBetweenCurrentAndNextAfterClosest = distanceBetween(
+				currentLocation, nextLocationFromClosest);
+		// 2. The location of the ghost(by time) and the location after that
+		float distanceBetweenClosestAndNextAfterClosest = distanceBetween(
+				closestGhostLocationByTime, nextLocationFromClosest);
+
+		// If we are closer to the location after the ghost(by time), we are
+		// ahead. If not, we're behind.
 		isAhead = (distanceBetweenClosestAndNextAfterClosest > distanceBetweenCurrentAndNextAfterClosest) ? true
 				: false;
 
-		Log.i("Ghosts",
-				"distance between closest and next after closest ghost loc : "
-						+ distanceBetweenClosestAndNextAfterClosest);
+		// Drawing the line between us and the ghost (passing isAhead to know
+		// the color of the line)
+		
+		  if (closestGhostLocationByTime != null) {
+		  mapElements.drawPolylineDifferenceWithGhost(currentLocation,
+		  closestGhostLocationByTime, isAhead); }
+		 
 
-		if (closestGhostLocation != null) {
-			// mapElements.addTestMarker(closestGhostLocation);
-			mapElements.drawPolylineDifferenceWithGhost(currentLocation,
-					closestGhostLocation, isAhead);
-		}
+		// TODO : Draw the lines between us and the ghost (but following the
+		// track)
+		/*if (closestGhostLocationByDistanceIndex < closestGhostLocationByTimeIndex) {
+			for (int i = closestGhostLocationByDistanceIndex; i < closestGhostLocationByTimeIndex - 1; i++) {
+				Location start = ghostTrackInstance.getWaypoints().get(i);
+				Location end = ghostTrackInstance.getWaypoints().get(i+1);
+				mapElements.drawPolylineDifferenceWithGhost(start,
+						end, isAhead);
+			}
+		} else {
+			for (int i = closestGhostLocationByDistanceIndex; i > closestGhostLocationByTimeIndex +	 1; i--) {
+				Location start = ghostTrackInstance.getWaypoints().get(i);
+				Location end = ghostTrackInstance.getWaypoints().get(i-1);
+				mapElements.drawPolylineDifferenceWithGhost(start,
+						end, isAhead);
+			}
+		}*/
+	}
 
-		Log.i("LMF", "" + closestTime + "" + closestGhostLocation.getTime());
+	private float distanceBetween(Location start, Location end) {
+		float distanceToGhostArray[] = new float[3];
+		Location.distanceBetween(start.getLatitude(), start.getLongitude(),
+				end.getLatitude(), end.getLongitude(), distanceToGhostArray);
+		return distanceToGhostArray[0];
 	}
 
 	@SuppressLint("NewApi")
@@ -381,7 +436,7 @@ public class LiveMapFragment extends MapFragment implements
 	@Override
 	public void onLocationChanged(Location location) {
 
-		Log.i("locFus",
+		/*Log.i("locFus",
 				location.getLatitude() + " : " + location.getLongitude());
 		if (!((LiveTrainingActivity) parentActivity).isPaused
 				&& trackInstance != null) {
@@ -392,20 +447,42 @@ public class LiveMapFragment extends MapFragment implements
 			((LiveTrainingActivity) parentActivity).refreshStatsPanel();
 			((LiveTrainingActivity) parentActivity).refreshGraphPanel();
 		}
-
+*/
 		if (mapElements.start(new LatLng(location.getLatitude(), location
 				.getLongitude()))) {
 			startTime = location.getTime();
 		}
-
+/*
 		mapElements.drawCurrentPositionIndicator(location);
 
 		if (parentActivity.getHasGhost())
 			computeGhost(location);
 
 		mapElements.map
-				.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(
-						location.getLatitude(), location.getLongitude()), mapElements.map.getCameraPosition().zoom >= 18 ? mapElements.map.getCameraPosition().zoom : 18));
+				.animateCamera(CameraUpdateFactory.newLatLngZoom(
+						new LatLng(location.getLatitude(), location
+								.getLongitude()),
+						mapElements.map.getCameraPosition().zoom >= 18 ? mapElements.map
+								.getCameraPosition().zoom : 18));*/
+	}
+
+	@Override
+	public boolean addPicMarkerToLocation(Location loc, String dropBoxPath) {
+		if (mapElements != null) {
+			Log.i("LMF", "add");
+			MarkerOptions mo = new MarkerOptions().position(new LatLng(loc
+					.getLatitude(), loc.getLongitude()));
+			mo.title(dropBoxPath);
+
+			mo.icon(BitmapDescriptorFactory
+					.fromResource(R.drawable.ic_action_photo));
+
+			// mapElements.map.addMarker(mo);
+			// mapElements.moList.add(mo);
+			mapElements.addPictureMarker(loc, dropBoxPath);
+			return true;
+		} else
+			return false;
 	}
 
 }
