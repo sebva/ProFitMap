@@ -25,7 +25,6 @@
         <item>@string/skiing</item>
         <item>@string/kayaking</item>
     </string-array>
-    
     <string-array name="tiles_array" translatable="false">
         <item>@string/track_length</item>
         <item>@string/track_duration</item>
@@ -98,10 +97,10 @@
     <string name="track_not_ready">This track has not yet been downloaded from the cloud. Please try later</string>
     <string name="title_activity_nfcimport">Import track</string>
     <string name="track_current_speed">Current speed</string>
-   
     <string name="altitude_graph_title">Altimetric profile</string>
     <string name="speed_graph_title">Speed</string>
     <string name="waiting_dropbox">Waiting for Dropbox…</string>
     <string name="not_enough_points">You cannot save a track with no waypoints!</string>
+    <string name="title_activity_dropbox_photo_viewer">Photo viewer</string>
 
 </resources>

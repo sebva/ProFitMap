@@ -18,7 +18,13 @@ import com.dropbox.sync.android.DbxPath;
 public class DropboxImageView extends ImageView
 {
 	private AsyncTask<Void, Void, Drawable> asyncTask;
+	private ImageLoadedListener listener = null;
 
+	public static interface ImageLoadedListener
+	{
+		public void onImageLoaded();
+	}
+	
 	public DropboxImageView(Context context, AttributeSet attributeSet)
 	{
 		super(context, attributeSet);
@@ -35,6 +41,11 @@ public class DropboxImageView extends ImageView
 	
 	public void loadImageFromDropbox(final DbxPath path, final DbxFileSystem dbxFs)
 	{
+		loadImageFromDropbox(path, dbxFs, false);
+	}
+	
+	public void loadImageFromDropbox(final DbxPath path, final DbxFileSystem dbxFs, final boolean wantMaxQuality)
+	{
 		asyncTask = new AsyncTask<Void, Void, Drawable>()
 		{
 			protected void onPreExecute()
@@ -48,7 +59,12 @@ public class DropboxImageView extends ImageView
 			{
 				try
 				{
-					DbxFile file = dbxFs.openThumbnail(path, ThumbSize.L, ThumbFormat.PNG);
+					DbxFile file;
+					if(wantMaxQuality)
+						file = dbxFs.open(path);
+					else
+						file = dbxFs.openThumbnail(path, ThumbSize.L, ThumbFormat.PNG);
+					
 					FileInputStream fis = file.getReadStream();
 					Drawable drawable = Drawable.createFromStream(fis, file.getPath().toString());
 					fis.close();
@@ -66,7 +82,14 @@ public class DropboxImageView extends ImageView
 			protected void onPostExecute(Drawable result)
 			{
 				setImageDrawable(result);
+				if(listener != null)
+					listener.onImageLoaded();
 			}
 		}.execute();
+	}
+
+	public void setListener(ImageLoadedListener imageLoadedListener)
+	{
+		this.listener = imageLoadedListener;
 	}
 }

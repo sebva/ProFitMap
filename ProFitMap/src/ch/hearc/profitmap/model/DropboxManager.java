@@ -217,6 +217,9 @@ public class DropboxManager implements AccountListener, SyncStatusListener, Path
 			
 			List<String> pathSegments = srcUri.getPathSegments();
 			String dstPath = pathSegments.get(pathSegments.size() - 1);
+			if(!dstPath.endsWith(".jpg") && !dstPath.endsWith(".png"))
+				dstPath += ".jpg";
+			
 			file = mFs.create(new DbxPath(rootPath, dstPath));
 			
 			final int bufSize = 2048;

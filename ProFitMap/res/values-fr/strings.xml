@@ -75,6 +75,6 @@
 
     <string name="waiting_dropbox">En attente de Dropbox…</string>
     <string name="not_enough_points">Vous ne pouvez pas enregistrer un tracé sans points !</string>
-
+	<string name="title_activity_dropbox_photo_viewer">Afficheur de photo</string>
 
 </resources>
