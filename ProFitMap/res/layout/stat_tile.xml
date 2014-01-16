@@ -15,6 +15,7 @@
         android:id="@+id/stat_tile_detail_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:maxWidth="140dp"
         android:layout_alignBottom="@+id/view1"
         android:layout_centerHorizontal="true" />
 
@@ -22,6 +23,7 @@
         android:id="@+id/stat_tile_value_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:maxWidth="140dp"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:gravity="center"
