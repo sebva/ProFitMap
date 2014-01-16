@@ -381,7 +381,7 @@ public class LiveTrainingActivity extends FragmentActivity implements
 
 	@Override
 	public TypeStatistics getTypeStatistics() {
-		return TypeStatistics.LIVE;
+		return mHasGhost ? TypeStatistics.LIVE_GHOST : TypeStatistics.LIVE;
 	}
 
 	public void refreshStatsPanel() {

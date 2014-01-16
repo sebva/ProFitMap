@@ -348,6 +348,8 @@ public class LiveMapFragment extends MapFragment implements
 		// ahead. If not, we're behind.
 		isAhead = (distanceBetweenClosestAndNextAfterClosest > distanceBetweenCurrentAndNextAfterClosest) ? true
 				: false;
+		
+		parentActivity.getStatistics().setGhostDistance(isAhead ? -totalDistanceToGhost : totalDistanceToGhost);
 
 		// Drawing the line between us and the ghost (passing isAhead to know
 		// the color of the line)

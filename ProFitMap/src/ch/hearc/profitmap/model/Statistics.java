@@ -43,15 +43,15 @@ public class Statistics {
 	private long duration;
 	private TrackInstance trackInstance;
 	private transient Location lastLocation = null;
+	private float distanceToGhost;
 
 	public enum TypeStatistics {
 		LIVE, END, SUMMARY, LIVE_GHOST;
 
 		public int[] getShownStats() {
 			switch (this) {
-			/*
-			 * case LIVE_GHOST: break;
-			 */
+			case LIVE_GHOST:
+				return new int[] { 0, 1, 2, 3, 4, 6, 7, 8, 9, 11, 12, 13 };
 			case END:
 				return new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11 };
 			case LIVE:
@@ -134,7 +134,7 @@ public class Statistics {
 		lastLocation = l;
 	}
 
-	private Pair<Integer, String> getStatisticForPosition(int position) {
+	private Pair<Integer, String> getStatisticForPosition(int position, Context context) {
 		NumberFormat format = DecimalFormat.getNumberInstance();
 		switch (position) {
 		default:
@@ -185,6 +185,10 @@ public class Statistics {
 			format.setMaximumFractionDigits(1);
 			return new Pair<Integer, String>(R.string.track_current_speed,
 					format.format((lastLocation != null) ? lastLocation.getSpeed() * 3.6 : 0.0) + " km/h");
+		case 13:
+			format.setMaximumFractionDigits(0);
+			String aheadBehind = context.getString(distanceToGhost <= 0 ? R.string.ahead : R.string.behind);
+			return new Pair<Integer, String>(R.string.track_ghost_distance, aheadBehind + "\n" + format.format(Math.abs(distanceToGhost)) + " m");
 		}
 	}
 
@@ -199,7 +203,7 @@ public class Statistics {
 			{
 				DbxRecord record = result.iterator().next();
 				DbxList list = record.getList("order");
-				if(list.size() != 13) // Upgrade number when new tiles are added
+				if(list.size() != 14) // Upgrade number when new tiles are added
 				{
 					userOrder = null;
 					record.deleteRecord();
@@ -231,7 +235,7 @@ public class Statistics {
 						v = convertView;
 
 					int stat = (userOrder == null) ? shownStats[position] : userOrder.get(shownStats[position]);
-					Pair<Integer, String> pair = getStatisticForPosition(stat);
+					Pair<Integer, String> pair = getStatisticForPosition(stat, c);
 					TextView value = (TextView) v.findViewById(R.id.stat_tile_value_text);
 					value.setText(pair.second);
 					TextView detail = (TextView) v.findViewById(R.id.stat_tile_detail_text);
@@ -272,6 +276,11 @@ public class Statistics {
 				+ ", maxSpeed=" + maxSpeed + ", effortKm=" + effortKm
 				+ ", duration=" + duration + ", trackInstance=" + trackInstance
 				+ "]";
+	}
+
+	public void setGhostDistance(float totalDistanceToGhost)
+	{
+		this.distanceToGhost = totalDistanceToGhost;
 	}
 
 }
