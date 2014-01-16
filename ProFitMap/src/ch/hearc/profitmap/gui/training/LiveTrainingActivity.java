@@ -8,11 +8,9 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.FragmentTransaction;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.location.Location;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -26,9 +24,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 import ch.hearc.profitmap.R;
-import ch.hearc.profitmap.gui.MapElements;
 import ch.hearc.profitmap.gui.training.fragments.GraphFragment;
-import ch.hearc.profitmap.gui.training.fragments.MapFragment;
 import ch.hearc.profitmap.gui.training.fragments.SummaryFragment;
 import ch.hearc.profitmap.gui.training.fragments.SummaryFragment.StatisticsProvider;
 import ch.hearc.profitmap.gui.training.fragments.live.LiveGraphFragment;
@@ -62,10 +58,10 @@ public class LiveTrainingActivity extends FragmentActivity implements
 
 	public boolean isCreated = false;
 	public boolean isPaused = false;
-	
+
 	private long pauseStartTime;
 
-	private MapFragment liveMapFragment;
+	private LiveMapFragment liveMapFragment;
 	private SummaryFragment liveStatsFragment;
 	private GraphFragment liveGraphFragment;
 
@@ -78,11 +74,11 @@ public class LiveTrainingActivity extends FragmentActivity implements
 	private int mSport;
 
 	private int mTrackId;
-	
+
 	private int mGhostTrackInstanceId;
 
 	private boolean mHasGhost;
-	
+
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		Log.i("LTA", "OSIS");
@@ -109,7 +105,8 @@ public class LiveTrainingActivity extends FragmentActivity implements
 		case R.id.action_startrec:
 			isPaused = false;
 			switchStartPauseVisibility();
-			trackInstance.addPause((System.nanoTime() - pauseStartTime) / 1000000000l);
+			trackInstance
+					.addPause((System.nanoTime() - pauseStartTime) / 1000000000l);
 			break;
 		case R.id.action_stoprec:
 			liveMapFragment.endTraining();
@@ -159,9 +156,8 @@ public class LiveTrainingActivity extends FragmentActivity implements
 
 	@Override
 	protected void onActivityResult(int arg0, int arg1, Intent intent) {
-		LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		Location lastLocation = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER); 
-		
+		Location lastLocation = liveMapFragment.getLastKnownLocation();
+
 		String[] projection = { MediaStore.Images.Media.DATA };
 		Cursor cursor = getApplicationContext().getContentResolver().query(
 				mCapturedImageURI, projection, null, null, null);
@@ -176,10 +172,12 @@ public class LiveTrainingActivity extends FragmentActivity implements
 		trackInstance.addImage(geoImage);
 
 		int orientation = 0; // TODO : change to correct orientation
-		liveMapFragment.addPicMarkerToLocation(lastLocation, geoImage.getImagePath());
+		liveMapFragment.addPicMarkerToLocation(lastLocation,
+				geoImage.getImagePath());
 
-		Log.i("Result i :", "" + lastLocation.toString() + capturedImageFilePath + " "
-				+ mCapturedImageURI + " " + geoImage.getImagePath());
+		Log.i("Result i :", "" + lastLocation.toString()
+				+ capturedImageFilePath + " " + mCapturedImageURI + " "
+				+ geoImage.getImagePath());
 		super.onActivityResult(arg0, arg1, intent);
 	}
 
@@ -191,10 +189,11 @@ public class LiveTrainingActivity extends FragmentActivity implements
 			Log.i("onC", "No bundle");
 			mSport = getIntent().getIntExtra("sport", 0);
 			mTrackId = getIntent().getIntExtra("trackId", -1);
-			
+
 			mHasGhost = getIntent().getBooleanExtra("hasGhost", false);
-			mGhostTrackInstanceId = getIntent().getIntExtra("ghostTrackInstanceId", 0);
-			
+			mGhostTrackInstanceId = getIntent().getIntExtra(
+					"ghostTrackInstanceId", 0);
+
 			trackInstance = new TrackInstance();
 			Tracks.currentTrackInstance = trackInstance;
 		} else {
@@ -202,9 +201,10 @@ public class LiveTrainingActivity extends FragmentActivity implements
 
 			mSport = savedInstanceState.getInt("sport", 0);
 			mTrackId = savedInstanceState.getInt("trackId", -1);
-			
+
 			mHasGhost = getIntent().getBooleanExtra("hasGhost", false);
-			mGhostTrackInstanceId = getIntent().getIntExtra("ghostTrackInstanceId", 0);
+			mGhostTrackInstanceId = getIntent().getIntExtra(
+					"ghostTrackInstanceId", 0);
 			trackInstance = Tracks.currentTrackInstance;
 		}
 
@@ -296,7 +296,7 @@ public class LiveTrainingActivity extends FragmentActivity implements
 			if (fragment instanceof LiveStatsFragment)
 				liveStatsFragment = (SummaryFragment) fragment;
 			else if (fragment instanceof LiveMapFragment)
-				liveMapFragment = (MapFragment) fragment;
+				liveMapFragment = (LiveMapFragment) fragment;
 			else if (fragment instanceof LiveGraphFragment)
 				liveGraphFragment = (GraphFragment) fragment;
 			return fragment;
@@ -308,7 +308,7 @@ public class LiveTrainingActivity extends FragmentActivity implements
 			Fragment fragment = null;
 			if (position == 1) {
 				fragment = new LiveMapFragment();
-				liveMapFragment = (MapFragment) fragment;
+				liveMapFragment = (LiveMapFragment) fragment;
 			} else if (position == 0) {
 				fragment = new LiveStatsFragment();
 				liveStatsFragment = (SummaryFragment) fragment;
@@ -358,19 +358,16 @@ public class LiveTrainingActivity extends FragmentActivity implements
 	public TrackInstance getTrackInstance() {
 		return trackInstance;
 	}
-	
-	public boolean getHasGhost()
-	{
+
+	public boolean getHasGhost() {
 		return mHasGhost;
 	}
-	
-	public int getGhostTrackInstanceId()
-	{
+
+	public int getGhostTrackInstanceId() {
 		return mGhostTrackInstanceId;
 	}
-	
-	public int getTrackId()
-	{
+
+	public int getTrackId() {
 		return mTrackId;
 	}
 

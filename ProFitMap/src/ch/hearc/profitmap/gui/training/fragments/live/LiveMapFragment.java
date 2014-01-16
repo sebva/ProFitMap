@@ -13,7 +13,6 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
-import ch.hearc.profitmap.R;
 import ch.hearc.profitmap.gui.training.LiveTrainingActivity;
 import ch.hearc.profitmap.gui.training.fragments.MapFragment;
 import ch.hearc.profitmap.model.GeoImage;
@@ -26,9 +25,7 @@ import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 public class LiveMapFragment extends MapFragment implements
 		com.google.android.gms.location.LocationListener,
@@ -112,6 +109,11 @@ public class LiveMapFragment extends MapFragment implements
 
 	}
 
+	public void endTraining() {
+		Location l = getLastKnownLocation();
+		LatLng endPosition = new LatLng(l.getLatitude(), l.getLongitude());
+		mapElements.end(endPosition);
+	}
 	@Override
 	public void onResume() {
 		Log.i("LiveMapFragment", "onRes before");
@@ -452,4 +454,9 @@ public class LiveMapFragment extends MapFragment implements
 			return false;
 	}*/
 
+	public Location getLastKnownLocation()
+	{
+		return mLocationClient.getLastLocation();
+	}
+	
 }

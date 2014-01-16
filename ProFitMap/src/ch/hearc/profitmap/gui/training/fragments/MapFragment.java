@@ -21,6 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import ch.hearc.profitmap.R;
 import ch.hearc.profitmap.gui.ActiveMapElements;
+import ch.hearc.profitmap.gui.DropboxPhotoViewerActivity;
 import ch.hearc.profitmap.gui.MapElements;
 import ch.hearc.profitmap.gui.TrackDetailActivity;
 import ch.hearc.profitmap.gui.training.LiveTrainingActivity;
@@ -130,10 +131,8 @@ public class MapFragment extends Fragment {
 				// TODO : dropbox image viewer
 				if (marker.getTitle() != null) {
 					Log.i("testM", marker.getTitle());
-					Intent intent = new Intent();
-					intent.setAction(Intent.ACTION_VIEW);
-					intent.setDataAndType(
-							Uri.parse("file://" + marker.getTitle()), "image/*");
+					Intent intent = new Intent(getActivity(), DropboxPhotoViewerActivity.class);
+					intent.putExtra("path", marker.getTitle());
 					startActivity(intent);
 				}
 				return true;
@@ -141,13 +140,6 @@ public class MapFragment extends Fragment {
 		});
 	}
 
-	public void endTraining() {
-		LocationManager lm = (LocationManager) getActivity().getSystemService(
-				Context.LOCATION_SERVICE);
-		Location l = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-		LatLng endPosition = new LatLng(l.getLatitude(), l.getLongitude());
-		mapElements.end(endPosition);
-	}
 
 	public boolean addPicMarkerToLocation(Location loc, String dropBoxPath) {
 		if (mapElements != null) {
