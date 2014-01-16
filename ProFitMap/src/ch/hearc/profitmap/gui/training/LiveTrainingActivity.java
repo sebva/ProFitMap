@@ -26,6 +26,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 import ch.hearc.profitmap.R;
+import ch.hearc.profitmap.gui.MapElements;
 import ch.hearc.profitmap.gui.training.fragments.GraphFragment;
 import ch.hearc.profitmap.gui.training.fragments.MapFragment;
 import ch.hearc.profitmap.gui.training.fragments.SummaryFragment;
@@ -84,6 +85,7 @@ public class LiveTrainingActivity extends FragmentActivity implements
 	
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
+		Log.i("LTA", "OSIS");
 		super.onSaveInstanceState(outState);
 		outState.putInt("sport", mSport);
 		outState.putInt("trackId", mTrackId);

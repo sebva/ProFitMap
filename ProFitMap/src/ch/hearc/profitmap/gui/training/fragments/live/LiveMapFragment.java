@@ -16,6 +16,7 @@ import android.util.Log;
 import ch.hearc.profitmap.R;
 import ch.hearc.profitmap.gui.training.LiveTrainingActivity;
 import ch.hearc.profitmap.gui.training.fragments.MapFragment;
+import ch.hearc.profitmap.model.GeoImage;
 import ch.hearc.profitmap.model.TrackInstance;
 import ch.hearc.profitmap.model.Tracks;
 
@@ -82,7 +83,6 @@ public class LiveMapFragment extends MapFragment implements
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		initiateFusedLocation();
-
 	}
 
 	private void initiateFusedLocation() {
@@ -120,8 +120,6 @@ public class LiveMapFragment extends MapFragment implements
 
 		if (parentActivity != null) {
 			if (parentActivity.getHasGhost()) {
-				Log.i("LMF", "has ghost");
-				Log.i("LMF", "gtid" + parentActivity.getGhostTrackInstanceId());
 
 				ghostTrackInstance = Tracks
 						.getInstance(parentActivity.getSportId())
@@ -131,12 +129,13 @@ public class LiveMapFragment extends MapFragment implements
 
 				drawGhostTrack();
 			} else {
-				System.out.println("no ghost");
+				// No ghost for this livetrack
 			}
 		} else
-			Log.i("LMF", "no parent activity");
-
+			Log.e("LMF", "Fatal : no parent activity");
 		setupFakeGPS();
+
+
 	}
 
 	private void drawGhostTrack() {
@@ -172,6 +171,11 @@ public class LiveMapFragment extends MapFragment implements
 							.getLatitude(), l.getLongitude()));
 				}
 			}
+			
+			
+			for (GeoImage geoImage : trackInstance.getImages()) {
+				mapElements.addPictureMarker(geoImage.getLocation(), geoImage.getImagePath());
+			}
 		}
 	};
 
@@ -206,19 +210,6 @@ public class LiveMapFragment extends MapFragment implements
 						lm.setTestProviderLocation("Test", loc);
 					}
 				});
-	}
-
-	public static LatLng randomLatLng() {
-
-		float minX = 0.0f;
-		float maxX = 40.0f;
-
-		Random rand = new Random();
-
-		float finalX = rand.nextFloat() * (maxX - minX) + minX;
-		float finalY = rand.nextFloat() * (maxX - minX) + minX;
-
-		return new LatLng(finalX, finalY);
 	}
 
 	private class FakeLocationListener implements LocationListener {
@@ -390,30 +381,6 @@ public class LiveMapFragment extends MapFragment implements
 		return distanceToGhostArray[0];
 	}
 
-	@SuppressLint("NewApi")
-	public void fakeMapClick(LatLng l, LocationManager lm) {
-		Log.i("fake click at", l.latitude + " ; " + l.longitude);
-
-		Location loc = new Location("Test");
-		loc.setLatitude(l.latitude);
-		loc.setLongitude(l.longitude);
-		loc.setAltitude(getRndDb());
-		loc.setSpeed((float) getRndDb());
-		System.out.println(loc.getAltitude() + " : " + loc.getSpeed());
-		loc.setAccuracy(1);
-		loc.setTime(System.currentTimeMillis());
-		loc.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
-		lm.setTestProviderLocation("Test", loc);
-	}
-
-	public void clickMapSleep(LocationManager lm) {
-		int i = 0;
-		while (i < 10) {
-			SystemClock.sleep(4000);
-			fakeMapClick(randomLatLng(), lm);
-			i++;
-		}
-	}
 
 	@Override
 	public void onConnectionFailed(ConnectionResult result) {
@@ -436,7 +403,7 @@ public class LiveMapFragment extends MapFragment implements
 	@Override
 	public void onLocationChanged(Location location) {
 
-		/*Log.i("locFus",
+		Log.i("locFus",
 				location.getLatitude() + " : " + location.getLongitude());
 		if (!((LiveTrainingActivity) parentActivity).isPaused
 				&& trackInstance != null) {
@@ -447,12 +414,12 @@ public class LiveMapFragment extends MapFragment implements
 			((LiveTrainingActivity) parentActivity).refreshStatsPanel();
 			((LiveTrainingActivity) parentActivity).refreshGraphPanel();
 		}
-*/
+
 		if (mapElements.start(new LatLng(location.getLatitude(), location
 				.getLongitude()))) {
 			startTime = location.getTime();
 		}
-/*
+
 		mapElements.drawCurrentPositionIndicator(location);
 
 		if (parentActivity.getHasGhost())
@@ -463,10 +430,10 @@ public class LiveMapFragment extends MapFragment implements
 						new LatLng(location.getLatitude(), location
 								.getLongitude()),
 						mapElements.map.getCameraPosition().zoom >= 18 ? mapElements.map
-								.getCameraPosition().zoom : 18));*/
+								.getCameraPosition().zoom : 18));
 	}
 
-	@Override
+	/*@Override
 	public boolean addPicMarkerToLocation(Location loc, String dropBoxPath) {
 		if (mapElements != null) {
 			Log.i("LMF", "add");
@@ -483,6 +450,6 @@ public class LiveMapFragment extends MapFragment implements
 			return true;
 		} else
 			return false;
-	}
+	}*/
 
 }

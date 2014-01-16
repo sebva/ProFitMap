@@ -24,6 +24,8 @@ import ch.hearc.profitmap.gui.ActiveMapElements;
 import ch.hearc.profitmap.gui.MapElements;
 import ch.hearc.profitmap.gui.TrackDetailActivity;
 import ch.hearc.profitmap.gui.training.LiveTrainingActivity;
+import ch.hearc.profitmap.gui.training.interfaces.TrackInstanceProvider;
+import ch.hearc.profitmap.model.GeoImage;
 import ch.hearc.profitmap.model.TrackInstance;
 
 import com.google.android.gms.maps.CameraUpdate;
@@ -62,6 +64,7 @@ public class MapFragment extends Fragment {
 		Log.i("MF", "Created");
 
 		mapElements = ActiveMapElements.getInstance().getMapElements();
+		//mapElements.clearMap();
 
 	}
 
@@ -75,13 +78,14 @@ public class MapFragment extends Fragment {
 	@Override
 	public void onResume() {
 		Log.i("MSF", "onRes before");
-		if (parentActivity instanceof LiveTrainingActivity) {
+		trackInstance = ((TrackInstanceProvider) parentActivity).getTrackInstance();
+		/*if (parentActivity instanceof LiveTrainingActivity) {
 			LiveTrainingActivity lta = (LiveTrainingActivity) parentActivity;
 			trackInstance = lta.getTrackInstance();
 		} else if (parentActivity instanceof TrackDetailActivity) {
 			TrackDetailActivity tda = (TrackDetailActivity) parentActivity;
 			trackInstance = tda.getTrackInstance();
-		}
+		}*/
 		if (mapElements != null) {
 			if (mapElements.map == null) {
 				Log.i("MSF", "map is null");
@@ -101,12 +105,13 @@ public class MapFragment extends Fragment {
 				mapElements.setMapLoadedListener();
 			}
 		}
+		else
+			Log.e("MF", "mapElements is null");
 		super.onResume();
 	}
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
-		Log.i("MSF", "onActivityC");
 		super.onActivityCreated(savedInstanceState);
 		FragmentManager fm = getChildFragmentManager();
 		fragment = (SupportMapFragment) fm.findFragmentById(R.id.map);
@@ -118,11 +123,11 @@ public class MapFragment extends Fragment {
 
 	public void setupMap() {
 		mapElements.clearMap();
-		// ActiveMapElements.getInstance().getMapElements().clearMap();
 		mapElements.map.setOnMarkerClickListener(new OnMarkerClickListener() {
 
 			@Override
 			public boolean onMarkerClick(Marker marker) {
+				// TODO : dropbox image viewer
 				if (marker.getTitle() != null) {
 					Log.i("testM", marker.getTitle());
 					Intent intent = new Intent();
@@ -146,15 +151,15 @@ public class MapFragment extends Fragment {
 
 	public boolean addPicMarkerToLocation(Location loc, String dropBoxPath) {
 		if (mapElements != null) {
-			Log.i("picMarker", "add");
+			/*Log.i("picMarker", "add");
 			MarkerOptions mo = new MarkerOptions().position(new LatLng(loc
 					.getLatitude(), loc.getLongitude()));
 			mo.title(dropBoxPath);
 
 			mo.icon(BitmapDescriptorFactory
-					.fromResource(R.drawable.ic_action_photo));
+					.fromResource(R.drawable.ic_action_photo));*/
 
-			// mapElements.map.addMarker(mo);
+			//mapElements.map.addMarker(mo);
 			// mapElements.moList.add(mo);
 			mapElements.addPictureMarker(loc, dropBoxPath);
 			return true;
@@ -189,8 +194,10 @@ public class MapFragment extends Fragment {
 			int padding = 25; // offset from edges of the map in pixels
 			CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
 			mapElements.setInitialCameraUpdate(cu);
+			
+			for (GeoImage geoImage : trackInstance.getImages()) {
+				mapElements.addPictureMarker(geoImage.getLocation(), geoImage.getImagePath());
+			}
 		}
-		// Log.i(this.getClass().getSimpleName(),
-		// "addWaypoints:trackInstance null");
 	}
 }

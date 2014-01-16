@@ -53,7 +53,7 @@ public class MapElements {
 
 	public MapElements() {
 
-		Log.i("mapE", hashCode() + "");
+		Log.i("mapE", hashCode() + "create");
 
 	}
 
@@ -141,12 +141,14 @@ public class MapElements {
 	}
 
 	public void clearMap() {
-		map.clear();
+		if (map != null)
+			map.clear();
 		plo = new PolylineOptions().geodesic(true).color(
 				Color.parseColor("#AA66CC"));
 		// pl = map.addPolyline(plo);
+		//showMarkers();
 		moList.clear();
-		Log.i("mapE", hashCode() + "c");
+		Log.i("mapE", hashCode() + "clear");
 	}
 
 	public void ghostAddPointAndRefreshPolyline(LatLng loc) {
@@ -201,11 +203,11 @@ public class MapElements {
 						closestGhostLocation.getLongitude()));
 
 		if (ghostLocMarker != null) {
-			persistentMarkerList.remove(ghostLocMarker);
+			//persistentMarkerList.remove(ghostLocMarker);
 			ghostLocMarker.remove();
 		}
 		ghostLocMarker = map.addMarker(cmos);
-		persistentMarkerList.add(ghostLocMarker);
+		//persistentMarkerList.add(ghostLocMarker);
 		Log.i("mapE", "adding ghostMarker : " + moList.size());
 	}
 
@@ -222,25 +224,20 @@ public class MapElements {
 			cLocMarker.remove();
 		}
 		cLocMarker = map.addMarker(cmos);
-		persistentMarkerList.add(cLocMarker);
-		Log.i("mapE", "adding CurrentPosMarker : " + moList.size());
-		Log.i("hashcode", "" + map.hashCode());
+		// persistentMarkerList.add(cLocMarker);
 
 	}
 
 	public void addPictureMarker(Location loc, String dropBoxPath) {
-
-		Log.i("addPic", loc.getLatitude() + loc.getLongitude() + "");
 		MarkerOptions mo = new MarkerOptions()
 				.position(new LatLng(loc.getLatitude(), loc.getLongitude()))
-
 				.title(dropBoxPath)
 				.icon(BitmapDescriptorFactory
 						.fromResource(R.drawable.ic_action_photo));
 
-		Log.i("hashcode", "" + map.hashCode());
-		map.addMarker(mo);
+		// Adding the marker to the marker list. Can't add it to the map directly because of the map is cleared after this method is calld
 		moList.add(mo);
+
 	}
 
 	public void setInitialCameraUpdate(CameraUpdate cu) {
