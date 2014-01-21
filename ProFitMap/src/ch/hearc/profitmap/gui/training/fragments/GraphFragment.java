@@ -1,6 +1,5 @@
 package ch.hearc.profitmap.gui.training.fragments;
 
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -8,18 +7,16 @@ import java.util.Locale;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebView.FindListener;
 import android.widget.LinearLayout;
 import ch.hearc.profitmap.R;
 import ch.hearc.profitmap.gui.training.interfaces.TrackInstanceProvider;
 import ch.hearc.profitmap.model.TrackInstance;
 
-import com.jjoe64.graphview.GraphView.GraphViewData;
 import com.jjoe64.graphview.CustomLabelFormatter;
+import com.jjoe64.graphview.GraphView.GraphViewData;
 import com.jjoe64.graphview.GraphViewSeries;
 import com.jjoe64.graphview.LineGraphView;
 

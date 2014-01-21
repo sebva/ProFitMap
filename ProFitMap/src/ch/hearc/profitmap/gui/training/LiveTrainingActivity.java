@@ -9,6 +9,7 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.FragmentTransaction;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.location.Location;
 import android.net.Uri;
@@ -132,7 +133,8 @@ public class LiveTrainingActivity extends FragmentActivity implements
 	}
 
 	private void takePic() {
-
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+		
 		String fileName = "temp.jpg";
 		ContentValues values = new ContentValues();
 		values.put(MediaStore.Images.Media.TITLE, fileName);
@@ -171,7 +173,6 @@ public class LiveTrainingActivity extends FragmentActivity implements
 
 		trackInstance.addImage(geoImage);
 
-		int orientation = 0; // TODO : change to correct orientation
 		liveMapFragment.addPicMarkerToLocation(lastLocation,
 				geoImage.getImagePath());
 
@@ -179,6 +180,8 @@ public class LiveTrainingActivity extends FragmentActivity implements
 				+ capturedImageFilePath + " " + mCapturedImageURI + " "
 				+ geoImage.getImagePath());
 		super.onActivityResult(arg0, arg1, intent);
+		
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
 	}
 
 	@Override

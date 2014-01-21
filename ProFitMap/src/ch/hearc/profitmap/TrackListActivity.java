@@ -206,7 +206,7 @@ public class TrackListActivity extends FragmentActivity
 	}
 	
 	@Override
-	public boolean onMenuItemSelected(int featureId, MenuItem item)
+	public boolean onOptionsItemSelected(MenuItem item)
 	{
 		switch(item.getItemId())
 		{
@@ -221,18 +221,12 @@ public class TrackListActivity extends FragmentActivity
 				mDropboxManager.unlinkDropbox();
 				mDropboxManager.linkToDropbox(this, DROPBOX_LINK_CALLBACK);
 				break;
+			case android.R.id.home:
+				return mDrawerToggle.onOptionsItemSelected(item);
 		}
-		return super.onMenuItemSelected(featureId, item);
+		return super.onOptionsItemSelected(item);
 	}
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item)
-	{
-		// The action bar home/up action should open or close the drawer.
-		// ActionBarDrawerToggle will take care of this.
-		return mDrawerToggle.onOptionsItemSelected(item);
-	}
-	
 	@Override
 	public void onBackPressed()
 	{

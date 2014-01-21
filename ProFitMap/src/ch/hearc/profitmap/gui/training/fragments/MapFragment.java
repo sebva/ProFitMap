@@ -1,17 +1,8 @@
 package ch.hearc.profitmap.gui.training.fragments;
 
-import java.io.File;
-import java.io.FileInputStream;
-
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.location.Location;
-import android.location.LocationManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -23,8 +14,6 @@ import ch.hearc.profitmap.R;
 import ch.hearc.profitmap.gui.ActiveMapElements;
 import ch.hearc.profitmap.gui.DropboxPhotoViewerActivity;
 import ch.hearc.profitmap.gui.MapElements;
-import ch.hearc.profitmap.gui.TrackDetailActivity;
-import ch.hearc.profitmap.gui.training.LiveTrainingActivity;
 import ch.hearc.profitmap.gui.training.interfaces.TrackInstanceProvider;
 import ch.hearc.profitmap.model.GeoImage;
 import ch.hearc.profitmap.model.TrackInstance;
@@ -33,11 +22,9 @@ import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MapFragment extends Fragment {
 

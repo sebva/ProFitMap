@@ -14,7 +14,6 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.NavUtils;
-//import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,6 +35,7 @@ import ch.hearc.profitmap.model.Tracks;
 
 import com.dropbox.chooser.android.DbxChooser;
 import com.dropbox.chooser.android.DbxChooser.ResultType;
+//import android.support.v4.app.FragmentActivity;
 
 public class EndTrainingActivity extends FragmentActivity implements StatisticsProvider, DropboxLinkedListener
 {

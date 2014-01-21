@@ -4,14 +4,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.util.Log;
 import ch.hearc.profitmap.gui.training.LiveTrainingActivity;
 import ch.hearc.profitmap.gui.training.fragments.MapFragment;
@@ -24,7 +20,6 @@ import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 
 public class LiveMapFragment extends MapFragment implements
@@ -40,8 +35,6 @@ public class LiveMapFragment extends MapFragment implements
 
 	private LocationClient mLocationClient;
 	private LocationRequest mLocationRequest;
-
-	private FakeLocationListener fakeLocationListener;
 
 	private TrackInstance ghostTrackInstance;
 
@@ -66,7 +59,6 @@ public class LiveMapFragment extends MapFragment implements
 		// TODO Auto-generated method stub
 		super.onDestroy();
 		Log.i("LMF", "Destroyed");
-		lm.removeUpdates(fakeLocationListener);
 		mLocationClient.disconnect();
 	}
 
@@ -135,7 +127,6 @@ public class LiveMapFragment extends MapFragment implements
 			}
 		} else
 			Log.e("LMF", "Fatal : no parent activity");
-		setupFakeGPS();
 
 
 	}
@@ -180,86 +171,6 @@ public class LiveMapFragment extends MapFragment implements
 			}
 		}
 	};
-
-	private void setupFakeGPS() {
-		lm = (LocationManager) getActivity().getSystemService(
-				Context.LOCATION_SERVICE);
-		fakeLocationListener = new FakeLocationListener();
-		if (lm.getProvider("Test") == null) {
-			lm.addTestProvider("Test", false, false, false, false, false,
-					false, false, 0, 1);
-		}
-		lm.setTestProviderEnabled("Test", true);
-		lm.requestLocationUpdates("Test", 0, 0, fakeLocationListener);
-
-		// new Thread(new Runnable() { @Override public void run() {
-		// clickMapSleep(lm); } }).start();
-
-		mapElements.map
-				.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-					@SuppressLint("NewApi")
-					@Override
-					public void onMapClick(LatLng l) {
-						Location loc = new Location("Test");
-						loc.setLatitude(l.latitude);
-						loc.setLongitude(l.longitude);
-						loc.setAltitude(getRndDb());
-						loc.setSpeed((float) getRndDb());
-						loc.setAccuracy(1);
-						loc.setTime(System.currentTimeMillis());
-						loc.setElapsedRealtimeNanos(SystemClock
-								.elapsedRealtimeNanos());
-						lm.setTestProviderLocation("Test", loc);
-					}
-				});
-	}
-
-	private class FakeLocationListener implements LocationListener {
-		@Override
-		public void onLocationChanged(Location location) {
-
-			if (!((LiveTrainingActivity) parentActivity).isPaused)
-				mapElements.addPointAndRefreshPolyline(new LatLng(location
-						.getLatitude(), location.getLongitude()));
-			trackInstance.addWaypoint(location);
-
-			((LiveTrainingActivity) parentActivity).refreshStatsPanel();
-			((LiveTrainingActivity) parentActivity).refreshGraphPanel();
-
-			// lastLocation = location;
-
-			mapElements.drawCurrentPositionIndicator(location);
-
-			if (parentActivity.getHasGhost())
-				computeGhost(location);
-
-			mapElements.map
-					.animateCamera(CameraUpdateFactory.newLatLngZoom(
-							new LatLng(location.getLatitude(), location
-									.getLongitude()),
-							mapElements.map.getCameraPosition().zoom >= 18 ? mapElements.map
-									.getCameraPosition().zoom : 18));
-
-		}
-
-		@Override
-		public void onProviderDisabled(String provider) {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public void onProviderEnabled(String provider) {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public void onStatusChanged(String provider, int status, Bundle extras) {
-			// TODO Auto-generated method stub
-
-		}
-	}
 
 	public double getRndDb() {
 		return Math.ceil(new Random().nextDouble() * 100 + 100);
