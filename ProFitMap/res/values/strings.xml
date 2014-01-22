@@ -40,6 +40,7 @@
         <item>@string/rating</item>
         <item>@string/track_km_effort</item>
         <item>@string/track_current_speed</item>
+        <item>@string/track_ghost_distance</item>
     </string-array>
 
     <string name="running">Running</string>
