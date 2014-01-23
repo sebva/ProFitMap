@@ -28,6 +28,8 @@ import com.dropbox.sync.android.DbxTable;
 import com.dropbox.sync.android.DbxTable.QueryResult;
 
 public class Statistics {
+	public static final double ALTITUDE_SMOOTH_FACTOR = 3.5;
+	
 	/**
 	 * Length in meters
 	 */
@@ -75,14 +77,16 @@ public class Statistics {
 			return;
 
 		Location previous = trackInstance.getWaypoints().get(0);
-		double lastAltitude = previous.getAltitude();
-		boolean isFirst = true;
+		double lastAltitude = 0;
 		for (Location l : trackInstance.getWaypoints()) {
+			if(lastAltitude == 0 && l.hasAltitude())
+				lastAltitude = l.getAltitude();
+			
 			length += previous.distanceTo(l);
-			if(l.hasAltitude() && !isFirst)
+			if(l.hasAltitude())
 			{
 				double deniv = -lastAltitude;
-				lastAltitude += (l.getAltitude() - lastAltitude) / 2.3;
+				lastAltitude += (l.getAltitude() - lastAltitude) / ALTITUDE_SMOOTH_FACTOR;
 				deniv += lastAltitude;
 				
 				if (deniv >= 0)
@@ -96,7 +100,6 @@ public class Statistics {
 				maxSpeed = speed;
 
 			previous = l;
-			isFirst = false;
 		}
 		
 		// Better precision, but only since Jelly Bean
@@ -121,7 +124,7 @@ public class Statistics {
 					lastAltitude = l.getAltitude();
 				
 				double deniv = -lastAltitude;
-				lastAltitude += (l.getAltitude() - lastAltitude) / 2.3;
+				lastAltitude += (l.getAltitude() - lastAltitude) / ALTITUDE_SMOOTH_FACTOR;
 				deniv += lastAltitude;
 				if (deniv >= 0)
 					ascent += deniv;

@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import ch.hearc.profitmap.R;
 import ch.hearc.profitmap.gui.training.interfaces.TrackInstanceProvider;
+import ch.hearc.profitmap.model.Statistics;
 import ch.hearc.profitmap.model.TrackInstance;
 
 import com.jjoe64.graphview.CustomLabelFormatter;
@@ -68,7 +69,7 @@ public class GraphFragment extends Fragment {
 					altitude), true, 1000);
 			speedSeries.appendData(new GraphViewData(location.getTime(),
 					location.getSpeed() * 3.6), true, 1000);
-			altitude += (location.getAltitude() - altitude) / 2.3;
+			altitude += (location.getAltitude() - altitude) / Statistics.ALTITUDE_SMOOTH_FACTOR;
 		}
 
 		altitudeGraphView = new LineGraphView(rootView.getContext() // context
