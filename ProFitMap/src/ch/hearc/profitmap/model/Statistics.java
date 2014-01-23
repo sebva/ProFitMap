@@ -43,6 +43,7 @@ public class Statistics {
 	private long duration;
 	private TrackInstance trackInstance;
 	private transient Location lastLocation = null;
+	private transient double lastAltitude = 0;
 	private float distanceToGhost;
 
 	public enum TypeStatistics {
@@ -74,11 +75,16 @@ public class Statistics {
 			return;
 
 		Location previous = trackInstance.getWaypoints().get(0);
+		double lastAltitude = previous.getAltitude();
+		boolean isFirst = true;
 		for (Location l : trackInstance.getWaypoints()) {
 			length += previous.distanceTo(l);
-			if(l.hasAltitude() && previous.hasAltitude())
+			if(l.hasAltitude() && !isFirst)
 			{
-				double deniv = l.getAltitude() - previous.getAltitude();
+				double deniv = -lastAltitude;
+				lastAltitude += (l.getAltitude() - lastAltitude) / 2.3;
+				deniv += lastAltitude;
+				
 				if (deniv >= 0)
 					ascent += deniv;
 				else
@@ -90,6 +96,7 @@ public class Statistics {
 				maxSpeed = speed;
 
 			previous = l;
+			isFirst = false;
 		}
 		
 		// Better precision, but only since Jelly Bean
@@ -108,9 +115,14 @@ public class Statistics {
 	void addLocation(Location l) {
 		if (lastLocation != null) {
 			length += lastLocation.distanceTo(l);
-			if(l.hasAltitude() && lastLocation.hasAltitude())
+			if(l.hasAltitude())
 			{
-				double deniv = l.getAltitude() - lastLocation.getAltitude();
+				if(lastAltitude == 0)
+					lastAltitude = l.getAltitude();
+				
+				double deniv = -lastAltitude;
+				lastAltitude += (l.getAltitude() - lastAltitude) / 2.3;
+				deniv += lastAltitude;
 				if (deniv >= 0)
 					ascent += deniv;
 				else

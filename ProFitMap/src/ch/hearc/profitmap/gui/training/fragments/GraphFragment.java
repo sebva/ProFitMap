@@ -60,12 +60,15 @@ public class GraphFragment extends Fragment {
 
 		speedSeries = new GraphViewSeries(new GraphViewData[] {});
 
-		for (int i = 0; i < mTrackInstance.getWaypoints().size(); i++) {
-			Location location = mTrackInstance.getWaypoints().get(i);
+		double altitude = 0;
+		for (Location location : mTrackInstance.getWaypoints()) {
+			if(altitude == 0)
+				altitude = location.getAltitude();
 			altitudeSeries.appendData(new GraphViewData(location.getTime(),
-					location.getAltitude()), true, 1000);
+					altitude), true, 1000);
 			speedSeries.appendData(new GraphViewData(location.getTime(),
 					location.getSpeed() * 3.6), true, 1000);
+			altitude += (location.getAltitude() - altitude) / 2.3;
 		}
 
 		altitudeGraphView = new LineGraphView(rootView.getContext() // context
